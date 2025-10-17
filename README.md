@@ -43,6 +43,13 @@ Licensed under the Apache License, Version 2.0
 この翻訳は [Sphinx](https://www.sphinx-doc.org/) でビルドしています。  
 ローカルで再ビルドする際の簡易手順例です。
 
+### 前提
+OSはUbuntu。ほかのOSを使っている人は一部読み替えてほしい
+
+下記ツールはインストール済み
+* git
+* python
+
 ### 環境構築
 
 ドキュメント作成環境のインストール
@@ -53,7 +60,7 @@ sudo apt install -y python3-sphinx python3-venv
 ### 前準備
 オリジナルドキュメントのクローン
 ```Bash
-# ドキュメントの作成するディレクトリは任意だが、本ドキュメントでは ~/doc で以下作業を進めるものとする
+# ドキュメントの作成するディレクトリは任意だが、本ドキュメントでは ~/doc で以下の作業を進めるものとする
 
 mkdir fstar
 cd fstar
@@ -96,6 +103,7 @@ gettext_compact = False     # 各 .rst ごとに分割（推奨）
 
 翻訳元の抽出（.pot 生成）
 ```Bash
+# cd ~/doc/fstar/PoP-in-FStar/book
 sphinx-build -b gettext . _build/gettext
 ```
 
@@ -107,7 +115,7 @@ sphinx-intl update -p _build/gettext -l ja
 
 ### 翻訳作業
 
-仮想環境にない場合、i18n 用の仮想環境 & ツールの項目を実行し、仮想環境にする。
+仮想環境にない場合、「**i18n 用の仮想環境 & ツールの項目**」を実行し、仮想環境にする。
 
 ここで作成された.poを下記に従って編集する
 * #, fuzzy が付いていたら外す(当該行を削除)
@@ -119,3 +127,11 @@ sphinx-intl update -p _build/gettext -l ja
 sphinx-build -b html -c . -D language=ja -E . _build/html
 ```
 
+## 📫 連絡
+誤訳・改善提案などは Issue や PR にて歓迎します。
+
+---
+
+## 🤖 翻訳支援について
+本翻訳の作成にあたっては、OpenAI の [ChatGPT](https://chat.openai.com/) による支援を受けています。  
+最終的な内容の確認および責任は翻訳者（timeler0）が負います。
