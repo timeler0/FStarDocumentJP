@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>帰納的型の定義 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="長さインデックス付きリスト" href="part2_vectors.html" />
+    <link rel="prev" title="帰納的型によるデータ・証明・計算の表現" href="part2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part2.html">帰納的型によるデータ・証明・計算の表現</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">帰納的型の定義</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#strictly-positive-definitions">厳密正な定義</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#strictly-positive-annotations">厳密正アノテーション</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unused-annotations">未使用（unused）アノテーション</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part2_vectors.html">長さインデックス付きリスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_merkle.html">Merkle 木</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_equality.html">等式型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_logical_connectives.html">構成的連言と古典的連言（論理結合子）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_stlc.html">単純型付きラムダ計算（STLC）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_phoas.html">高階抽象構文（HOAS）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_well_founded.html">良基底関係と停止性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_par.html">計算効果の最初のモデル</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_universes.html">ユニバース（Universes）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+      <li class="breadcrumb-item active">帰納的型の定義</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="inductive-type-definitions">
+<span id="part2-inductives"></span><h1>帰納的型の定義<a class="headerlink" href="#inductive-type-definitions" title="Link to this heading"></a></h1>
+<p>しばしば <em>データ型</em> とも呼ばれる帰納的型の定義は、一般に次のような構造を取ります。</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathsf{type}~T_1~\overline{(x_1:p_1)} : \overline{y_1:q_1} \rightarrow \mathsf{Type} = \overline{| D_1 : t_1} \\
+\ldots\qquad\qquad\qquad\qquad\\
+\mathsf{and}~T_n~\overline{(x_n:p_n)} : \overline{y_n:q_n} \rightarrow \mathsf{Type} =  \overline{| D_n : t_n} \\\end{split}\]</div>
+<p>これは <span class="math notranslate nohighlight">\(T_1 \ldots T_n\)</span> と名付けられた <span class="math notranslate nohighlight">\(n\)</span> 個の相互再帰的な帰納的型（<em>型コンストラクタ</em>）を定義します。各型コンストラクタ <span class="math notranslate nohighlight">\(T_i\)</span> は複数の <em>パラメータ</em> <span class="math notranslate nohighlight">\(\overline{x_i : p_i}\)</span> と、複数の <em>インデックス</em> <span class="math notranslate nohighlight">\(\overline{y_i:q_i}\)</span> を持ちます。</p>
+<p>各型コンストラクタ <span class="math notranslate nohighlight">\(T_i\)</span> は 0 個以上の <em>データコンストラクタ</em> <span class="math notranslate nohighlight">\(\overline{D_i:t_i}\)</span> を持ちます。各データコンストラクタ <span class="math notranslate nohighlight">\(D_{ij}\)</span> の型 <span class="math notranslate nohighlight">\(t_{ij}\)</span> は <span class="math notranslate nohighlight">\(\overline{z:s} \rightarrow T_i~\bar{x_i}~\bar{e}\)</span> の形でなければなりません。つまり、戻り値は型コンストラクタのシグネチャと <em>同じパラメータ</em> <span class="math notranslate nohighlight">\(\overline{x_i}\)</span> を持つ <span class="math notranslate nohighlight">\(T_i\)</span> のインスタンスであり、インデックス引数には任意の整型な項 <span class="math notranslate nohighlight">\(\overline{e}\)</span> を与えられます。ここにパラメータとインデックスの主な違いがあります。すなわち、データコンストラクタの結果型において型コンストラクタの <em>パラメータは変化してはならず</em>、一方でインデックスは変化してよいのです。</p>
+<p>さらに、各データコンストラクタの引数 <span class="math notranslate nohighlight">\(\overline{z:s}\)</span> の中で、相互に定義された型コンストラクタ <span class="math notranslate nohighlight">\(\overline{T}\)</span> が矢印の左側に現れてはなりません。すなわち、型コンストラクタの出現はすべて <a href="#id1"><span class="problematic" id="id2">*</span></a>厳密正*（strictly positive）でなければなりません。これは以下で説明するように、帰納的定義の良基性を保証するためです。この制約がなければ、<code class="docutils literal notranslate"><span class="pre">Tot</span></code> 型を持つにもかかわらず停止しない関数を書いて、健全性を簡単に損なってしまいます。</p>
+<p>論理的一貫性の確保に関しては、帰納的型定義の <em>宇宙（universe）</em> レベルも関係します。これについては、いくつか例を見た後で触れます。</p>
+<section id="strictly-positive-definitions">
+<span id="part2-strict-positivity"></span><h2>厳密正な定義<a class="headerlink" href="#strictly-positive-definitions" title="Link to this heading"></a></h2>
+<p>議論のたたき台として、F* の中に小さな動的型付け言語を埋め込えることを考えましょう。この言語のすべての項は静的には <code class="docutils literal notranslate"><span class="pre">dyn</span></code> という同一の型を持ちますが、実行時の値は <code class="docutils literal notranslate"><span class="pre">Bool</span></code>、<code class="docutils literal notranslate"><span class="pre">Int</span></code>、<code class="docutils literal notranslate"><span class="pre">Function</span></code> などを取り得ます。</p>
+<p>このような言語を F* のデータ型で表す試みの一例は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> dyn =
+  | Bool : bool -&gt; dyn
+  | Int  : int -&gt; dyn
+  | Function : (dyn -&gt; dyn) -&gt; dyn
+</pre></div>
+</div>
+<p>このデータ型の 3 つの分岐は、それぞれ実行時の 3 種類の値（<code class="docutils literal notranslate"><span class="pre">Bool</span> <span class="pre">b</span></code>、<code class="docutils literal notranslate"><span class="pre">Int</span> <span class="pre">b</span></code>、<code class="docutils literal notranslate"><span class="pre">Function</span> <span class="pre">f</span></code>）を表します。しかし <code class="docutils literal notranslate"><span class="pre">Function</span></code> 分岐が問題です。引数 <code class="docutils literal notranslate"><span class="pre">f</span></code> 自体が <code class="docutils literal notranslate"><span class="pre">dyn</span> <span class="pre">-&gt;</span> <span class="pre">dyn</span></code> の関数であり、コンストラクタ <code class="docutils literal notranslate"><span class="pre">Function</span></code> は <code class="docutils literal notranslate"><span class="pre">dyn</span> <span class="pre">-&gt;</span> <span class="pre">dyn</span></code> の関数をそのまま <code class="docutils literal notranslate"><span class="pre">dyn</span></code> 型の値へ昇格させます。例えば恒等関数は <code class="docutils literal notranslate"><span class="pre">Function</span> <span class="pre">(fun</span> <span class="pre">(x:dyn)</span> <span class="pre">-&gt;</span> <span class="pre">x)</span></code> のように表現できます。ところが、この <code class="docutils literal notranslate"><span class="pre">Function</span></code> 分岐は、以下で見るように、基底の場合を与えずに <code class="docutils literal notranslate"><span class="pre">dyn</span></code> のインスタンスを構成できてしまう循環定義を許してしまいます。そのため F* は <code class="docutils literal notranslate"><span class="pre">dyn</span></code> の定義を「帰納的型 dyn は厳密正条件を満たさない」として却下します。</p>
+<p>帰納的型定義の一般形をもう一度考えましょう。</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathsf{type}~T_1~\overline{(x_1:p_1)} : \overline{y_1:q_1} \rightarrow \mathsf{Type} = \overline{| D_1 : t_1} \\
+\ldots\qquad\qquad\qquad\qquad\\
+\mathsf{and}~T_n~\overline{(x_n:p_n)} : \overline{y_n:q_n} \rightarrow \mathsf{Type} =  \overline{| D_n : t_n} \\\end{split}\]</div>
+<p>次の条件を満たすとき、この定義は厳密正です。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>すべての型コンストラクタ <span class="math notranslate nohighlight">\(T \in T_1, \ldots, T_n\)</span> について、</p></li>
+<li><p>各データコンストラクタ <span class="math notranslate nohighlight">\(D : t \in \overline{D_1}, \ldots, \overline{D_n}\)</span> について、<cite>t</cite> が <span class="math notranslate nohighlight">\(x_0:s_0 \rightarrow \cdots \rightarrow x_n:s_n \rightarrow T_i \ldots\)</span> の形であり、<span class="math notranslate nohighlight">\(s_0, \ldots, s_n\)</span> が <span class="math notranslate nohighlight">\(D\)</span> のフィールド型であるとき、</p></li>
+<li><p>さらに、型 <span class="math notranslate nohighlight">\(T\)</span> の型パラメータ <span class="math notranslate nohighlight">\(\overline{p}\)</span> のすべての具体化 <span class="math notranslate nohighlight">\(\overline{v}\)</span> について、</p></li>
+<li><p><span class="math notranslate nohighlight">\((s_0, \ldots, s_k)[\overline{v}/\overline{p}]\)</span> に属する任意の <span class="math notranslate nohighlight">\(s\)</span> において、<span class="math notranslate nohighlight">\(T\)</span> がいかなる矢印の左側にも現れないこと。</p></li>
+</ul>
+</div></blockquote>
+<p>我々の型 <code class="docutils literal notranslate"><span class="pre">dyn</span></code> はこの条件に反します。というのも、<code class="docutils literal notranslate"><span class="pre">Function</span></code> コンストラクタの <code class="docutils literal notranslate"><span class="pre">dyn</span> <span class="pre">-&gt;</span> <span class="pre">dyn</span></code> 型のフィールド内で、定義中の型 <code class="docutils literal notranslate"><span class="pre">dyn</span></code> が矢印の左側に現れているからです。</p>
+<p>F* がこの定義を受け入れてしまうと何が問題になるかを見るために、オプション <code class="docutils literal notranslate"><span class="pre">__no_positivity</span></code> を用いてエラーを抑止し、挙動を確かめてみましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--__no_positivity&quot;
+<span class="k">noeq</span>
+<span class="k">type</span> dyn =
+  | Bool : bool -&gt; dyn
+  | Int  : int -&gt; dyn
+  | Function : (dyn -&gt; dyn) -&gt; dyn
+#pop-options
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>F* はコマンドラインオプションの内部スタックを管理しています。プラグマ <code class="docutils literal notranslate"><span class="pre">#push-options</span></code> はスタックの先頭にオプションを積み、<code class="docutils literal notranslate"><span class="pre">#pop-options</span></code> はそれを取り除きます。ここで用いるパターンは、<code class="docutils literal notranslate"><span class="pre">__no_positivity</span></code> を有効にした場合だけ <code class="docutils literal notranslate"><span class="pre">dyn</span></code> を型検査するよう F* に指示するものです。後で見るように、<code class="docutils literal notranslate"><span class="pre">__no_positivity</span></code> は健全性を破壊し得るため、十分に理解している場合にのみ使用してください。</p>
+</div>
+<p>このように厳密正ではないにもかかわらず <code class="docutils literal notranslate"><span class="pre">dyn</span></code> を整形式な帰納的型として宣言すると、F* の健全性を破壊できます。具体的には、実際には永久にループするのに、全域（Total）であると主張する項を書けてしまいます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> loop&#39; (f:dyn)
+  : dyn
+  = <span class="k">match</span> f <span class="k">with</span>
+    | Function g -&gt; g f
+    | <span class="k">_</span> -&gt; f
+
+<span class="k">let</span> loop
+  : dyn
+  = loop&#39; (Function loop&#39;)
+</pre></div>
+</div>
+<p>ここで <code class="docutils literal notranslate"><span class="pre">loop</span></code> の型は、常に有限ステップで <code class="docutils literal notranslate"><span class="pre">dyn</span></code> 型の値に評価されると主張しています。ところが実際に簡約すると、<code class="docutils literal notranslate"><span class="pre">loop'</span> <span class="pre">(Function</span> <span class="pre">loop')</span></code> への呼び出しが無限連鎖します。<code class="docutils literal notranslate"><span class="pre">dyn</span></code> のような非正の定義を許したことで、停止しないループを構成できてしまったのです。</p>
+<p>次の例が示すように、この種のループは <code class="docutils literal notranslate"><span class="pre">False</span></code> を証明すること（＝健全性の破壊）も可能にします。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--__no_positivity&quot;
+<span class="k">noeq</span>
+<span class="k">type</span> non_positive =
+  | NP : (non_positive -&gt; False) -&gt; non_positive
+#pop-options
+
+<span class="k">let</span> almost_false (f:non_positive)
+  : False
+  = <span class="k">let</span> NP g = f <span class="k">in</span> g f
+
+<span class="k">let</span> ff
+  : False
+  = almost_false (NP almost_false)
+</pre></div>
+</div>
+<p>この例は <code class="docutils literal notranslate"><span class="pre">dyn</span></code> に非常によく似ていますが、<code class="docutils literal notranslate"><span class="pre">NP</span></code> は <code class="docutils literal notranslate"><span class="pre">False</span></code> を返す非正な関数を保持している点が異なります。これにより <code class="docutils literal notranslate"><span class="pre">ff</span> <span class="pre">:</span> <span class="pre">False</span></code> を証明できてしまいます。つまり、この例では厳密正の違反が実行時の無限ループを生むだけでなく、<code class="docutils literal notranslate"><span class="pre">False</span></code> が証明可能になって F* の証明体系全体が無意味になってしまいます。</p>
+<p>最後の例では、<code class="docutils literal notranslate"><span class="pre">ANP</span></code> コンストラクタのフィールド中に型 <code class="docutils literal notranslate"><span class="pre">also_non_pos</span></code> が構文的には矢印の左側に現れないにもかかわらず、型パラメータ <code class="docutils literal notranslate"><span class="pre">f</span></code> を（例えば <code class="docutils literal notranslate"><span class="pre">f_false</span></code> のように）具体化すると、結果として矢印の左側に現れることになります。よってこの型も厳密正ではないと見なされ、<code class="docutils literal notranslate"><span class="pre">False</span></code> を証明するのに使えてしまいます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--__no_positivity&quot;
+<span class="k">noeq</span>
+<span class="k">type</span> also_non_pos (f:Type -&gt; Type) =
+  | ANP : f (also_non_pos f) -&gt; also_non_pos f
+#pop-options
+
+<span class="k">let</span> f_false
+  : Type -&gt; Type
+  = <span class="k">fun</span> a -&gt; (a -&gt; False)
+
+<span class="k">let</span> almost_false_again
+  : f_false (also_non_pos f_false)
+  = <span class="k">fun</span> x -&gt; <span class="k">let</span> ANP h = x <span class="k">in</span> h x
+
+<span class="k">let</span> ff_again
+  : False
+  = almost_false_again (ANP almost_false_again)
+</pre></div>
+</div>
+<p>帰納的型の定義において、厳密正でない型を許すべきではないことに納得いただけたでしょう。以降では <code class="docutils literal notranslate"><span class="pre">__no_positivity</span></code> オプションは使用しません。後の節で <em>発散効果</em> を導入したのち、プログラムが停止を期待されない文脈では、<code class="docutils literal notranslate"><span class="pre">dyn</span></code> のような型を安全にモデル化でき、かつ F* の健全性も損なわない形で非正の定義を利用できることを示します。</p>
+<section id="strictly-positive-annotations">
+<span id="part2-strictly-positive-annotations"></span><h3>厳密正アノテーション<a class="headerlink" href="#strictly-positive-annotations" title="Link to this heading"></a></h3>
+<p>ときには、<code class="docutils literal notranslate"><span class="pre">also_non_pos</span></code> のような非正の定義を導入せずに、型関数で帰納的定義をパラメータ化できると便利です。</p>
+<p>例えば、次の定義は型 <code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">f</span> <span class="pre">a</span></code> を導入します。これは葉に <code class="docutils literal notranslate"><span class="pre">a</span></code> の値を持ち、内部ノードの分岐の仕方を型関数 <code class="docutils literal notranslate"><span class="pre">f</span></code> が決める木構造です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> free (f:([@@@ strictly_positive] <span class="k">_</span>:Type -&gt; Type))
+          (a:Type) 
+  : Type =
+  | Leaf : a -&gt; free f a
+  | Branch : f (free f a) -&gt; free f a
+</pre></div>
+</div>
+<p>この汎用的な <code class="docutils literal notranslate"><span class="pre">free</span></code> を具体化して、さまざまな木を得られます。注意：下の <code class="docutils literal notranslate"><span class="pre">variable_branching_list</span></code> で <code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">list</span> <span class="pre">a</span></code> を具体化する際には、<code class="docutils literal notranslate"><span class="pre">list</span></code> 型を厳密正アノテーション付きで明示的に再定義する必要があります。F* は高階に用いられた型コンストラクタについて、厳密正であることの再検証を十分にサポートしていないためです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> binary_tree (a:Type) = free (<span class="k">fun</span> t -&gt; t &amp; t) a
+<span class="k">let</span> list_redef ([@@@strictly_positive] a:Type) = list a
+<span class="k">let</span> variable_branching_list a = free list_redef a
+<span class="k">let</span> infinite_branching_tree a = free (<span class="k">fun</span> t -&gt; nat -&gt; t) a
+</pre></div>
+</div>
+<p>ただし <code class="docutils literal notranslate"><span class="pre">f</span></code> は、その引数に対して厳密正な型関数に限って具体化できるべきです。そうでないと、<code class="docutils literal notranslate"><span class="pre">also_non_pos</span></code> のときと同様に <code class="docutils literal notranslate"><span class="pre">False</span></code> を証明できてしまいます。形式パラメータ <code class="docutils literal notranslate"><span class="pre">f</span></code> への <code class="docutils literal notranslate"><span class="pre">&#64;&#64;&#64;strictly_positive</span></code> アトリビュートは、この制約を強制します。</p>
+<p>もし厳密正でない型関数で <code class="docutils literal notranslate"><span class="pre">free</span></code> を具体化しようとすると，</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> free_bad = free (<span class="k">fun</span> t -&gt; (t -&gt; False)) int
+</pre></div>
+</div>
+<p>F* は次のようなエラーを報告します。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Binder</span> <span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="ow">is</span> <span class="n">marked</span> <span class="n">strictly</span> <span class="n">positive</span><span class="p">,</span> <span class="n">but</span> <span class="n">its</span> <span class="n">use</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">definition</span> <span class="ow">is</span> <span class="ow">not</span>
+</pre></div>
+</div>
+</section>
+<section id="unused-annotations">
+<h3>未使用（unused）アノテーション<a class="headerlink" href="#unused-annotations" title="Link to this heading"></a></h3>
+<p>しばしば、意味的には無関係であるにもかかわらず、別の型で型をインデックス付けすることがあります。例えば、可変状態をモデル化するいくつかの F* の開発では、ヒープ参照は単にヒープ内のアドレスを表す自然数です。しかし、たとえ定義において型 <code class="docutils literal notranslate"><span class="pre">a</span></code> を使用しなくても、<code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">ref</span> <span class="pre">(a:Type)</span> <span class="pre">=</span> <span class="pre">nat</span></code> のように参照型を表現することがあります。このような場合、パラメータを未使用としてマークし、F* の正性検査器に対し、その型インデックスが実際には無関係であることを知らせると便利です。以下に例を示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">irreducible</span>
+<span class="k">let</span> ref ([@@@unused] a:Type) = nat
+<span class="k">noeq</span>
+<span class="k">type</span> linked_list (a:Type) =
+  | LL : ref (a &amp; linked_list a) -&gt; linked_list a
+<span class="k">noeq</span>
+<span class="k">type</span> neg_unused =
+  | NU : ref (neg_unused -&gt; bool) -&gt; neg_unused
+</pre></div>
+</div>
+<p>ここでは <code class="docutils literal notranslate"><span class="pre">ref</span></code> のパラメータに <code class="docutils literal notranslate"><span class="pre">unused</span></code> 属性を付けています。またこの例では、F* が <code class="docutils literal notranslate"><span class="pre">ref</span></code> の定義を暗黙に展開しないよう、<code class="docutils literal notranslate"><span class="pre">ref</span></code> に <code class="docutils literal notranslate"><span class="pre">irreducible</span></code> も付与しています。</p>
+<p>このように <code class="docutils literal notranslate"><span class="pre">ref</span></code> のパラメータが未使用であると分かっていれば、<code class="docutils literal notranslate"><span class="pre">linked_list</span> <span class="pre">a</span></code> のような型を定義できます。<code class="docutils literal notranslate"><span class="pre">linked_list</span> <span class="pre">a</span></code> は <code class="docutils literal notranslate"><span class="pre">ref</span></code> の引数として現れますが、パラメータは未使用なので正性検査器は受理します。これはパラメータに <code class="docutils literal notranslate"><span class="pre">strictly_positive</span></code> アノテーションを付けるのと類似の効果があります。</p>
+<p>さらに <code class="docutils literal notranslate"><span class="pre">unused</span></code> 属性を用いれば、もう一歩先まで可能です。例えば <code class="docutils literal notranslate"><span class="pre">neg_unused</span></code> は、定義された型が負位置に現れていても、その出現が未使用パラメータの具体化に限られるなら受理されることを示しています。</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part2.html" class="btn btn-neutral float-left" title="帰納的型によるデータ・証明・計算の表現" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part2_vectors.html" class="btn btn-neutral float-right" title="長さインデックス付きリスト" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

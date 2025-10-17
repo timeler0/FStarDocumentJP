@@ -1,0 +1,234 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>本書の構成 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=24463673" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c033477b"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=4755f45a"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="検索" href="search.html" />
+    <link rel="next" title="イントロダクション" href="intro.html" />
+    <link rel="prev" title="F* による証明指向プログラミング" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">本書の構成</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="structure-of-this-book">
+<h1>本書の構成<a class="headerlink" href="#structure-of-this-book" title="Link to this heading"></a></h1>
+<p><strong>本書は執筆中（進行中）の教材です</strong></p>
+<p>本書の最初の4部では、多様な例を通じて言語の主要機能を説明します。付随するコード例と演習に沿って、順に読み進めてください。これら最初の4部は難易度が上がるように並んでおり、どこかで止めても F* の有用な断片を実践的に使える知識が身につきます。</p>
+<p>残りの部はやや緩やかに関連づけられ、コンパイラやライブラリのリファレンス、あるいは読者の関心で選べるケーススタディを扱います。もちろん、いくつかのケーススタディには前提知識があります（例：パーサやフォーマッタの章に進む前に効果について読んでいる必要があります）。</p>
+<ul class="simple">
+<li><p>第1部：基本的な関数型プログラミングと証明</p></li>
+</ul>
+<p>第1部では、純粋で全称的な関数、篩型、SMT による証明、そして最初の F* プログラムのコンパイルと実行までを基礎から紹介します。これは過去のオンラインチュートリアルの改訂版で、プログラミングには慣れているが形式的証明の背景はない読者を想定しています。プログラム証明や依存型に馴染みがある方も、F* 特有の要素があるため一読しておくと役立ちます。</p>
+<ul class="simple">
+<li><p>第2部：データ・証明・計算のための帰納的型</p></li>
+</ul>
+<p>次に、ユーザが新しいデータ型を定義する主要手段である帰納的型を扱います。F* の添字付き帰納的型はデータ構造の有用な性質を捉えられ、これらに対する依存型関数がさまざまな不変量を満たすことを証明できます。データ構造に留まらず、帰納的型は等式や停止性証明といった基礎概念を表す F* 論理の中核でもあり、他のプログラミングパラダイムのモデル化や埋め込みにも用いられます。</p>
+<ul class="simple">
+<li><p>第3部：インターフェイスと型クラスによるモジュール性</p></li>
+</ul>
+<p>大規模開発の構造化に有用な2つの主要な抽象化手法――インターフェイスと型クラス――を扱います。インターフェイスは F* のモジュール系に組み込まれた単純な情報隠蔽機構です。型クラスは高度な開発に適し、柔軟な抽象化パターンとカスタム型推論を提供します。</p>
+<ul class="simple">
+<li><p>第4部：計算効果</p></li>
+</ul>
+<p>F* の効果系を導入し、全称・ゴースト・発散といった基本的な効果から始めます。さらに、フロイド–ホーア論理と最弱前提計算の概説を行い、F* の効果系設計の核である Dijkstra モナドと結び付けて説明します。</p>
+<ul class="simple">
+<li><p>第5部：タクティクスとメタプログラミング</p></li>
+</ul>
+<p>F* に同梱されているメタプログラミング系 Meta-F* を紹介します。Meta-F* は証明の自動構築や、F* プログラム断片の生成に利用できます。本章では、プログラム中の特定の主張を Meta-F* で狙い撃ちし、タクティクスと SMT を併用して証明する基本から始めます。</p>
+<ul class="simple">
+<li><p>舞台裏：F* と SMT</p></li>
+</ul>
+<p>この部では、F* が Z3 SMT ソルバーをどのように用いるかを扱います。F* の SMT エンコードを概観し、とくに再帰関数や帰納的型の展開を調整するための “fuel” の使い方に焦点を当てます。あわせて量化子のインスタンシエーションの仕組み、Z3 のプロファイリング方法、インスタンス過多で遅くなる証明を制御する戦略も紹介します。</p>
+<ul class="simple" id="effects">
+<li><p>計画中の内容</p></li>
+</ul>
+<p>残りの部は執筆中ですが、以下の内容を予定しています。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>第4部：ユーザ定義効果</p>
+<ul>
+<li><p>状態</p></li>
+<li><p>例外</p></li>
+<li><p>並行性</p></li>
+<li><p>代数的効果</p></li>
+</ul>
+</li>
+<li><p>第5部：タクティクスとメタプログラミング</p>
+<ul>
+<li><p>構文の反映</p></li>
+<li><p>ホールと証明状態</p></li>
+<li><p>組み込みタクティクス</p></li>
+<li><p>派生タクティクス</p></li>
+<li><p>対話的証明</p></li>
+<li><p>独自の決定手続き</p></li>
+<li><p>反射による証明</p></li>
+<li><p>プログラムの合成</p></li>
+<li><p>抽出（生成）向けタクティクス</p></li>
+</ul>
+</li>
+<li><p>第6部：F* ライブラリ</p></li>
+<li><p>第7部：F* 開発の構成と保守のためのユーザーガイド</p>
+<ul>
+<li><dl class="simple">
+<dt>ビルドシステム</dt><dd><p>— 依存関係解析 — 検証済みファイル — サンプルプロジェクト</p>
+</dd>
+</dl>
+</li>
+<li><p>F* エディタの活用</p></li>
+<li><dl class="simple">
+<dt>正規化による証明</dt><dd><ul>
+<li><p>正規化ステップ</p></li>
+<li><p>名前呼び vs. 値呼び</p></li>
+<li><p>ネイティブ実行とプラグイン</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>証明工学</dt><dd><ul>
+<li><p>安定した証明の構築・保守・デバッグ</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>抽出（コード生成）</dt><dd><ul>
+<li><p>OCaml</p></li>
+<li><p>F#</p></li>
+<li><p>KaRaMeL</p></li>
+<li><p>部分評価</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>コマンドラインオプション</p></li>
+<li><p>F* の各種エラーメッセージ解説</p></li>
+<li><p>構文ガイド</p></li>
+<li><p>FAQ（よくある質問）</p></li>
+</ul>
+</li>
+<li><p>第8部：Steel——F* に埋め込まれた並行セパレーション論理</p></li>
+<li><p>第9部：高信頼暗号への応用</p></li>
+<li><p>第10部：パーサとフォーマッタへの応用</p></li>
+</ul>
+</div></blockquote>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="F* による証明指向プログラミング" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="intro.html" class="btn btn-neutral float-right" title="イントロダクション" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

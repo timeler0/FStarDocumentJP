@@ -1,0 +1,395 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>良基底関係と停止性 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="計算効果の最初のモデル" href="part2_par.html" />
+    <link rel="prev" title="高階抽象構文（HOAS）" href="part2_phoas.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part2.html">帰納的型によるデータ・証明・計算の表現</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part2_inductive_type_families.html">帰納的型の定義</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_vectors.html">長さインデックス付きリスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_merkle.html">Merkle 木</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_equality.html">等式型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_logical_connectives.html">構成的連言と古典的連言（論理結合子）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_stlc.html">単純型付きラムダ計算（STLC）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_phoas.html">高階抽象構文（HOAS）</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">良基底関係と停止性</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#well-founded-relations-and-accessibility-predicates">良基底関係と可到達性述語（Accessibility）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#well-founded-recursion">良基底再帰</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#some-well-founded-relations">いくつかの良基底関係</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#termination-checking-with-custom-well-founded-relations">自作の良基底関係を用いた停止性検査</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part2_par.html">計算効果の最初のモデル</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_universes.html">ユニバース（Universes）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+      <li class="breadcrumb-item active">良基底関係と停止性</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="well-founded-relations-and-termination">
+<span id="part2-well-founded-recursion"></span><h1>良基底関係と停止性<a class="headerlink" href="#well-founded-relations-and-termination" title="Link to this heading"></a></h1>
+<p><a class="reference internal" href="../part1/part1_termination.html#part1-termination"><span class="std std-ref">停止性の証明</span></a> の章で、F* が再帰関数の停止性をどのように検査するかを見ました。この章では、その停止性検査がどのように帰納的型と構造的再帰から生じるのかを扱います。<a class="reference internal" href="part2_equality.html#part2-equality"><span class="std std-ref">等式</span></a> と同様、F* の論理・証明系の中核機能である停止性検査は、帰納的型に基礎づけられています。</p>
+<p>より技術的な背景については、次の資料が参考になります。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://core.ac.uk/download/pdf/81965996.pdf">Constructing Recursion Operators in Type Theory, L. Paulson, Journal of Symbolic Computation (1986) 2, 325-355</a></p></li>
+<li><p><a class="reference external" href="http://www.duplavis.com/venanzio/publications/General_Recursion_MSCS_2005.pdf">Modeling General Recursion in Type Theory, A. Bove &amp; V. Capretta,
+Mathematical Structures in Computer Science (2005)</a></p></li>
+</ul>
+</div></blockquote>
+<p>本章で紹介する F* ライブラリの一部を提供してくださった Aseem Rastogi、Chantal Keller、Catalin Hritcu に感謝します。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://github.com/FStarLang/FStar/blob/master/ulib/FStar.WellFounded.fst">FStar.WellFounded.fst</a></p></li>
+<li><p><a class="reference external" href="https://github.com/FStarLang/FStar/blob/master/ulib/FStar.LexicographicOrdering.fsti">FStar.LexicographicOrdering</a></p></li>
+</ul>
+</div></blockquote>
+<section id="well-founded-relations-and-accessibility-predicates">
+<h2>良基底関係と可到達性述語（Accessibility）<a class="headerlink" href="#well-founded-relations-and-accessibility-predicates" title="Link to this heading"></a></h2>
+<p>型 <span class="math notranslate nohighlight">\(T\)</span> の要素上の二項関係 <span class="math notranslate nohighlight">\(R\)</span> が良基底（well-founded）であるとは、任意の <span class="math notranslate nohighlight">\(i\)</span> について <span class="math notranslate nohighlight">\(x_i~R~x_{i+1}\)</span> を満たす無限列 <span class="math notranslate nohighlight">\(x_0, x_1, x_2, ...\)</span> が存在しないことを言います。</p>
+<p><a class="reference internal" href="../part1/part1_termination.html#part1-termination"><span class="std std-ref">前章</span></a> で述べたように、再帰関数 <code class="docutils literal notranslate"><span class="pre">f</span></code> の型検査では、F* は利用者に <em>測度（measure）</em> を与えることを求め、再帰呼び出しにおいて引数の測度が仮引数の測度よりも、F* の項上に備わる良基底関係で小さくなることを検査します。良基底関係には無限降下列がないため、そのような関係で結ばれた再帰呼び出しの列は必ず停止します。ただし、<code class="docutils literal notranslate"><span class="pre">&lt;&lt;</span></code> や <code class="docutils literal notranslate"><span class="pre">precedes</span></code> と書かれるこの組み込みの良基底関係は派生概念です。</p>
+<p>最も素朴な形では、関係の良基底性は、以下に示す帰納的型 <a href="#id1"><span class="problematic" id="id2">``</span></a>acc``（“accessible” の略）で表現できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> binrel a = a -&gt; a -&gt; Type
+<span class="k">noeq</span>
+<span class="k">type</span> acc (#a:Type) (r:binrel a) (x0:a) : Type =
+  | AccIntro : access_smaller:(x1:a -&gt; r x1 x0 -&gt; acc r x1) -&gt; acc r x0
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">acc</span></code> は型 <code class="docutils literal notranslate"><span class="pre">a</span></code>、<code class="docutils literal notranslate"><span class="pre">a</span></code> 上の二項関係 <code class="docutils literal notranslate"><span class="pre">r:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Type</span></code>、および要素 <code class="docutils literal notranslate"><span class="pre">x:a</span></code> をパラメータに取ります。直感的には、<code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">y</span> <span class="pre">x</span></code> が成り立つとき、<code class="docutils literal notranslate"><span class="pre">y</span></code> は <code class="docutils literal notranslate"><span class="pre">x</span></code> より「小さい」とみなします。</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">acc</span></code> type has just one constructor <code class="docutils literal notranslate"><span class="pre">AccIntro</span></code>, whose only
+argument is a function of type <code class="docutils literal notranslate"><span class="pre">y:a</span> <span class="pre">-&gt;</span> <span class="pre">r</span> <span class="pre">y</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">acc</span> <span class="pre">r</span>
+<span class="pre">y</span></code>. Intuitively, this says that in order to build an instance of
+<code class="docutils literal notranslate"><span class="pre">acc</span> <span class="pre">r</span> <span class="pre">x0</span></code>, you have to provide a function which can build a proof
+of <code class="docutils literal notranslate"><span class="pre">acc</span> <span class="pre">r</span> <span class="pre">x1</span></code> for all <code class="docutils literal notranslate"><span class="pre">x1:a</span></code> smaller than <code class="docutils literal notranslate"><span class="pre">x0</span></code>. The only way to
+build such a function is one can avoid infinite regress, is if
+the chain <code class="docutils literal notranslate"><span class="pre">x0</span> <span class="pre">r</span> <span class="pre">x1</span> <span class="pre">r</span> <span class="pre">x2</span> <span class="pre">r</span> <span class="pre">...</span></code>, eventually terminates in some <code class="docutils literal notranslate"><span class="pre">xn</span></code>
+such that there are no elements smaller than it according to <code class="docutils literal notranslate"><span class="pre">r</span></code>.</p>
+<p>言い換えると、すべての <code class="docutils literal notranslate"><span class="pre">x:a</span></code> について <code class="docutils literal notranslate"><span class="pre">acc</span> <span class="pre">r</span> <span class="pre">x</span></code> を証明できるなら、<code class="docutils literal notranslate"><span class="pre">a</span></code> に <code class="docutils literal notranslate"><span class="pre">r</span></code> による無限降下列が存在しない、すなわち <code class="docutils literal notranslate"><span class="pre">r</span></code> が良基底であることを正確に表しています。以下の定義がまさにそれで、<code class="docutils literal notranslate"><span class="pre">is_well_founded</span></code> は <code class="docutils literal notranslate"><span class="pre">well_founded</span></code> の古典論理（SMT 自動化可能）版です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> well_founded (#a:Type) (r:binrel a) = x:a -&gt; acc r x
+<span class="k">let</span> is_well_founded (#a:Type) (r:binrel a) = <span class="k">forall</span> x. squash (acc r x)
+</pre></div>
+</div>
+</section>
+<section id="well-founded-recursion">
+<h2>良基底再帰<a class="headerlink" href="#well-founded-recursion" title="Link to this heading"></a></h2>
+<p>関係 <code class="docutils literal notranslate"><span class="pre">r</span></code> と <code class="docutils literal notranslate"><span class="pre">p:acc</span> <span class="pre">r</span> <span class="pre">x</span></code> の証明が与えられれば、証明 <code class="docutils literal notranslate"><span class="pre">p</span></code> に対する構造的再帰だけで停止性を示せる <code class="docutils literal notranslate"><span class="pre">x</span></code> 上の再帰関数を定義できます。たとえその関数自体が <code class="docutils literal notranslate"><span class="pre">x</span></code> に関して構造的再帰でなくとも構いません。</p>
+<p>以下のコンビネータ <code class="docutils literal notranslate"><span class="pre">fix_F</span></code> がその仕組みを示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> fix_F (#aa:Type)
+              (#r:binrel aa)
+              (#p:(aa -&gt; Type))
+              (f: (x:aa -&gt; (y:aa -&gt; r y x -&gt; p y) -&gt; p x))              
+              (x0:aa)
+              (accessible_x0:acc r x0)
+  : <span class="k">Tot</span> (p x0) (<span class="k">decreases</span> accessible_x0)
+  = f x0 (<span class="k">fun</span> y r_yx -&gt; fix_F f y (accessible_x0.access_smaller y r_yx))
+</pre></div>
+</div>
+<p>もし <code class="docutils literal notranslate"><span class="pre">f</span></code> が、<code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span></code> の定義における再帰呼び出しが常に「ある関係 <code class="docutils literal notranslate"><span class="pre">r</span></code> によって <code class="docutils literal notranslate"><span class="pre">x</span></code> より小さい」引数 <code class="docutils literal notranslate"><span class="pre">y</span></code> に対してのみ行われ、かつある引数 <code class="docutils literal notranslate"><span class="pre">x0</span></code> について <code class="docutils literal notranslate"><span class="pre">acc</span> <span class="pre">r</span> <span class="pre">x0``（``x0</span></code> から始まる無限降下列がない）の証明があるなら、<code class="docutils literal notranslate"><span class="pre">f</span></code> の不動点は <code class="docutils literal notranslate"><span class="pre">accessible_x0</span></code> の証明に対する構造的再帰で定義できます。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fix_F</span></code> は <code class="docutils literal notranslate"><span class="pre">accessible_x0</span></code> に関して構造的再帰です。というのも、再帰呼び出しは <code class="docutils literal notranslate"><span class="pre">h1</span> <span class="pre">y</span> <span class="pre">r_yx</span></code> という要素（<code class="docutils literal notranslate"><span class="pre">AccIntro</span> <span class="pre">h1</span></code> を根とする（分岐が無限の場合もある）木の子ノード）に対してだけ行われるからです。</p></li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">r</span></code> が良基底、すなわちすべての <code class="docutils literal notranslate"><span class="pre">x:a</span></code> で <code class="docutils literal notranslate"><span class="pre">r</span></code> が可到達である場合には、<code class="docutils literal notranslate"><span class="pre">fix_F</span></code> のやや簡潔な版も導けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> fix (#aa:Type) (#r:binrel aa) (rwf:well_founded r)
+        (p:aa -&gt; Type) (f:(x:aa -&gt; (y:aa -&gt; r y x -&gt; p y) -&gt; p x))
+        (x:aa)
+  : p x
+  = fix_F f x (rwf x)
+</pre></div>
+</div>
+</section>
+<section id="some-well-founded-relations">
+<h2>いくつかの良基底関係<a class="headerlink" href="#some-well-founded-relations" title="Link to this heading"></a></h2>
+<p>ここでは基本的な良基底関係の作り方を示します。まず、自然数の <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> は F* の停止性検査に組み込まれているため、<code class="docutils literal notranslate"><span class="pre">&lt;</span></code> が良基底であることは容易に証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> lt_nat (x y:nat) : Type = x &lt; y == <span class="k">true</span>
+<span class="k">let</span> <span class="k">rec</span> wf_lt_nat (x:nat)
+  : acc lt_nat x
+  = AccIntro (<span class="k">fun</span> y <span class="k">_</span> -&gt; wf_lt_nat y)
+</pre></div>
+</div>
+<p>また、既存の良基底関係から別の良基底関係を導くコンビネータも定義できます。例えば、関係 <code class="docutils literal notranslate"><span class="pre">sub_r</span></code> が良基底関係 <code class="docutils literal notranslate"><span class="pre">r</span></code> の <a href="#id1"><span class="problematic" id="id2">*</span></a>部分関係*（<code class="docutils literal notranslate"><span class="pre">sub_r</span> <span class="pre">x</span> <span class="pre">y</span></code> なら常に <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">x</span> <span class="pre">y</span></code>）なら、<code class="docutils literal notranslate"><span class="pre">sub_r</span></code> も良基底です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> subrel_wf (#a:Type) (#r #sub_r:binrel a)
+              (sub_w:(x:a -&gt; y:a -&gt; sub_r x y -&gt; r x y))
+              (r_wf:well_founded r)
+  : well_founded sub_r
+  = <span class="k">let</span> <span class="k">rec</span> aux (x:a)
+                (acc_r:acc r x)
+      : <span class="k">Tot</span> (acc sub_r x) (<span class="k">decreases</span> acc_r)
+      = AccIntro 
+          (<span class="k">fun</span> y sub_r_y_x -&gt;
+             aux y (acc_r.access_smaller y (sub_w y x sub_r_y_x)))
+    <span class="k">in</span>
+    <span class="k">fun</span> x -&gt; aux x (r_wf x)
+</pre></div>
+</div>
+<p>別の有用なコンビネータとして、関係 <code class="docutils literal notranslate"><span class="pre">r:</span> <span class="pre">binrel</span> <span class="pre">b</span></code> が、ある関数 <code class="docutils literal notranslate"><span class="pre">f:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span></code> による別の良基底関係の逆像として定義できる場合に、<code class="docutils literal notranslate"><span class="pre">r</span></code> の良基底性を導くものがあります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> inverse_image (#a #b:Type) (r_b:binrel b) (f:a -&gt; b) : binrel a =
+  <span class="k">fun</span> x y -&gt; r_b (f x) (f y)
+
+<span class="k">let</span> inverse_image_wf (#a #b:Type) (#r_b:binrel b)
+                     (f:a -&gt; b)
+                     (r_b_wf:well_founded r_b)
+  : well_founded (inverse_image r_b f)
+  = <span class="k">let</span> <span class="k">rec</span> aux (x:a)
+                (acc_r_b:acc r_b (f x))
+      : <span class="k">Tot</span> (acc (inverse_image r_b f) x)
+            (<span class="k">decreases</span> acc_r_b)
+      = AccIntro (<span class="k">fun</span> y p -&gt; aux y (acc_r_b.access_smaller (f y) p)) <span class="k">in</span>
+    <span class="k">fun</span> x -&gt; aux x (r_b_wf (f x))
+</pre></div>
+</div>
+<p>例えば、負の整数上の <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> 順序は、自然数上の <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> の逆像として定義することで良基底であると証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> neg = x:int { x &lt;= 0 }
+<span class="k">let</span> negate (x:neg) : nat = -x
+<span class="k">let</span> gt_neg : binrel neg = inverse_image lt_nat negate
+<span class="k">let</span> wf_gt_neg = inverse_image_wf negate wf_lt_nat
+</pre></div>
+</div>
+</section>
+<section id="termination-checking-with-custom-well-founded-relations">
+<h2>自作の良基底関係を用いた停止性検査<a class="headerlink" href="#termination-checking-with-custom-well-founded-relations" title="Link to this heading"></a></h2>
+<p>F* のライブラリ <code class="docutils literal notranslate"><span class="pre">FStar.LexicographicOrdering</span></code> では、依存対の辞書式順序を含む、いくつかの関係が良基底であることが示されています。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> lexicographic_order (#a:Type)
+                         (#b:a -&gt; Type)
+                         (r_a:binrel a)
+                         (r_b:(x:a -&gt; binrel (b x)))
+  : (x:a &amp; b x) -&gt; (x:a &amp; b x) -&gt; Type =
+  | Left_lex:
+    x1:a -&gt; x2:a -&gt;
+    y1:b x1 -&gt; y2:b x2 -&gt;
+    r_a x1 x2 -&gt;
+    lexicographic_order r_a r_b (| x1, y1 |) (| x2, y2 |)
+
+  | Right_lex:
+    x:a -&gt;
+    y1:b x -&gt; y2:b x -&gt;
+    r_b x y1 y2 -&gt;
+    lexicographic_order r_a r_b (| x, y1 |) (| x, y2 |)
+</pre></div>
+</div>
+<p>この順序は <code class="docutils literal notranslate"><span class="pre">binrel</span> <span class="pre">(x:a</span> <span class="pre">&amp;</span> <span class="pre">b</span> <span class="pre">x)</span></code> として定義され、<code class="docutils literal notranslate"><span class="pre">a</span></code> 上の二項関係 <code class="docutils literal notranslate"><span class="pre">r_a</span></code> と、各 <code class="docutils literal notranslate"><span class="pre">x:a</span></code> に対する <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">x</span></code> 上の関係族 <code class="docutils literal notranslate"><span class="pre">r_b</span></code> をパラメータに取ります。ケースは 2 つあります。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Left_lex</span></code>: ペアの第 1 要素が <code class="docutils literal notranslate"><span class="pre">r_a</span></code> により減少し、第 2 要素は無関係。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Right_lex</span></code>: 第 1 要素は不変で、第 2 要素が <code class="docutils literal notranslate"><span class="pre">r_b</span></code> により減少。</p></li>
+</ul>
+</div></blockquote>
+<p>証明はやや込み入っています（<code class="docutils literal notranslate"><span class="pre">FStar.LexicographicOrdering.fst</span></code> を参照）。しかし <code class="docutils literal notranslate"><span class="pre">r_a</span></code> と <code class="docutils literal notranslate"><span class="pre">r_b</span></code> 自体が良基底であれば、この辞書式順序も良基底であると示せます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> lexicographic_order_wf (#a:Type) (#b:a -&gt; Type)
+                           (#r_a:binrel a)
+                           (#r_b:(x:a -&gt; binrel (b x)))
+                           (wf_a:well_founded r_a)
+                           (wf_b:(x:a -&gt; well_founded (r_b x)))
+  : well_founded (lexicographic_order r_a r_b)
+</pre></div>
+</div>
+<p>この良基底性の証明があれば、自前の良基底順序を用いて再帰関数を定義できます。</p>
+<p>例として、<code class="docutils literal notranslate"><span class="pre">ackermann</span></code> 関数を再び定義してみましょう（初出は <a class="reference internal" href="../part1/part1_termination.html#part1-lexicographic-orderings"><span class="std std-ref">こちら</span></a>）。今回は組み込みの <code class="docutils literal notranslate"><span class="pre">precedes</span></code> ではなく、可到達性と良基底関係を使います。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">//A type abbreviation for a pair of nats</span>
+<span class="c">//  we&#39;re using dependent pairs, even though there&#39;s no real dependence here</span>
+<span class="k">let</span> nat_pair = (x:nat &amp; nat)
+
+<span class="c">//Making a lexicographic ordering from a pair of nat ordering</span>
+<span class="k">let</span> lex_order_nat_pair 
+  : binrel nat_pair
+  = lexicographic_order lt_nat (<span class="k">fun</span> <span class="k">_</span> -&gt; lt_nat)
+
+<span class="c">// The lex order on nat pairs is well-founded, using our general proof</span>
+<span class="c">// of lexicographic composition of well-founded orders</span>
+<span class="k">let</span> lex_order_nat_pair_wf 
+  : well_founded lex_order_nat_pair
+  = lexicographic_order_wf wf_lt_nat (<span class="k">fun</span> <span class="k">_</span> -&gt; wf_lt_nat)
+
+<span class="c">// A utility to introduce lt_nat</span>
+<span class="k">let</span> mk_lt_nat (x:nat) (y:nat { x &lt; y }) 
+  : lt_nat x y
+  = <span class="k">let</span> <span class="k">_</span> : equals (x &lt; y) <span class="k">true</span> = Refl <span class="k">in</span>
+    ()
+    
+<span class="c">// A utility to make a lex ordering of nat pairs</span>
+<span class="k">let</span> mk_lex_order_nat_pair (xy0:nat_pair) 
+                          (xy1:nat_pair {
+                            <span class="k">let</span> (|x0, y0|) = xy0 <span class="k">in</span>
+                            <span class="k">let</span> (|x1, y1|) = xy1 <span class="k">in</span>
+                            x0 &lt; x1 \/ (x0 == x1 /\ y0 &lt; y1)
+                          })
+  : lex_order_nat_pair xy0 xy1
+  = <span class="k">let</span> (|x0, y0|) = xy0 <span class="k">in</span>
+    <span class="k">let</span> (|x1, y1|) = xy1 <span class="k">in</span>
+    <span class="k">if</span> x0 &lt; x1 <span class="k">then</span> Left_lex x0 x1 y0 y1 (mk_lt_nat x0 x1)
+    <span class="k">else</span> Right_lex x0 y0 y1 (mk_lt_nat y0 y1)
+
+<span class="c">// Defining ackermann, where `arec` is called for recursive calls</span>
+<span class="c">// on pairs that precede xy, lexicographically</span>
+<span class="k">let</span> ackermann&#39; (xy: nat_pair)
+               (arec: (xy&#39;:nat_pair -&gt; lex_order_nat_pair xy&#39; xy -&gt; nat))
+  : nat
+  = <span class="k">let</span> (| x, y |) = xy <span class="k">in</span>
+    <span class="k">if</span> x = 0 <span class="k">then</span> y + 1
+    <span class="k">else</span> <span class="k">if</span> y = 0 <span class="k">then</span> arec (| x - 1, 1 |) (mk_lex_order_nat_pair <span class="k">_</span> <span class="k">_</span>)
+    <span class="k">else</span> arec (| x - 1, arec (| x, y - 1|) (mk_lex_order_nat_pair <span class="k">_</span> <span class="k">_</span>) |)
+              (mk_lex_order_nat_pair <span class="k">_</span> <span class="k">_</span>)
+
+<span class="c">// Tie the knot with `fix`</span>
+<span class="k">let</span> ackermann : nat_pair -&gt; nat = fix lex_order_nat_pair_wf (<span class="k">fun</span> <span class="k">_</span> -&gt; nat) ackermann&#39;
+</pre></div>
+</div>
+<p>この版は先ほどの Ackermann よりかなり冗長ですが、<code class="docutils literal notranslate"><span class="pre">precedes</span></code> による辞書式順序の組み込みサポートが、より素朴な良基底関係のモデルによって意味論的に正当化できることを示しています。</p>
+<p>ユーザ定義の良基底順序を扱いやすくするため、F* には良基底関係と併用するための <code class="docutils literal notranslate"><span class="pre">decreases</span></code> 節の変種があります。例えば次の構文を使うと、自作の良基底関係の表現力を保ちながら、F* の SMT 自動化と停止性検査の恩恵を受けられます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> L = FStar.LexicographicOrdering
+<span class="k">let</span> <span class="k">rec</span> ackermann_wf (m n:nat)
+   : <span class="k">Tot</span> nat 
+     (<span class="k">decreases</span> 
+       {:well-founded 
+         L.lex (coerce_wf wf_lt_nat) (<span class="k">fun</span> <span class="k">_</span> -&gt; (coerce_wf wf_lt_nat)) (| m, n |) 
+       })
+  = <span class="k">if</span> m = 0 <span class="k">then</span> n + 1
+    <span class="k">else</span> <span class="k">if</span> n = 0 <span class="k">then</span> ackermann_wf (m - 1) 1
+    <span class="k">else</span> ackermann_wf (m - 1) (ackermann_wf m (n - 1))
+</pre></div>
+</div>
+<p>構文の説明です。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">decreases</span> <span class="pre">{:well-founded</span> <span class="pre">p</span> <span class="pre">x}</span></code>: ここで <code class="docutils literal notranslate"><span class="pre">p</span></code> は <code class="docutils literal notranslate"><span class="pre">FStar.LexicographicOrdering.well_founded_relation</span></code> のインスタンスであり、スコープ内の仮引数から作られる項 <code class="docutils literal notranslate"><span class="pre">x</span></code> に適用されます。</p></li>
+<li><p>この例では、コンビネータ <code class="docutils literal notranslate"><span class="pre">L.lex</span></code> を使って <code class="docutils literal notranslate"><span class="pre">wf_lt_nat</span></code> から辞書式順序を構成します（チュートリアル中の定義を <code class="docutils literal notranslate"><span class="pre">FStar.LexicographicOrdering</span></code> ライブラリが期待する型に合わせるため、補助の <code class="docutils literal notranslate"><span class="pre">coerce_wf</span></code> で型変換しています）。</p></li>
+</ul>
+</div></blockquote>
+<p>完全性のために以下に型変換（coercion）を示しますが、このチュートリアル以外の文脈では必須ではありません。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> W = FStar.WellFounded
+<span class="k">let</span> <span class="k">rec</span> coerce #a #r #x (p:acc #a r x)
+  : <span class="k">Tot</span> (W.acc r x) (<span class="k">decreases</span> p)
+  = W.AccIntro (<span class="k">fun</span> y r -&gt; coerce (p.access_smaller y r))
+
+<span class="k">let</span> coerce_wf #a #r (p: (x:a -&gt; acc r x))
+  : x:a -&gt; W.acc r x
+  = <span class="k">fun</span> x -&gt; coerce (p x)
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part2_phoas.html" class="btn btn-neutral float-left" title="高階抽象構文（HOAS）" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part2_par.html" class="btn btn-neutral float-right" title="計算効果の最初のモデル" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

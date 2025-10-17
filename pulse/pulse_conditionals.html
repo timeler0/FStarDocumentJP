@@ -1,0 +1,468 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>条件分岐 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="ループと再帰" href="pulse_loops.html" />
+    <link rel="prev" title="ユーザー定義述語" href="pulse_user_defined_predicates.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">条件分岐</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-simple-branching-program-max">簡単な分岐プログラム：最大値</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#limitation-non-tail-conditionals">制限事項：末尾でない条件分岐</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pattern-matching-with-nullable-references">NULL 可能参照でのパターンマッチ</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#representation-predicate">表現述語</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reading-a-nullable-ref">NULL 可能参照の読み出し</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#helpers">ヘルパー</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing-a-nullable-reference">NULL 可能参照への書き込み</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">条件分岐</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="conditionals">
+<span id="pulse-conditionals"></span><h1>条件分岐<a class="headerlink" href="#conditionals" title="Link to this heading"></a></h1>
+<p>より面白いプログラムを書くには、いくつかの制御構文が必要です。この章では、<code class="docutils literal notranslate"><span class="pre">if/else</span></code> と <code class="docutils literal notranslate"><span class="pre">match</span></code> の 2 種類の分岐を使ったプログラムを書いていきます。</p>
+<section id="a-simple-branching-program-max">
+<h2>簡単な分岐プログラム：最大値<a class="headerlink" href="#a-simple-branching-program-max" title="Link to this heading"></a></h2>
+<p>2 つの参照に格納された値の最大値を返す簡単なプログラムを示します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> max_spec x y = <span class="k">if</span> x &lt; y <span class="k">then</span> y <span class="k">else</span> x
+
+<span class="k">fn</span> max #p #q (x y:ref int)
+<span class="k">requires</span> pts_to x #p &#39;vx ** pts_to y #q &#39;vy
+<span class="k">returns</span> n:int
+<span class="k">ensures</span> pts_to x #p &#39;vx ** pts_to y #q &#39;vy
+        ** pure (n == max_spec &#39;vx &#39;vy)
+{
+    <span class="k">let</span> vx = !x;
+    <span class="k">let</span> vy = !y;
+    <span class="k">if</span> (vx &gt; vy)
+    {
+        vx
+    }
+    <span class="k">else</span>
+    {
+        vy
+    }
+}
+</pre></div>
+</div>
+<p>このプログラムはごく一般的な仕様記述スタイルを示しています。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>まず、純粋な F* 関数 <code class="docutils literal notranslate"><span class="pre">max_spec</span></code> を用意します。</p></li>
+<li><p>次に、可変参照を扱う Pulse の関数を定義し、純粋な F* の仕様と対応付ける仕様を書きます。ここでは、2 つの参照内容を表す論理的証人に対して、<code class="docutils literal notranslate"><span class="pre">max</span></code> が <code class="docutils literal notranslate"><span class="pre">max_spec</span></code> と同じ振る舞いをすることを証明します。</p></li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">max</span></code> の実装は Pulse の条件文を使います。これは F* の <code class="docutils literal notranslate"><span class="pre">if-then-else</span></code> 式とは文法が異なり、C のような言語に近い、中括弧を用いたより命令的な構文になっています。</p>
+<section id="limitation-non-tail-conditionals">
+<h3>制限事項：末尾でない条件分岐<a class="headerlink" href="#limitation-non-tail-conditionals" title="Link to this heading"></a></h3>
+<p>現状の Pulse の推論機構は、末尾（tail）以外の位置に現れる条件分岐をまだサポートしていません。例えば次の <code class="docutils literal notranslate"><span class="pre">max</span></code> の変種は、以下のエラーメッセージと共に失敗します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> max_alt #p #q (x y:ref int)
+<span class="k">requires</span> pts_to x #p &#39;vx ** pts_to y #q &#39;vy
+<span class="k">returns</span> n:int
+<span class="k">ensures</span> pts_to x #p &#39;vx ** pts_to y #q &#39;vy
+        ** pure (n == max_spec &#39;vx &#39;vy)
+{
+    <span class="k">let</span> <span class="k">mut</span> result = 0;
+    <span class="k">let</span> vx = !x;
+    <span class="k">let</span> vy = !y;
+    <span class="k">if</span> (vx &gt; vy)
+    {
+        result := vx;
+    }
+    <span class="k">else</span>
+    {
+        result := vy;
+    };
+    !result;
+}
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Pulse cannot yet infer a postcondition for a non-tail conditional statement;
+Either annotate this `if` with `returns` clause; or rewrite your code to use a tail conditional
+</pre></div>
+</div>
+<p>こちらは注釈を付けて通るようにした <code class="docutils literal notranslate"><span class="pre">max_alt</span></code> の例です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> max_alt2 #p #q (x y:ref int)
+<span class="k">requires</span> pts_to x #p &#39;vx ** pts_to y #q &#39;vy
+<span class="k">returns</span> n:int
+<span class="k">ensures</span> pts_to x #p &#39;vx ** pts_to y #q &#39;vy
+        ** pure (n == max_spec &#39;vx &#39;vy)
+{
+    <span class="k">let</span> <span class="k">mut</span> result = 0;
+    <span class="k">let</span> vx = !x;
+    <span class="k">let</span> vy = !y;
+    <span class="k">if</span> (vx &gt; vy)
+    <span class="k">ensures</span>
+     <span class="k">exists</span>* r.
+       pts_to x #p &#39;vx **
+       pts_to y #q &#39;vy **
+       pts_to result r **
+       pure (r == max_spec &#39;vx &#39;vy)
+    {
+        result := vx;
+    }
+    <span class="k">else</span>
+    {
+        result := vy;
+    };
+    !result;
+}
+</pre></div>
+</div>
+<p>末尾でない条件分岐への推論サポートは現在開発中です。</p>
+</section>
+</section>
+<section id="pattern-matching-with-nullable-references">
+<h2>NULL 可能参照でのパターンマッチ<a class="headerlink" href="#pattern-matching-with-nullable-references" title="Link to this heading"></a></h2>
+<p>パターンマッチの使い方を示すため、NULL の可能性がある参照の次の表現を考えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> nullable_ref (a: Type0) = option (ref a)
+
+<span class="k">let</span> pts_to_or_null #a
+        (x:nullable_ref a) 
+        (#[default_arg (`1.0R)] p:perm) <span class="c">//implicit argument with a default</span>
+        (v:option a)
+: slprop
+= <span class="k">match</span> x <span class="k">with</span>
+  | None -&gt; pure (v == None)
+  | Some x -&gt; <span class="k">exists</span>* w. pts_to x #p w ** pure (v == Some w)
+</pre></div>
+</div>
+<section id="representation-predicate">
+<h3>表現述語<a class="headerlink" href="#representation-predicate" title="Link to this heading"></a></h3>
+<p>NULL 可能参照は、表現述語 <code class="docutils literal notranslate"><span class="pre">pts_to_or_null</span></code> を伴う <code class="docutils literal notranslate"><span class="pre">option</span> <span class="pre">(ref</span> <span class="pre">a)</span></code> として表せます。いくつか注意点があります。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">(#[default_arg</span> <span class="pre">(\`1.0R)]</span> <span class="pre">p:perm)</span></code> という記法は、省略時に <code class="docutils literal notranslate"><span class="pre">1.0R</span></code> を既定値とする暗黙引数を表す F* の構文です。<code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Reference.pts_to</span></code> などの述語も同様に定義されています。</p></li>
+<li><p>定義は場合分けになっています。参照 <code class="docutils literal notranslate"><span class="pre">x</span></code> が <code class="docutils literal notranslate"><span class="pre">None</span></code> なら、論理的証人も <code class="docutils literal notranslate"><span class="pre">None</span></code> です。</p></li>
+<li><p>それ以外の場合、基になる参照は何らかの値 <code class="docutils literal notranslate"><span class="pre">w</span></code> を指しており、論理的証人は <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">==</span> <span class="pre">Some</span> <span class="pre">w</span></code> となって値と一致します。</p></li>
+</ul>
+</div></blockquote>
+<p>次のように定義したくなるかもしれません。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> pts_to_or_null #a
+     (x:nullable_ref a)
+     (#[default_arg (`1.0R)] p:perm)
+     (v:option a)
+: slprop
+= <span class="k">match</span> x <span class="k">with</span>
+  | None -&gt; pure (v == None)
+  | Some x -&gt; pure (Some? v) ** pts_to x #p (Some?.v v)
+</pre></div>
+</div>
+<p>しかし、F* の連言 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">/\</span> <span class="pre">q``（ここでは</span> <span class="pre">``q</span></code> の型付けに <code class="docutils literal notranslate"><span class="pre">p</span></code> を利用できる）と異なり、<code class="docutils literal notranslate"><span class="pre">**</span></code> は左に偏った演算子ではありません。したがってこの文脈では <code class="docutils literal notranslate"><span class="pre">(Some?.v</span> <span class="pre">v)</span></code> を示せず、この定義は却下されます。</p>
+<p>別の書き方として次のようなスタイルも考えられます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> pts_to_or_null #a
+     (x:nullable_ref a)
+     (#[default_arg (`1.0R)] p:perm)
+     (v:option a)
+: slprop
+= <span class="k">match</span> x, v <span class="k">with</span>
+  | None, None -&gt; emp
+  | Some x, Some w -&gt; pts_to x #p w
+  | <span class="k">_</span> -&gt; pure False
+</pre></div>
+</div>
+<p>これでも動きますが、（実際には起こりえない）追加のケース処理が必要になります。</p>
+</section>
+<section id="reading-a-nullable-ref">
+<h3>NULL 可能参照の読み出し<a class="headerlink" href="#reading-a-nullable-ref" title="Link to this heading"></a></h3>
+<p>Pulse で最初のパターンマッチを書いてみましょう。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> read_nullable #a #p (r:nullable_ref a)
+<span class="k">requires</span> pts_to_or_null r #p &#39;v
+<span class="k">returns</span> o:option a
+<span class="k">ensures</span> pts_to_or_null r #p &#39;v
+        ** pure (&#39;v == o)
+{
+    <span class="k">match</span> r {
+     Some x -&gt; {
+        <span class="k">unfold</span> (pts_to_or_null (Some x) #p &#39;v);
+        <span class="k">let</span> o = !x;
+        <span class="k">fold</span> (pts_to_or_null (Some x) #p &#39;v);
+        <span class="k">rewrite</span> <span class="k">each</span> (Some x) as r;
+        Some o
+     }
+     None -&gt; {
+        <span class="k">unfold</span> (pts_to_or_null None #p &#39;v);
+        <span class="k">fold</span> (pts_to_or_null None #p &#39;v);
+        <span class="k">rewrite</span> <span class="k">each</span> (None #(ref a)) as r;
+        None
+     }
+    }
+}
+</pre></div>
+</div>
+<p>Pulse のパターンマッチの構文は、F* よりも命令的で、Rust に近い書き味です。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">match</span></code> の本体全体を中括弧で囲みます。</p></li>
+<li><p>各分岐もそれぞれ中括弧で囲みます。</p></li>
+<li><p>（現時点の）Pulse がサポートするのは、トップレベルにコンストラクタ 1 つ＋変数、または変数のみという単純なパターンです。例えば <code class="docutils literal notranslate"><span class="pre">Some</span> <span class="pre">(Some</span> <span class="pre">x)</span></code> のようなパターンは書けません。</p></li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">read_nullable</span></code> の型は、表現述語の論理的証人と等しい値を返すことを約束します。</p>
+<p>コードは少し冗長です——すぐ後で、もう少しすっきり書く方法を見ます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Some</span> <span class="pre">x</span></code> 側の分岐で <code class="docutils literal notranslate"><span class="pre">show_proof_state</span></code> を呼ぶと、次のように表示されます。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">Current</span> <span class="n">context</span><span class="p">:</span>
+    <span class="n">pts_to_or_null</span> <span class="n">r</span> <span class="p">(</span><span class="n">reveal</span> <span class="s1">&#39;v)</span>
+<span class="o">-</span> <span class="n">In</span> <span class="n">typing</span> <span class="n">environment</span><span class="p">:</span>
+    <span class="p">[</span><span class="n">branch</span> <span class="n">equality</span><span class="c1">#684 : squash (eq2 r (Some x)),</span>
+     <span class="o">...</span>
+</pre></div>
+</div>
+<p>注目すべきは <code class="docutils literal notranslate"><span class="pre">branch</span> <span class="pre">equality</span></code> という仮定で、この分岐では <code class="docutils literal notranslate"><span class="pre">(r</span> <span class="pre">==</span> <span class="pre">Some</span> <span class="pre">x)</span></code> を仮定できるという意味です。そこで、まず <code class="docutils literal notranslate"><span class="pre">r</span></code> を書き換え、表現述語を <code class="docutils literal notranslate"><span class="pre">unfold</span></code> し、<code class="docutils literal notranslate"><span class="pre">x</span></code> から値 <code class="docutils literal notranslate"><span class="pre">o</span></code> を読み、述語を fold で戻し、逆方向へ書き換え、最後に <code class="docutils literal notranslate"><span class="pre">Some</span> <span class="pre">o</span></code> を返します。<code class="docutils literal notranslate"><span class="pre">None</span></code> 側も同様です。</p>
+<p>Pulse の <code class="docutils literal notranslate"><span class="pre">match</span></code> は、F* と異なり、否定された経路条件を与えません。例えば次の例では、パターンがワイルドカードのみで、未選択の前半の分岐に対する経路条件として <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">(Some?</span> <span class="pre">x)</span></code> をPulse チェッカが仮定しないため、主張が失敗します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@expect_failure]
+<span class="k">fn</span> read_nullable_alt #a #p (r:nullable_ref a)
+<span class="k">requires</span> pts_to_or_null r #p &#39;v
+<span class="k">returns</span> o:option a
+<span class="k">ensures</span> emp
+{
+    <span class="k">match</span> r {
+     Some x -&gt; { admit () }
+     <span class="k">_</span> -&gt; { 
+        <span class="c">// we only have `r == _` in scope</span>
+        <span class="c">// not the negation of the prior branch conditions</span>
+        <span class="c">// i.e., unlike F*, we don&#39;t have not (Some? r)</span>
+        <span class="c">// so the assertion below fails</span>
+        <span class="k">assert</span> (pure (r == None)); 
+        admit() }
+    }
+}
+</pre></div>
+</div>
+<p>これらの否定的な経路条件も提供できるよう、Pulse チェッカの拡張を予定しています。</p>
+</section>
+<section id="helpers">
+<span id="pulse-nullable-ref-helpers"></span><h3>ヘルパー<a class="headerlink" href="#helpers" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">pts_to_or_null</span></code> のように <code class="docutils literal notranslate"><span class="pre">slprop</span></code> が場合分けで定義されていると、パターンマッチ時にもその場合分けに沿って推論することがよくあります。毎回書き換え→unfold→fold→書き換え…を行う代わりに、これらを処理するヘルパー関数を定義できます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> elim_pts_to_or_null_none #a #p (r:nullable_ref a)
+<span class="k">requires</span> pts_to_or_null r #p &#39;v ** pure (r == None)
+<span class="k">ensures</span> pts_to_or_null r #p &#39;v ** pure (&#39;v == None)
+{
+    <span class="k">rewrite</span> <span class="k">each</span> r as None;
+    <span class="k">unfold</span> (pts_to_or_null None #p &#39;v);
+    <span class="k">fold</span> (pts_to_or_null None #p &#39;v);
+    <span class="k">rewrite</span> <span class="k">each</span> (None #(ref a)) as r;
+}
+
+<span class="k">ghost</span>
+<span class="k">fn</span> intro_pts_to_or_null_none #a #p (r:nullable_ref a)
+<span class="k">requires</span> pure (r == None)
+<span class="k">ensures</span> pts_to_or_null r #p None
+{
+    <span class="k">fold</span> (pts_to_or_null #a None #p None);
+    <span class="k">rewrite</span> <span class="k">each</span> (None #(ref a)) as r;
+}
+
+<span class="k">ghost</span>
+<span class="k">fn</span> elim_pts_to_or_null_some #a #p (r:nullable_ref a) (x:ref a)
+<span class="k">requires</span> pts_to_or_null r #p &#39;v ** pure (r == Some x)
+<span class="k">ensures</span> <span class="k">exists</span>* w. pts_to x #p w ** pure (&#39;v == Some w)
+{
+    <span class="k">rewrite</span> <span class="k">each</span> r as (Some x);
+    <span class="k">unfold</span> (pts_to_or_null (Some x) #p &#39;v);
+}
+
+<span class="k">ghost</span>
+<span class="k">fn</span> intro_pts_to_or_null_some #a #p (r:nullable_ref a) (x:ref a)
+<span class="k">requires</span> pts_to x #p &#39;v ** pure (r == Some x)
+<span class="k">ensures</span> pts_to_or_null r #p (Some &#39;v)
+{
+    <span class="k">fold</span> (pts_to_or_null (Some x) #p (Some &#39;v));
+    <span class="k">rewrite</span> <span class="k">each</span> (Some x) as r;
+}
+</pre></div>
+</div>
+<p>これらの関数はすべて <code class="docutils literal notranslate"><span class="pre">ghost</span></code> としてマークされ、純粋に証明目的でのみ用いられることを示します。</p>
+<p>この種のヘルパーは多くの場合、機械的に作れます。将来的には <code class="docutils literal notranslate"><span class="pre">pts_to_or_null</span></code> の定義からPulse チェッカが自動生成することも考えられますし、F* のメタプログラミングで独自に自動生成することも可能です。現時点では手書きします。</p>
+<p>ヘルパーを使うと、NULL 可能参照のケース分解がいくらか楽になります：</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> read_nullable_alt #a #p (r:nullable_ref a)
+<span class="k">requires</span> pts_to_or_null r #p &#39;v
+<span class="k">returns</span> o:option a
+<span class="k">ensures</span> pts_to_or_null r #p &#39;v
+        ** pure (&#39;v == o)
+{
+    <span class="k">match</span> r {
+     Some x -&gt; {
+        elim_pts_to_or_null_some (Some x) x;
+        <span class="k">let</span> o = !x;
+        intro_pts_to_or_null_some r x;
+        Some o
+     }
+     None -&gt; {
+        <span class="k">unfold</span> pts_to_or_null None &#39;v;
+        <span class="k">fold</span> pts_to_or_null None &#39;v;
+        None
+     }
+    }
+}
+</pre></div>
+</div>
+</section>
+<section id="writing-a-nullable-reference">
+<h3>NULL 可能参照への書き込み<a class="headerlink" href="#writing-a-nullable-reference" title="Link to this heading"></a></h3>
+<p>ヘルパーを定義したら、繰り返し利用できます。例えば、NULL 可能参照へ書き込む関数を次に示します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> write_nullable #a (r:nullable_ref a) (v:a)
+<span class="k">requires</span> pts_to_or_null r &#39;v
+<span class="k">ensures</span> <span class="k">exists</span>* w. pts_to_or_null r w ** pure (Some? r ==&gt; w == Some v)
+{
+    <span class="k">match</span> r {
+     None -&gt; {
+        <span class="k">rewrite</span> pts_to_or_null None &#39;v
+             as pts_to_or_null r &#39;v;
+     }
+     Some x -&gt; {
+        <span class="k">unfold</span> pts_to_or_null (Some x) &#39;v;
+        x := v;
+        intro_pts_to_or_null_some r x;
+     }
+    }
+}
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_user_defined_predicates.html" class="btn btn-neutral float-left" title="ユーザー定義述語" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_loops.html" class="btn btn-neutral float-right" title="ループと再帰" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

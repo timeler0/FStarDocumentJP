@@ -1,0 +1,509 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>可変参照 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="存在量化" href="pulse_existentials.html" />
+    <link rel="prev" title="Pulse の基本" href="pulse_ch1.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">可変参照</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ref-t-stack-or-heap-references"><code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">t</span></code>：スタック参照とヒープ参照</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#reading-a-reference">参照の読み出し</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#erased-values-are-for-specification-and-proof-only">消去値は仕様・証明専用</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing-through-a-reference">参照への書き込み</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dereferencing-is-explicit">デリファレンスは明示的</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#inspecting-the-proof-state">証明状態の観察</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#stateful-commands-are-explicitly-sequenced">状態付きコマンドは明示的に列挙される</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fractional-permissions">分数パーミッション</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#stack-references">スタック参照</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#let-mut-creates-a-new-stack-ref"><code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">mut</span></code> で新しいスタック参照を作る</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#stack-references-are-scoped-and-implicitly-reclaimed">スタック参照はスコープ付きで暗黙に回収される</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#heap-references">ヒープ参照</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ghost-references">ゴースト参照</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">可変参照</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="mutable-references">
+<span id="pulse-references"></span><h1>可変参照<a class="headerlink" href="#mutable-references" title="Link to this heading"></a></h1>
+<p>Pulse は、C や Rust のようにガベージコレクタに頼らず、メモリ管理を明示的に制御できるプログラミングを（証明指向のスタイルで）支援します。そのために、（純粋関数言語である F* と比べて特に）重要な機能として、確保と解放の両方が可能な可変メモリ参照を提供します。</p>
+<p>本章では 3 種類の可変参照を扱います：スタック参照、ヒープ参照（ボックス）、ゴースト参照です。スタック参照は現在の関数のスタックフレームに確保されたメモリを指し、関数の終了時に自動で回収されます。ヒープ参照（ボックス）はヒープ上の位置を指し、<code class="docutils literal notranslate"><span class="pre">drop</span></code> または <code class="docutils literal notranslate"><span class="pre">free</span></code> を呼んで明示的に解放します。ゴースト参照は仕様・証明専用で、実行時には実在しないメモリ位置を指すものです。</p>
+<section id="ref-t-stack-or-heap-references">
+<h2><code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">t</span></code>：スタック参照とヒープ参照<a class="headerlink" href="#ref-t-stack-or-heap-references" title="Link to this heading"></a></h2>
+<p>可変参照に対する多くの操作は、参照先がスタックかヒープかに依存しません。主な違いは、スタック参照はスコープ内で確保され、スコープを抜けると暗黙に回収されるのに対し、ヒープ参照は明示的に確保・解放する点です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Reference.ref</span> <span class="pre">t</span></code> は可変参照の基本型です。前節の <code class="docutils literal notranslate"><span class="pre">incr</span></code> でも <code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">t</span></code> を見ました。以下では 2 つの参照の中身を入れ替える典型的な関数を示します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> swap u#a (#a: Type u#a) (r0 r1:ref a)
+<span class="k">requires</span> pts_to r0 &#39;v0 ** pts_to r1 &#39;v1
+<span class="k">ensures</span> pts_to r0 &#39;v1 ** pts_to r1 &#39;v0
+{
+    <span class="k">let</span> v0 = !r0;
+    <span class="k">let</span> v1 = !r1;
+    r0 := v1;
+    r1 := v0;
+}
+</pre></div>
+</div>
+<section id="reading-a-reference">
+<h3>参照の読み出し<a class="headerlink" href="#reading-a-reference" title="Link to this heading"></a></h3>
+<p>まず、次の <code class="docutils literal notranslate"><span class="pre">value_of</span></code> 関数で参照外し（デリファレンス）がどのように働くかを詳しく見てみましょう。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> value_of u#a (#a:Type u#a) (r:ref a)
+<span class="k">requires</span> pts_to r &#39;v
+<span class="k">returns</span> v:a
+<span class="k">ensures</span> pts_to r &#39;v ** pure (v == &#39;v)
+{
+    !r;
+}
+</pre></div>
+</div>
+<p>より明示的な形を以下に示します。ここで <code class="docutils literal notranslate"><span class="pre">w:erased</span> <span class="pre">a</span></code> は、<code class="docutils literal notranslate"><span class="pre">r</span></code> が現在参照している内容を表す（消去された）証人値です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> value_of_explicit u#a (#a:Type u#a) (r:ref a) (#w:erased a)
+<span class="k">requires</span> pts_to r w
+<span class="k">returns</span> v:a
+<span class="k">ensures</span> pts_to r w ** pure (v == reveal w)
+{
+    !r;
+}
+</pre></div>
+</div>
+<p>前提で <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">r</span> <span class="pre">w</span></code> を要求し、事後条件でも <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">r</span> <span class="pre">w</span></code> を保持しつつ <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">==</span> <span class="pre">reveal</span> <span class="pre">w</span></code> を述べています。すなわち、参照を読み出すと、得られる値が与えられた論理的証人と等しいことを型が保証します。</p>
+</section>
+<section id="erased-values-are-for-specification-and-proof-only">
+<h3>消去値は仕様・証明専用<a class="headerlink" href="#erased-values-are-for-specification-and-proof-only" title="Link to this heading"></a></h3>
+<p>論理的証人は消去値なので、非ゴースト計算で直接使うことはできません。例えば参照を読まずに単に <code class="docutils literal notranslate"><span class="pre">reveal</span> <span class="pre">w</span></code> を返そうとすると、次のようなエラーで検査に失敗します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> value_of_explicit_fail u#a (#a:Type u#a) (r:ref a) (#w:erased a)
+<span class="k">requires</span> pts_to r w
+<span class="k">returns</span> v:a
+<span class="k">ensures</span> pts_to r w ** pure (v == reveal w)
+{
+    reveal w
+}
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Expected</span> <span class="n">a</span> <span class="n">Total</span> <span class="n">computation</span><span class="p">,</span> <span class="n">but</span> <span class="n">got</span> <span class="n">Ghost</span>
+</pre></div>
+</div>
+</section>
+<section id="writing-through-a-reference">
+<h3>参照への書き込み<a class="headerlink" href="#writing-through-a-reference" title="Link to this heading"></a></h3>
+<p>次の <code class="docutils literal notranslate"><span class="pre">assign</span></code> は参照の中身を変更する方法を示します。仕様では、関数の終了時に <code class="docutils literal notranslate"><span class="pre">r</span></code> が代入した値 <code class="docutils literal notranslate"><span class="pre">v</span></code> を指すことを述べます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> assign u#a (#a:Type u#a) (r:ref a) (v:a)
+<span class="k">requires</span> pts_to r &#39;v
+<span class="k">ensures</span> pts_to r v
+{
+    r := v;
+}
+</pre></div>
+</div>
+</section>
+<section id="dereferencing-is-explicit">
+<h3>デリファレンスは明示的<a class="headerlink" href="#dereferencing-is-explicit" title="Link to this heading"></a></h3>
+<p>C や Rust のように左辺値・右辺値を区別して参照内容を暗黙に読む言語と異なり、Pulse（や OCaml）ではデリファレンスは明示的です。下のプログラムが示すように、参照そのものは（入出力パラメータのように）関数に渡せますが、現在の値は明示的に渡す必要があります。</p>
+<p>関数 <code class="docutils literal notranslate"><span class="pre">add</span></code> は参照 <code class="docutils literal notranslate"><span class="pre">r:ref</span> <span class="pre">int</span></code> と値 <code class="docutils literal notranslate"><span class="pre">n:int</span></code> の両方を引数に取ります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> add (r:ref int) (n:int)
+<span class="k">requires</span> pts_to r &#39;v
+<span class="k">ensures</span> pts_to r (&#39;v + n)
+{
+    <span class="k">let</span> v = !r;
+    r := v + n;
+}
+</pre></div>
+</div>
+<p>一方 <code class="docutils literal notranslate"><span class="pre">quadruple</span></code> は <code class="docutils literal notranslate"><span class="pre">add</span></code> を 2 回呼び、毎回 <code class="docutils literal notranslate"><span class="pre">r</span></code> に格納された値を 2 倍にします。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> quadruple (r:ref int)
+<span class="k">requires</span> pts_to r &#39;v
+<span class="k">ensures</span> pts_to r (4 * &#39;v)
+{
+    <span class="k">let</span> v1 = !r;
+    add r v1;
+    <span class="k">let</span> v2 = !r;
+    add r v2;
+}
+</pre></div>
+</div>
+</section>
+<section id="inspecting-the-proof-state">
+<h3>証明状態の観察<a class="headerlink" href="#inspecting-the-proof-state" title="Link to this heading"></a></h3>
+<p>Pulse プログラムは状態付き操作を一つずつ検査し、前提から始まる <code class="docutils literal notranslate"><span class="pre">slprop</span></code> の主張を関数終端まで「押し進め」ます。関数出口で得られた <code class="docutils literal notranslate"><span class="pre">slprop</span></code> は注釈された事後条件に一致しなければなりません。過程で Pulse は SMT ソルバを呼び出し、たとえば <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">(v</span> <span class="pre">+</span> <span class="pre">v)</span></code> と <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">(2</span> <span class="pre">*</span> <span class="pre">v)</span></code> の同値性などを証明します。</p>
+<p>プログラムの各地点で、Pulse チェッカは二つの構成要素から成る証明状態を保持します。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>型付け環境：スコープ内の変数を型に束縛します。変数に関する性質を反映する精密型も含みます（例：<code class="docutils literal notranslate"><span class="pre">x:int;</span> <span class="pre">y:erased</span> <span class="pre">int;</span> <span class="pre">_:squash</span> <span class="pre">(x</span> <span class="pre">==</span> <span class="pre">reveal</span> <span class="pre">y)</span></code>）。</p></li>
+<li><p>分離論理コンテキスト（単に「コンテキスト」あるいは「<code class="docutils literal notranslate"><span class="pre">slprop</span></code> コンテキスト」）：現在のプログラム状態について既知の事実を保持します。</p></li>
+</ul>
+</div></blockquote>
+<p>Pulse には <code class="docutils literal notranslate"><span class="pre">show_proof_state</span></code> というコマンドがあり、任意の地点で検査を中断して証明状態を観察できます。開発中は証明状態を何度も確認し、1 ステップずつ（あるいは数ステップずつ）進めるのが一般的です。これは F* などでタクティクスを書くのに近いインタラクティブな体験ですが、Pulse では命令的プログラム本体と正当性の証明を同時に少しずつ構築していきます。</p>
+<p>以下に再掲する <code class="docutils literal notranslate"><span class="pre">quadruple</span></code> では、各地点の証明状態をコメントで示し、途中に <code class="docutils literal notranslate"><span class="pre">show_proof_state</span></code> を挿入しています。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> quadruple (r:ref int)
+<span class="k">requires</span> pts_to r &#39;v
+<span class="k">ensures</span> pts_to r (4 * &#39;v)
+{
+    <span class="k">let</span> v1 = !r; <span class="c">// Env=v1:int; _:squash (v1 == &#39;v)       Ctxt= pts_to r v1</span>
+    add r v1;    <span class="c">// ...                                   Ctxt= pts_to r (v1 + v1)</span>
+    <span class="k">show_proof_state</span>;
+    <span class="k">let</span> v2 = !r; <span class="c">// Env=...; v2:int; _:squash(v2==v1+v1)  Ctxt= pts_to r v2 </span>
+    add r v2;    <span class="c">// Env=...                               Ctxt= pts_to r (v2 + v2)</span>
+                 <span class="c">// ..                                    Ctxt= pts_to r (4 * &#39;v)</span>
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">show_proof_state</span></code> の出力例は次のとおりです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>- Current context:
+    pts_to r (reveal (hide v1) + v1) **
+    emp
+- In typing environment:
+    [<span class="k">_</span>#5 : unit,
+    <span class="k">_</span>#4 : squash (reveal &#39;v == v1),
+    v1#3 : int,
+    &#39;v#2 : erased int,
+    r#1 : ref int]
+</pre></div>
+</div>
+<p>各コマンド後に証明状態がどのように変化するかをコメントで示しています。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Pulse は各ステップで、現在の証明状態の仮定がそのステップの前提を示すのに十分かを検査し、未使用の権限はフレーム規則（前節）によりコンテキストに保持されることを確認します。文脈が <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">**</span> <span class="pre">q</span></code> に同値で、<code class="docutils literal notranslate"><span class="pre">p</span></code> だけで <code class="docutils literal notranslate"><span class="pre">goal</span></code> を証明できるとき、<code class="docutils literal notranslate"><span class="pre">p</span></code> を*support*、<code class="docutils literal notranslate"><span class="pre">q</span></code> を <em>frame</em> と呼びます。</p></li>
+<li><p>F* と同様、Pulse は暗黙引数を自動でインスタンス化します。たとえば 2 回目の <code class="docutils literal notranslate"><span class="pre">add</span></code> 呼び出しでは <code class="docutils literal notranslate"><span class="pre">'v</span></code> が自動で <code class="docutils literal notranslate"><span class="pre">v2</span></code> になります。</p></li>
+<li><p>Pulse は <code class="docutils literal notranslate"><span class="pre">slprop</span></code> コンテキスト中の <code class="docutils literal notranslate"><span class="pre">pure</span> <span class="pre">p</span></code> を、自動的に型付け環境の <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">p</span></code> 仮定へ移します。また <code class="docutils literal notranslate"><span class="pre">pure</span></code> な性質は SMT ソルバに投げて自動証明します（利用できるのは型付け環境の仮定のみです）。</p></li>
+<li><p>Pulse は SMT ソルバを用いて <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">r</span> <span class="pre">(v2</span> <span class="pre">+</span> <span class="pre">v2)</span></code> を <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">r</span> <span class="pre">(4</span> <span class="pre">*</span> <span class="pre">'v)</span></code> に書き換えます。</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="stateful-commands-are-explicitly-sequenced">
+<h3>状態付きコマンドは明示的に列挙される<a class="headerlink" href="#stateful-commands-are-explicitly-sequenced" title="Link to this heading"></a></h3>
+<p>Pulse では、状態付き操作の結果はすべて明示的に <code class="docutils literal notranslate"><span class="pre">let</span></code> 束縛されている必要があります。例えば次のコードは型検査に失敗します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> quad_fail (r:ref int)
+<span class="k">requires</span> pts_to r &#39;v
+<span class="k">ensures</span> pts_to r (4 * &#39;v)
+{
+    add r (!r);
+    add r (!r);
+}
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>- Expected type &quot;int&quot;; but &quot;!r&quot; has type
+  &quot;stt int
+       (pts_to r (reveal (*?u93*) _))
+       (fun x -&gt; pts_to r x ** pure (reveal (*?u93*) _ == x))&quot;
+</pre></div>
+</div>
+<p>エラーは最初の <code class="docutils literal notranslate"><span class="pre">(!r)</span></code> を指します。メッセージは分かりづらいですが、後章で見るように <code class="docutils literal notranslate"><span class="pre">stt</span> <span class="pre">_</span> <span class="pre">_</span> <span class="pre">_</span></code> は未評価の Pulse 計算の型で、<code class="docutils literal notranslate"><span class="pre">add</span></code> が <code class="docutils literal notranslate"><span class="pre">int</span></code> を期待しているのに未評価計算が渡されたことを示しています。</p>
+</section>
+<section id="fractional-permissions">
+<h3>分数パーミッション<a class="headerlink" href="#fractional-permissions" title="Link to this heading"></a></h3>
+<p>Pulse は読み取り専用参照と読み書き参照を区別します。Rust などと同様、読み書き権限を持てるスレッドは高々 1 つで、読み取り専用は多数で共有可能です。これによりデータ競合が避けられます。より抽象的には、ある参照への読み書き権限を保持していれば、プログラムの他の部分からその内容が変更されないと確信できるため、局所的な推論が可能になります。</p>
+<p>この規律を実現するため、Pulse は <a class="reference external" href="https://link.springer.com/chapter/10.1007/3-540-44898-5_4">John Boyland</a> による分数パーミッションを用います。具体的には、これまで使ってきた <code class="docutils literal notranslate"><span class="pre">pts_to</span></code> には、参照に対する保有権限の量を表す暗黙の引数があります。</p>
+<p><code class="docutils literal notranslate"><span class="pre">pts_to</span></code> 述語の完全な型は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> pts_to (#a:Type u#0) (r:ref a) (#p:perm) (v:a) : slprop
+</pre></div>
+</div>
+<p>これまでは <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">#a</span> <span class="pre">r</span> <span class="pre">#p</span> <span class="pre">v</span></code> の代わりに <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">r</span> <span class="pre">v</span></code> と書いてきました。最初の <code class="docutils literal notranslate"><span class="pre">#a</span></code> は型推論されるので通常は不要です。より重要なのは <code class="docutils literal notranslate"><span class="pre">#p:perm</span></code> で、省略時は <code class="docutils literal notranslate"><span class="pre">1.0R</span></code> になります。<code class="docutils literal notranslate"><span class="pre">perm``（``PulseCore.FractionalPermission</span></code> で定義）は``0.0R`` より大きく <code class="docutils literal notranslate"><span class="pre">1.0R</span></code> 以下の実数です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">r</span> <span class="pre">#1.0R</span> <span class="pre">v</span></code> はその参照への排他的な読み書き権限を表します。先ほどの <code class="docutils literal notranslate"><span class="pre">assign</span></code> を、権限を明示して書き直すと次のようになります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> assign_full_perm u#a (#a:Type u#a) (r:ref a) (v:a)
+<span class="k">requires</span> pts_to r #1.0R &#39;v
+<span class="k">ensures</span> pts_to r #1.0R v
+{
+    r := v;
+}
+</pre></div>
+</div>
+<p>一方、参照の読み出しには任意の権限 <code class="docutils literal notranslate"><span class="pre">p</span></code> で構いません（下記参照）。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> value_of_perm u#a (#a: Type u#a) #p (r:ref a)
+<span class="k">requires</span> pts_to r #p &#39;v
+<span class="k">returns</span> v:a
+<span class="k">ensures</span> pts_to r #p &#39;v ** pure (v == &#39;v)
+{
+    !r;
+}
+</pre></div>
+</div>
+<p>フル権限を持たずに書き込みを行おうとすると、Pulse は次のように却下します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@expect_failure [19]]
+
+<span class="k">fn</span> assign_perm u#a (#a: Type u#a) #p (r:ref a) (v:a) (#w:erased a)
+<span class="k">requires</span> pts_to r #p w
+<span class="k">ensures</span> pts_to r #p w
+{
+    r := v;
+}
+</pre></div>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>- Cannot prove:
+    pts_to #a r #1.0R (reveal #a <span class="k">_</span>)
+- In the context:
+    pts_to #a r #p (reveal #a w)
+</pre></div>
+</div>
+<p>完全なエラーメッセージを見るには F* オプション <code class="docutils literal notranslate"><span class="pre">--print_implicits</span></code> が必要です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">share</span></code> と <code class="docutils literal notranslate"><span class="pre">gather</span></code> を使うと、参照に対する権限を分割・結合できます（下記）。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> share_ref u#a (#a: Type u#a) #p (r:ref a)
+<span class="k">requires</span> pts_to r #p &#39;v
+<span class="k">ensures</span> pts_to r #(p /. 2.0R) &#39;v ** pts_to r #(p /. 2.0R) &#39;v
+{
+    share r;
+}
+</pre></div>
+</div>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> gather_ref u#a (#a: Type u#a) (#p:perm) (r:ref a)
+<span class="k">requires</span>
+    pts_to r #(p /. 2.0R) &#39;v0 **
+    pts_to r #(p /. 2.0R) &#39;v1
+<span class="k">ensures</span>
+    pts_to r #p &#39;v0 **
+    pure (&#39;v0 == &#39;v1)
+{
+    gather r
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">gather_ref</span></code> の型には興味深い点があります。事後条件で <code class="docutils literal notranslate"><span class="pre">'v0</span> <span class="pre">==</span> <span class="pre">'v1</span></code> を証明しています。すなわち、<code class="docutils literal notranslate"><span class="pre">x</span></code> は高々 1 つの値を指すので、<code class="docutils literal notranslate"><span class="pre">x</span></code> について二つの <code class="docutils literal notranslate"><span class="pre">pts_to</span></code> があれば、その証人は等しいと結論できます。</p>
+</section>
+</section>
+<section id="stack-references">
+<h2>スタック参照<a class="headerlink" href="#stack-references" title="Link to this heading"></a></h2>
+<section id="let-mut-creates-a-new-stack-ref">
+<h3><code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">mut</span></code> で新しいスタック参照を作る<a class="headerlink" href="#let-mut-creates-a-new-stack-ref" title="Link to this heading"></a></h3>
+<p>新しい <code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">t</span></code> を作るには、Pulse の <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">mut</span></code> 構文を使います（下記）。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> one ()
+<span class="k">requires</span> emp
+<span class="k">returns</span> v:int
+<span class="k">ensures</span> pure (v == 1)
+{
+                   <span class="c">//     .     |- emp</span>
+    <span class="k">let</span> <span class="k">mut</span> i = 0; <span class="c">// i:ref int |- pts_to i 0</span>
+    incr i;        <span class="c">// i:ref int |- pts_to i (0 + 1)</span>
+    !i             <span class="c">//      .    |- v:int. emp ** pure (v == 1) </span>
+
+}
+</pre></div>
+</div>
+<p>各コマンド後に成り立つプログラム上の主張を示すため、本文に注釈を付けています。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>最初は前提 <code class="docutils literal notranslate"><span class="pre">emp</span></code> のみが成り立ちます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">mut</span> <span class="pre">i</span> <span class="pre">=</span> <span class="pre">0</span></code> の後は <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">:</span> <span class="pre">ref</span> <span class="pre">int</span></code> と <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">i</span> <span class="pre">0</span></code> が成り立ち、<code class="docutils literal notranslate"><span class="pre">i</span></code> が 0 を保持するスタックスロットを指します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">incr</span> <span class="pre">i</span></code> の後は <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">i</span> <span class="pre">(0</span> <span class="pre">+</span> <span class="pre">1)</span></code> が得られます。</p></li>
+<li><p>最後に <code class="docutils literal notranslate"><span class="pre">!i</span></code> でデリファレンスし、現在の値を <code class="docutils literal notranslate"><span class="pre">v:int</span></code> として返します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">mut</span> <span class="pre">x</span></code> のスコープ終端では、コンテキストに何らかの <code class="docutils literal notranslate"><span class="pre">_v</span></code> について <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">#1.0R</span> <span class="pre">_v</span></code> が残っている必要があります。これは、スコープ外へ出る参照の権限を別の権限に紛れ込ませて持ち出せないようにするためです。スコープが終わるとメモリは回収され、<code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">#1.0R</span> <span class="pre">_v</span></code> も消費されます。</p></li>
+</ul>
+</div></blockquote>
+<p>補足事項：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pure</span></code> な性質は SMT ソルバに投げて自動的に証明します。</p></li>
+<li><p>Pulse は <code class="docutils literal notranslate"><span class="pre">slprop</span></code> を暗黙に簡約します（例：<code class="docutils literal notranslate"><span class="pre">emp</span> <span class="pre">**</span> <span class="pre">p</span></code> は自動で <code class="docutils literal notranslate"><span class="pre">p</span></code> に書き換えられます）。</p></li>
+<li><p>F* 同様、暗黙引数は自動で埋められます。たとえば <code class="docutils literal notranslate"><span class="pre">incr</span></code> 呼び出しでは <code class="docutils literal notranslate"><span class="pre">'v</span></code> が <code class="docutils literal notranslate"><span class="pre">0``（正確には</span> <span class="pre">``hide</span> <span class="pre">0</span></code>）になります。</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="stack-references-are-scoped-and-implicitly-reclaimed">
+<h3>スタック参照はスコープ付きで暗黙に回収される<a class="headerlink" href="#stack-references-are-scoped-and-implicitly-reclaimed" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">mut</span></code> で確保したスタック参照がスコープ付きであることを強調するため、Pulse が検査を拒否する次のプログラムを見てみます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> refs_are_scoped ()
+<span class="k">requires</span> emp
+<span class="k">returns</span> s:ref int
+<span class="k">ensures</span> pts_to s 0
+{
+    <span class="k">let</span> <span class="k">mut</span> s = 0;
+    s
+}
+</pre></div>
+</div>
+<p>エラーは <code class="docutils literal notranslate"><span class="pre">s</span></code> の箇所を指し、ヒープ上の現在の主張は <code class="docutils literal notranslate"><span class="pre">emp</span></code> しかないのに、事後条件では <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">s</span> <span class="pre">0</span></code> を要している、と述べます。つまり、スコープを抜けた時点で <code class="docutils literal notranslate"><span class="pre">s</span></code> の所有権は失われているのです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>- Cannot prove:
+    pts_to s 0
+- In the context:
+    emp
+</pre></div>
+</div>
+</section>
+</section>
+<section id="heap-references">
+<h2>ヒープ参照<a class="headerlink" href="#heap-references" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Box.box</span> <span class="pre">t</span></code> はヒープ参照の型です——名前は Rust の <code class="docutils literal notranslate"><span class="pre">Box&lt;T&gt;</span></code> を想起させるものです。以下ではモジュール別名 <code class="docutils literal notranslate"><span class="pre">Box</span></code> を用います。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> Box = Pulse.Lib.Box
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Box</span></code> には通常の参照と同様の述語・関数（<code class="docutils literal notranslate"><span class="pre">pts_to</span></code>、<code class="docutils literal notranslate"><span class="pre">(!)</span></code>、<code class="docutils literal notranslate"><span class="pre">(:=)</span></code>、<code class="docutils literal notranslate"><span class="pre">share</span></code>、<code class="docutils literal notranslate"><span class="pre">gather</span></code> など）が揃っています。加えて、ヒープ参照は <code class="docutils literal notranslate"><span class="pre">alloc</span></code> で確保し、<code class="docutils literal notranslate"><span class="pre">free</span></code> で解放します（下記）。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> new_heap_ref (#a:Type) (v:a)
+<span class="k">requires</span> emp
+<span class="k">returns</span> r:Box.box a
+<span class="k">ensures</span> Box.pts_to r v
+{
+    Box.alloc v
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">mut</span></code> のスタック参照と異なり、新たに確保したヒープ参照は関数の戻り値にできます。</p>
+<p>次の例では、<code class="docutils literal notranslate"><span class="pre">open</span> <span class="pre">Box;</span></code> により以降のスコープで <code class="docutils literal notranslate"><span class="pre">Box</span></code> 名前空間を開いています。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> last_value_of #a (r:Box.box a)
+<span class="k">requires</span> Box.pts_to r &#39;v
+<span class="k">returns</span> v:a
+<span class="k">ensures</span> pure (v == &#39;v)
+{
+    <span class="k">open</span> Box;
+    <span class="k">let</span> v = !r;
+    free r;
+    v
+}
+</pre></div>
+</div>
+<p>コード再利用のため、<code class="docutils literal notranslate"><span class="pre">box</span> <span class="pre">t</span></code> は通常の <code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">t</span></code> に一時的に落として扱えます。下の例では、まず <code class="docutils literal notranslate"><span class="pre">Box.pts_to</span> <span class="pre">r</span> <span class="pre">'v</span></code> を <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">(box_to_ref</span> <span class="pre">r)</span> <span class="pre">'v</span></code> に変換し、<code class="docutils literal notranslate"><span class="pre">incr</span> <span class="pre">(box_to_ref</span> <span class="pre">r)</span></code> を呼んでから、再び <code class="docutils literal notranslate"><span class="pre">Box.pts_to</span></code> に戻しています。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> incr_box (r:Box.box int)
+<span class="k">requires</span> Box.pts_to r &#39;v
+<span class="k">ensures</span> Box.pts_to r (&#39;v + 1)
+{
+    Box.to_ref_pts_to r;     <span class="c">//Box.pts_to (box_to_ref r) &#39;v</span>
+    incr (Box.box_to_ref r); <span class="c">//pts_to (box_to_ref r) (&#39;v + 1)</span>
+    Box.to_box_pts_to r      <span class="c">//Box.pts_to r (&#39;v + 1)</span>
+}
+</pre></div>
+</div>
+<p>最後に、Rust の <code class="docutils literal notranslate"><span class="pre">Box&lt;T&gt;</span></code> が常に線形（排他的読み書き権限）として扱われるのとは異なり、Pulse の <code class="docutils literal notranslate"><span class="pre">Box.pts_to</span> <span class="pre">r</span> <span class="pre">#p</span> <span class="pre">v</span></code> は通常の参照と同様に暗黙の分数パーミッションを持ちます。</p>
+</section>
+<section id="ghost-references">
+<h2>ゴースト参照<a class="headerlink" href="#ghost-references" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_ch1.html" class="btn btn-neutral float-left" title="Pulse の基本" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_existentials.html" class="btn btn-neutral float-right" title="存在量化" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,677 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>発散（非停止） &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="プリミティブ効果の精錬（リファインメント）" href="part4_pure.html" />
+    <link rel="prev" title="消去とゴースト効果" href="part4_ghost.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part4.html">計算効果</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part4_background.html">依存関係を追跡する計算型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part4_computation_types_and_tot.html">Total な計算の効果</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part4_ghost.html">消去とゴースト効果</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">発散（非停止）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-dv-effect"><code class="docutils literal notranslate"><span class="pre">Dv</span></code> 効果</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#partial-correctness-semantics-of-dv"><code class="docutils literal notranslate"><span class="pre">Dv</span></code> の部分正当性意味論</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#isolating-dv-from-the-logical-core">論理コアから <code class="docutils literal notranslate"><span class="pre">Dv</span></code> を隔離する</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#no-extrinsic-proofs-for-dv-computations"><code class="docutils literal notranslate"><span class="pre">Dv</span></code> 計算に対する外在的証明は不可</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exercise">演習</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#general-recursive-types-and-impredicativity-with-dv"><code class="docutils literal notranslate"><span class="pre">Dv</span></code> と一般再帰型／非内包性</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#top-level-effects">トップレベルの効果</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-untyped-lambda-calculus">例：型なしラムダ計算</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#interpreting-deeply-embedded-lambda-terms">深い埋め込みのラムダ項の解釈</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#denoting-lambda-terms-into-an-f-recursive-type">ラムダ項を F* の再帰型へ表示（デノテーション）する</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#shallowly-embedded-dynamically-typed-programming">浅い埋め込みによる動的型付けプログラミング</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part4_pure.html">プリミティブ効果の精錬（リファインメント）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part4.html">計算効果</a></li>
+      <li class="breadcrumb-item active">発散（非停止）</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="divergence-or-non-termination">
+<span id="part4-div"></span><h1>発散（非停止）<a class="headerlink" href="#divergence-or-non-termination" title="Link to this heading"></a></h1>
+<p>多くの依存型付き言語は <a class="reference external" href="https://en.wikipedia.org/wiki/Turing_completeness">チューリング完全</a> ではありません。その理由は <a class="reference internal" href="../part1/part1_termination.html#part1-termination"><span class="std std-ref">前に説明した通り</span></a>、型理論の健全性のためにはすべての関数が停止することが重要だからです。つまり、Coq のような言語では汎用言語のインタプリタを作ることはできません。そうしたインタプリタは意図的に無限ループするプログラムを扱えないからです。<a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
+<p>F* の論理コア（total／ghost 関数）は停止する計算しか表現できません。しかし F* では、効果システムを用いて論理コアから切り離すことで、停止しない <em>発散</em> 計算も表現できます。とくに計算型 <code class="docutils literal notranslate"><span class="pre">Dv</span> <span class="pre">t</span></code> は、無限ループするかもしれないが、完了すれば型 <code class="docutils literal notranslate"><span class="pre">t</span></code> の値を返す計算を表します。</p>
+<p>依存関係の追跡機構としての効果システムにより、F* は効果階層で <code class="docutils literal notranslate"><span class="pre">Dv</span></code> を <code class="docutils literal notranslate"><span class="pre">Tot</span></code> の上位に置くことで、<code class="docutils literal notranslate"><span class="pre">Tot</span></code> 計算が <code class="docutils literal notranslate"><span class="pre">Dv</span></code> 計算に依存できないようにします。逆に、total 計算 <code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">t</span></code> は暗黙に <code class="docutils literal notranslate"><span class="pre">Dv</span> <span class="pre">t``（停止しないかもしれない計算）へ昇格できます。すなわち効果の半順序で</span> <span class="pre">``Tot</span> <span class="pre">&lt;</span> <span class="pre">Dv</span></code> です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Dv</span></code> 効果の計算を返す再帰関数は停止性検査の対象になりません。そのため <code class="docutils literal notranslate"><span class="pre">Dv</span></code> を使えば、次のような <a class="reference external" href="https://en.wikipedia.org/wiki/Collatz_conjecture">コラッツ列</a> を計算するプログラムが書けます——このプログラムがすべての入力で停止するかどうかは未解決問題です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(* You can program a function to compute Collatz sequences</span>
+<span class="c">   ... though no one knows if it actually terminates for all n *)</span>
+<span class="k">let</span> <span class="k">rec</span> collatz (n:pos)
+  : <span class="k">Dv</span> (list pos)
+  = <span class="k">if</span> n = 1 <span class="k">then</span> [n]
+    <span class="k">else</span> <span class="k">if</span> n % 2 = 0
+    <span class="k">then</span> n::collatz (n / 2)
+    <span class="k">else</span> n::collatz (3 * n + 1)
+</pre></div>
+</div>
+<p>この章では <code class="docutils literal notranslate"><span class="pre">Dv</span></code> 効果の詳細と、他の効果・再帰的な型定義・それが可能にするプログラミング／証明スタイルとの相互作用を見ていきます。</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>一般再帰と非停止の代わりに、Coq や Agda のような依存型言語は余再帰・余帰納を提供します。余帰納は <em>生産的な</em> 非停止プログラムの一種を表現できます。例えば、無限のリクエストを処理しつつ各リクエストには有限時間で応答を返す、永遠にループする Web サーバを表現できます。<code class="docutils literal notranslate"><span class="pre">collatz</span></code> でさえ、潜在的に無限の数列を計算する余再帰定義が可能です。しかし、すべての非停止計算が余帰納／余再帰で実装できるわけではありません。F* はまだ余帰納をサポートしていません。</p>
+</aside>
+</aside>
+<section id="the-dv-effect">
+<h2><code class="docutils literal notranslate"><span class="pre">Dv</span></code> 効果<a class="headerlink" href="#the-dv-effect" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Dv``（divergence）は</span> <span class="pre">F*</span> <span class="pre">のプリミティブな効果です。``Dv</span></code> の計算は（資源が無限にあっても）停止しない可能性があります。言い換えると、<code class="docutils literal notranslate"><span class="pre">Dv</span></code> の計算は観測的には非停止の振る舞いを持ちます。例えば次の <code class="docutils literal notranslate"><span class="pre">loop</span></code> 関数は型 <code class="docutils literal notranslate"><span class="pre">unit</span> <span class="pre">-&gt;</span> <span class="pre">Dv</span> <span class="pre">unit</span></code> を持ち、呼び出すと常に発散します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> loop (): <span class="k">Dv</span> unit = loop ()
+</pre></div>
+</div>
+<p>もし <code class="docutils literal notranslate"><span class="pre">Dv</span></code> の効果注釈を外すと、F* はその関数を total と見なし、通常の停止性検査に従って再帰呼び出しが停止することを示そうとします。すなわち <code class="docutils literal notranslate"><span class="pre">()</span> <span class="pre">&lt;&lt;</span> <span class="pre">()</span></code> を証明しようとして（当然ながら）失敗します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Dv</span></code> は発散を認めるため、F* は <code class="docutils literal notranslate"><span class="pre">Dv</span></code> 計算の型検査では実質的に停止性検査を無効にします。したがって <code class="docutils literal notranslate"><span class="pre">loop</span> <span class="pre">()</span></code> の再帰呼び出しに減少性の指標は不要です。</p>
+</section>
+<section id="partial-correctness-semantics-of-dv">
+<h2><code class="docutils literal notranslate"><span class="pre">Dv</span></code> の部分正当性意味論<a class="headerlink" href="#partial-correctness-semantics-of-dv" title="Link to this heading"></a></h2>
+<p>F* の <code class="docutils literal notranslate"><span class="pre">Tot</span></code> は <em>全体正当性</em> の意味論を持ちます。すなわち <code class="docutils literal notranslate"><span class="pre">e:Tot</span> <span class="pre">t</span></code> なら、<code class="docutils literal notranslate"><span class="pre">e</span></code> は停止し、型 <code class="docutils literal notranslate"><span class="pre">t</span></code> の値を生成します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Dv</span> <span class="pre">t</span></code> は <em>部分正当性</em> の意味論です。つまり <code class="docutils literal notranslate"><span class="pre">e:Dv</span> <span class="pre">t</span></code> の場合、<code class="docutils literal notranslate"><span class="pre">e</span></code> は無限に走るかもしれませんが、停止したなら結果は型 <code class="docutils literal notranslate"><span class="pre">t</span></code> です。</p>
+<p>別の見方をすると、F* の停止性検査を無効化する点以外は、<code class="docutils literal notranslate"><span class="pre">Dv</span></code> の項にも他の型検査制約はすべて課されます。したがって <code class="docutils literal notranslate"><span class="pre">Dv</span></code> のプログラムにも健全で興味深い仕様を与えられます。例えば次の型は、コラッツ関数が停止するなら列の最後の要素が <code class="docutils literal notranslate"><span class="pre">1</span></code> であることを示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> collatz_ends_in_one (n:pos)
+  : <span class="k">Dv</span> (l:list pos { Cons? l /\ last l == 1 })
+  = <span class="k">if</span> n = 1 <span class="k">then</span> [n]
+    <span class="k">else</span> <span class="k">if</span> n % 2 = 0
+    <span class="k">then</span> n::collatz_ends_in_one (n / 2)
+    <span class="k">else</span> n::collatz_ends_in_one (3 * n + 1)
+</pre></div>
+</div>
+<p>例えば基底ケースで <code class="docutils literal notranslate"><span class="pre">[n]</span></code> ではなく空リスト <code class="docutils literal notranslate"><span class="pre">[]</span></code> を返すと、注釈した戻り型の要素でない値を返して停止しうるため、F* はそのプログラムを受理しません。</p>
+</section>
+<section id="isolating-dv-from-the-logical-core">
+<h2>論理コアから <code class="docutils literal notranslate"><span class="pre">Dv</span></code> を隔離する<a class="headerlink" href="#isolating-dv-from-the-logical-core" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Dv</span></code> の項は停止する必要がないため、常にループするプログラムには任意の戻り型を付けられます。例えば次のプログラムは戻り型 <code class="docutils literal notranslate"><span class="pre">False</span></code> を持てます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> dv_false () : <span class="k">Dv</span> False = dv_false()
+</pre></div>
+</div>
+<p>重要なのは、<code class="docutils literal notranslate"><span class="pre">Dv</span> <span class="pre">False</span></code> 型の項を <code class="docutils literal notranslate"><span class="pre">False</span></code> の*証明*と混同してはならないことです。そうすると F* の論理コアが即座に不健全になります。特に、<code class="docutils literal notranslate"><span class="pre">e:Dv</span> <span class="pre">t</span></code> を <code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">t</span></code> に変換できてはなりません。これは効果順序で <code class="docutils literal notranslate"><span class="pre">Tot</span></code> を <code class="docutils literal notranslate"><span class="pre">Dv</span></code> の部分効果（<code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">&lt;</span> <span class="pre">Dv</span></code>）とすることで実現されます。<a class="reference internal" href="part4_background.html#part4-background"><span class="std std-ref">前述</span></a> の通り、これにより <code class="docutils literal notranslate"><span class="pre">Tot</span></code> の項が <code class="docutils literal notranslate"><span class="pre">Dv</span></code> の項に依存することはなく、<code class="docutils literal notranslate"><span class="pre">Tot</span></code> の全体正当性の解釈が保たれます。</p>
+<p>例えば、<code class="docutils literal notranslate"><span class="pre">dv_false</span></code> を <code class="docutils literal notranslate"><span class="pre">Tot</span></code> へ“キャスト”しようとする試みや、<code class="docutils literal notranslate"><span class="pre">dv_false</span></code> を使って他の型の誤った証明を作ろうとする試みは失敗します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>[@@expect_failure]
+<span class="k">let</span> tot_false : <span class="k">Tot</span> False = dv_false()
+[@@ expect_failure]
+<span class="k">let</span> bad_zero : <span class="k">Tot</span> (y:int{y == 0}) = dv_false (); 1
+</pre></div>
+</div>
+<p>F* は <code class="docutils literal notranslate"><span class="pre">Tot</span></code> 計算が <code class="docutils literal notranslate"><span class="pre">Dv</span></code> 計算に依存することを許しませんが、その逆方向は問題ありません。直観的には、常に停止する計算は“潜在的に非停止”でもあります。これは仕様の <em>弱化</em> と考えられます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> add_one (x:int) : int = x + 1
+<span class="k">let</span> add_one_div (x:int) : <span class="k">Dv</span> int = add_one x
+</pre></div>
+</div>
+<p>F* の効果システムは <code class="docutils literal notranslate"><span class="pre">Tot</span></code> 計算を自動で <code class="docutils literal notranslate"><span class="pre">Dv</span></code> へ <em>リフト</em> します。つまり <code class="docutils literal notranslate"><span class="pre">Tot</span></code> の関数は <code class="docutils literal notranslate"><span class="pre">Dv</span></code> の関数内でシームレスに使えます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Tot</span></code> 項の他効果への弱化は F* ではごく当たり前で、意識することはほとんどありません。例えば <code class="docutils literal notranslate"><span class="pre">collatz</span></code> の中の <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">/</span> <span class="pre">2</span></code> のような部分式は <code class="docutils literal notranslate"><span class="pre">Tot</span></code> ですが、<code class="docutils literal notranslate"><span class="pre">Dv</span></code> 計算内で容易に使えます。</p>
+</section>
+<section id="no-extrinsic-proofs-for-dv-computations">
+<h2><code class="docutils literal notranslate"><span class="pre">Dv</span></code> 計算に対する外在的証明は不可<a class="headerlink" href="#no-extrinsic-proofs-for-dv-computations" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Dv</span></code> を含む効果的なコードが F* の論理コアの外にあることの重要な帰結として、効果的コードについて <a class="reference internal" href="../part1/part1_lemmas.html#part1-intrinsic-extrinsic"><span class="std std-ref">外在的証明</span></a> を行うことはできません。仕様自体が total でなければならないため、<code class="docutils literal notranslate"><span class="pre">Dv</span></code> 計算の性質を仕様に書くことすらできません。例えば次の補題を書くことは不正です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>[@@expect_failure]
+<span class="k">val</span> collatz_property (n:pos)
+  : <span class="k">Lemma</span> (Cons? (collatz n) /\ last (collatz n) = 1)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Cons?</span> <span class="pre">(collatz</span> <span class="pre">n)</span></code> と書くことは、<code class="docutils literal notranslate"><span class="pre">collatz</span> <span class="pre">n</span></code> が*定義されている*（停止する）ことを仮定しており、実際には永遠にループするかもしれないため、F* では意味をなしません。</p>
+<p>発散するプログラムの性質を述べる唯一の方法は、上で見たように、性質を計算型に内在的に組み込むことです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> last #a (l:list a { Cons? l }) : a = L.index l (L.length l - 1)
+<span class="k">val</span> collatz_ends_in_one (n:pos)
+  : <span class="k">Dv</span> (l:list pos { Cons? l /\ last l == 1 })
+</pre></div>
+</div>
+<section id="exercise">
+<h3>演習<a class="headerlink" href="#exercise" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">collatz_spec</span> <span class="pre">(n:pos)</span> <span class="pre">(l:list</span> <span class="pre">pos)</span> <span class="pre">:</span> <span class="pre">bool</span></code> を定義し、<code class="docutils literal notranslate"><span class="pre">l</span></code> が <code class="docutils literal notranslate"><span class="pre">n</span></code> から始まる正しいコラッツ列かどうかを判定しなさい。</p>
+<p><code class="docutils literal notranslate"><span class="pre">val</span> <span class="pre">collatz'</span> <span class="pre">(n:pos)</span> <span class="pre">:</span> <span class="pre">Dv</span> <span class="pre">(l:list</span> <span class="pre">pos</span> <span class="pre">{</span> <span class="pre">collatz_spec</span> <span class="pre">n</span> <span class="pre">l</span> <span class="pre">})</span></code> を実装しなさい。</p>
+<p>この型は何を意味しますか？ 同じ型を保ったまま他の実装方法はありますか？</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> collatz_spec (n:pos) (l:list pos)
+  : <span class="k">Tot</span> bool (<span class="k">decreases</span> l) 
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; <span class="k">false</span>
+    | hd :: tl -&gt; 
+      hd = n &amp;&amp; (
+        <span class="k">if</span> hd = 1 <span class="k">then</span> tl = []
+        <span class="k">else</span> <span class="k">if</span> n%2 = 0 <span class="k">then</span> collatz_spec (n/2) tl
+        <span class="k">else</span> collatz_spec (3*n + 1) tl
+      )
+<span class="c">// collatz&#39; may loop forever on some inputs</span>
+<span class="c">// but if it completes it always returns a valid</span>
+<span class="c">// Collatz sequence</span>
+<span class="k">let</span> <span class="k">rec</span> collatz&#39; (n:pos)
+  : <span class="k">Dv</span> (l:list pos { collatz_spec n l } )
+  = <span class="k">if</span> n = 1 <span class="k">then</span> [n]
+    <span class="k">else</span> <span class="k">if</span> n % 2 = 0
+    <span class="k">then</span> n::collatz&#39; (n / 2)
+    <span class="k">else</span> n::collatz&#39; (3 * n + 1)
+
+<span class="c">// here&#39;s another bogus implementation that always loops</span>
+<span class="k">let</span> <span class="k">rec</span> collatz&#39;&#39; (n:pos)
+  : <span class="k">Dv</span> (l:list pos { collatz_spec n l } )
+  = collatz&#39;&#39; n
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="general-recursive-types-and-impredicativity-with-dv">
+<h2><code class="docutils literal notranslate"><span class="pre">Dv</span></code> と一般再帰型／非内包性<a class="headerlink" href="#general-recursive-types-and-impredicativity-with-dv" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Dv</span></code> の再帰関数で減少性指標を無効化することに加えて、F* は <code class="docutils literal notranslate"><span class="pre">Dv</span></code> 計算では他の二種類の停止性検査も無効にします。</p>
+<p><a class="reference internal" href="../part2/part2_inductive_type_families.html#part2-strict-positivity"><span class="std std-ref">以前の章</span></a> で見たように、帰納的型定義には <em>厳密正性</em> 条件が必要です。非正な定義は再帰型や非停止計算を許してしまうからです。しかし <code class="docutils literal notranslate"><span class="pre">Dv</span></code> 効果の計算はすでに無限ループを許すため、<code class="docutils literal notranslate"><span class="pre">Dv</span></code> 型が関わる場合にはこの条件を緩和できます。例えば次のように定義できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> nonpos =
+  | NonPos : (nonpos -&gt; <span class="k">Dv</span> False) -&gt; nonpos
+
+<span class="k">let</span> loop_nonpos&#39; (f:nonpos) : <span class="k">Dv</span> False =
+   <span class="k">let</span> NonPos g = f <span class="k">in</span> g f 
+   
+<span class="k">let</span> loop_nonpos () : <span class="k">Dv</span> False  = loop_nonpos&#39; (NonPos loop_nonpos&#39;)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">nonpos</span></code> は、コンストラクタのフィールドで矢印の左に現れるため厳密正ではありません。実際、<code class="docutils literal notranslate"><span class="pre">nonpos</span></code> を使えば（<code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">rec</span></code> なしで）無限にループする <code class="docutils literal notranslate"><span class="pre">loop_nonpos()</span></code> を定義できます。ただし型が <code class="docutils literal notranslate"><span class="pre">Dv</span> <span class="pre">False</span></code> であることが、このプログラムが無限ループしうることと、そのループが F* の論理コアから安全に隔離されていることを示します。</p>
+<p>F* の型システムで停止性検査が関与するもう一つの場所は <a class="reference internal" href="../part2/part2_universes.html#part2-universes"><span class="std std-ref">宇宙（universe）階層</span></a> です。以前学んだように、F* の論理コアは無限の階層で構成され、型システムの写しがタワー状に並んでいます。これは論理コア内の不整合を防ぐために必要です。しかし <code class="docutils literal notranslate"><span class="pre">Dv</span></code> 効果の項は論理コアの外にあり、宇宙レベルの制約は適用されません。以下のスニペットのように、宇宙 <code class="docutils literal notranslate"><span class="pre">u#a</span></code> の型を返す total 関数は宇宙 <code class="docutils literal notranslate"><span class="pre">u#(a</span> <span class="pre">+</span> <span class="pre">1)</span></code> に属しますが、<code class="docutils literal notranslate"><span class="pre">u#a</span></code> の型を返す <code class="docutils literal notranslate"><span class="pre">Dv</span></code> 関数は単に宇宙 <code class="docutils literal notranslate"><span class="pre">0</span></code> に属します。というのも、その型を得る唯一の方法は <code class="docutils literal notranslate"><span class="pre">Dv</span></code> 効果を発生させて論理コアの外に出ることだからです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> tot_type : Type u#(a + 1) = unit -&gt; <span class="k">Tot</span> (Type u#a)
+<span class="k">let</span> dv_type : Type0 = unit -&gt; <span class="k">Dv</span> (Type u#a)
+</pre></div>
+</div>
+</section>
+<section id="top-level-effects">
+<h2>トップレベルの効果<a class="headerlink" href="#top-level-effects" title="Link to this heading"></a></h2>
+<p>F* のトップレベル項は本来、効果を持つことを想定していません。次のような項を定義すると、F* は受理しますが「トップレベルの let 束縛は total でなければなりません——この項は効果を持つ可能性があります」という警告を出します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> inconsistent : False = loop_nonpos()
+</pre></div>
+</div>
+<p>トップレベルの効果にはいくつか問題があります。</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p>複数モジュールを持つプログラムでは、トップレベル項の効果の評価順序は未定義です——実行時にモジュールが読み込まれる順序に依存します。</p></li>
+<li><p>トップレベルの効果（特に発散を含む場合）は、F* の型検査コンテキストを不整合にすることがあります。例えば一度 <code class="docutils literal notranslate"><span class="pre">inconsistent</span></code> が定義されると、任意の主張が証明できてしまいます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">_</span>  = <span class="k">let</span> <span class="k">_</span> = FStar.Squash.return_squash inconsistent <span class="k">in</span>
+         <span class="k">assert</span> <span class="k">false</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div></blockquote>
+<p>とはいえ注意深く使えば、モジュールの状態初期化やプログラムのエントリポイントの開始など、有用な場合もあります。トップレベル効果があるときに F* が発する警告に注意し、本当に何をしているか理解していることを確認してください。</p>
+</section>
+<section id="example-untyped-lambda-calculus">
+<h2>例：型なしラムダ計算<a class="headerlink" href="#example-untyped-lambda-calculus" title="Link to this heading"></a></h2>
+<p>この節では、<code class="docutils literal notranslate"><span class="pre">Dv</span></code> 計算について学んだ事柄を総合して、いくつかの型なしラムダ計算の変種を定義します。</p>
+<p>ラムダ計算の基礎が必要であれば、以前の <a class="reference internal" href="../part2/part2_stlc.html#part2-stlc"><span class="std std-ref">単純型付きラムダ計算</span></a> の展開を参照してください。</p>
+<section id="interpreting-deeply-embedded-lambda-terms">
+<h3>深い埋め込みのラムダ項の解釈<a class="headerlink" href="#interpreting-deeply-embedded-lambda-terms" title="Link to this heading"></a></h3>
+<p>まず、型なしラムダ項の構文を以下のように定義します。変数は de Bruijn 記法を用い、変数の添字はその束縛位置に到達するまでに通過するラムダ束縛子の数を表します。<code class="docutils literal notranslate"><span class="pre">Lam</span></code> は束縛変数に型注釈や名前を付けず、本体のみを持ちます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> var = nat
+<span class="k">type</span> term = 
+  | Var  : var -&gt; term
+  | Int  : int -&gt; term
+  | Lam  : term -&gt; term
+  | App  : term -&gt; term -&gt; term
+</pre></div>
+</div>
+<p>通常通り、項 <code class="docutils literal notranslate"><span class="pre">t</span></code> 中の変数 <code class="docutils literal notranslate"><span class="pre">x</span></code> を（閉じた）項 <code class="docutils literal notranslate"><span class="pre">v</span></code> に置換する意味を定義できます——これは普通の <code class="docutils literal notranslate"><span class="pre">Tot</span></code> 関数です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> subst (x:var) (v:term) (t:term)
+  : <span class="k">Tot</span> term  (<span class="k">decreases</span> t) = 
+  <span class="k">match</span> t <span class="k">with</span>
+  | Var y -&gt; <span class="k">if</span> x = y <span class="k">then</span> v <span class="k">else</span> t
+  | Int <span class="k">_</span> -&gt; t
+  | Lam t -&gt; Lam (subst (x + 1) v t)
+  | App t0 t1 -&gt; App (subst x v t0) (subst x v t1)
+</pre></div>
+</div>
+<p>最後に、<code class="docutils literal notranslate"><span class="pre">term</span></code> のインタプリタを定義します。<code class="docutils literal notranslate"><span class="pre">Dv</span></code> の注釈から明らかなように、これは（意図的に）無限ループすることがあります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(* This interpreter can (intentionally) loop infinitely *)</span>
+<span class="k">let</span> <span class="k">rec</span> interpret (t:term)
+  : <span class="k">Dv</span> (option term)
+  = <span class="k">match</span> t <span class="k">with</span>
+    | Var <span class="k">_</span>
+    | Int <span class="k">_</span>
+    | Lam <span class="k">_</span> -&gt; Some t
+    | App t0 t1 -&gt;
+      <span class="k">let</span> head = interpret t0 <span class="k">in</span>
+      <span class="k">match</span> head <span class="k">with</span>
+      | None -&gt; None
+      | Some (Lam body) -&gt; interpret (subst 0 t1 body)
+      | <span class="k">_</span> -&gt; None <span class="c">//type error, expected a function</span>
+
+<span class="c">(* (\x. x x) (\x. x x) *)</span>
+<span class="k">let</span> loops () : <span class="k">Dv</span> <span class="k">_</span> = interpret (App (Lam (App (Var 0) (Var 0)))
+                                     (Lam (App (Var 0) (Var 0))))
+</pre></div>
+</div>
+<section id="id3">
+<h4>演習<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<p>この演習は、興味深い依存型を与えることで <code class="docutils literal notranslate"><span class="pre">Dv</span></code> 計算に非自明な性質を証明できることを示すためのものです。</p>
+<p>ここで定義する置換関数は、置換対象の項が閉じている場合にのみ健全です。そうでないと、ラムダの内側に置換すると自由変数が捕捉され得ます。</p>
+<p>次の定義を満たすとき、項は閉じています。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> closed&#39; (t:term) (offset:int) 
+  : bool
+  = <span class="k">match</span> t <span class="k">with</span>
+    | Int <span class="k">_</span> -&gt; <span class="k">true</span>
+    | Var i -&gt; i &lt;= offset
+    | Lam t -&gt; closed&#39; t (offset + 1)
+    | App t0 t1 -&gt; closed&#39; t0 offset &amp;&amp; closed&#39; t1 offset
+<span class="k">let</span> closed t = closed&#39; t (-1)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">subst</span></code> の型を制限し、引数を <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">:</span> <span class="pre">term</span> <span class="pre">{</span> <span class="pre">closed</span> <span class="pre">v</span> <span class="pre">}</span></code> としなさい——証明が通るよう、もう一方の引数の型も修正する必要があります。</p>
+<p>次にインタプリタ自体に以下の型を与え、閉じた項を解釈すると閉じた項が得られるか、さもなくば永遠にループすることを示しなさい。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> interpret (t:term { closed t })
+  : <span class="k">Dv</span> (option (t:term { closed t }))
+  = <span class="k">match</span> t <span class="k">with</span>
+    | Int <span class="k">_</span>
+    | Lam <span class="k">_</span> -&gt; Some t
+    | App t0 t1 -&gt;
+      <span class="k">let</span> head = interpret t0 <span class="k">in</span>
+      <span class="k">match</span> head <span class="k">with</span>
+      | None -&gt; None
+      | Some (Lam body) -&gt; interpret (subst 0 t1 body)
+      | <span class="k">_</span> -&gt; None <span class="c">//type error, expected a function</span>
+</pre></div>
+</div>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> Part4.UTLCEx1
+
+<span class="k">let</span> var = nat
+<span class="k">type</span> term = 
+  | Var  : var -&gt; term
+  | Int  : int -&gt; term
+  | Lam  : term -&gt; term
+  | App  : term -&gt; term -&gt; term
+
+<span class="c">//SNIPPET_START: closed$</span>
+<span class="k">let</span> <span class="k">rec</span> closed&#39; (t:term) (offset:int) 
+  : bool
+  = <span class="k">match</span> t <span class="k">with</span>
+    | Int <span class="k">_</span> -&gt; <span class="k">true</span>
+    | Var i -&gt; i &lt;= offset
+    | Lam t -&gt; closed&#39; t (offset + 1)
+    | App t0 t1 -&gt; closed&#39; t0 offset &amp;&amp; closed&#39; t1 offset
+<span class="k">let</span> closed t = closed&#39; t (-1)
+<span class="c">//SNIPPET_END: closed$</span>
+
+<span class="k">let</span> <span class="k">rec</span> closed&#39;_weaken (t:term) (offset offset&#39;:int)
+  : <span class="k">Lemma</span> 
+    (<span class="k">requires</span> closed&#39; t offset /\
+              offset &lt;= offset&#39;)
+    (<span class="k">ensures</span> closed&#39; t offset&#39;)
+  = <span class="k">match</span> t <span class="k">with</span>
+    | Int <span class="k">_</span> -&gt; ()
+    | Var <span class="k">_</span> -&gt; ()
+    | Lam t -&gt; closed&#39;_weaken t (offset + 1) (offset&#39; + 1)
+    | App t0 t1 -&gt; 
+      closed&#39;_weaken t0 offset offset&#39;;
+      closed&#39;_weaken t1 offset offset&#39; 
+
+<span class="k">let</span> <span class="k">rec</span> subst (x:var) 
+              (v:term { closed v })
+              (t:term { closed&#39; t x })
+  : <span class="k">Tot</span> (t1:term { closed&#39; t1 (x - 1) }) (<span class="k">decreases</span> t) = 
+  <span class="k">match</span> t <span class="k">with</span>
+  | Var y -&gt; <span class="k">if</span> x = y <span class="k">then</span> (closed&#39;_weaken v (-1) (x - 1); v) <span class="k">else</span> t
+  | Int <span class="k">_</span> -&gt; t
+  | Lam t -&gt; Lam (subst (x + 1) v t)
+  | App t0 t1 -&gt; App (subst x v t0) (subst x v t1)
+
+<span class="c">//SNIPPET_START: interpret$</span>
+<span class="k">let</span> <span class="k">rec</span> interpret (t:term { closed t })
+  : <span class="k">Dv</span> (option (t:term { closed t }))
+  = <span class="k">match</span> t <span class="k">with</span>
+    | Int <span class="k">_</span>
+    | Lam <span class="k">_</span> -&gt; Some t
+    | App t0 t1 -&gt;
+      <span class="k">let</span> head = interpret t0 <span class="k">in</span>
+      <span class="k">match</span> head <span class="k">with</span>
+      | None -&gt; None
+      | Some (Lam body) -&gt; interpret (subst 0 t1 body)
+      | <span class="k">_</span> -&gt; None <span class="c">//type error, expected a function</span>
+<span class="c">//SNIPPET_END: interpret$</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="denoting-lambda-terms-into-an-f-recursive-type">
+<h3>ラムダ項を F* の再帰型へ表示（デノテーション）する<a class="headerlink" href="#denoting-lambda-terms-into-an-f-recursive-type" title="Link to this heading"></a></h3>
+<p>次に、上のインタプリタの変種として、<code class="docutils literal notranslate"><span class="pre">Dv</span></code> を用いた（非正な）再帰型で型なしラムダ項に意味論を与えられることを示します。</p>
+<p>次の <code class="docutils literal notranslate"><span class="pre">dyn</span></code> 型を考えます——非正なコンストラクタ <code class="docutils literal notranslate"><span class="pre">DFun</span></code> を持ちます。この型を用いて、型なしラムダ項を動的型付けされ、発散しうる F* の項へ解釈できます。ある意味では、型なしラムダ計算は <code class="docutils literal notranslate"><span class="pre">Dv</span></code> を持つ F* と同等の表現力であることを示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> dyn = 
+  | DErr  : string -&gt; dyn
+  | DInt  : int -&gt; dyn
+  | DFun  : (dyn -&gt; <span class="k">Dv</span> dyn) -&gt; dyn
+</pre></div>
+</div>
+<p>以下の <code class="docutils literal notranslate"><span class="pre">denote</span></code> は <code class="docutils literal notranslate"><span class="pre">dyn</span></code> を用いて <code class="docutils literal notranslate"><span class="pre">term</span></code> に意味論を与えるプログラムです。<code class="docutils literal notranslate"><span class="pre">ctx</span> <span class="pre">:</span> <span class="pre">ctx_t</span></code> を引数に取り、項の自由変数を <code class="docutils literal notranslate"><span class="pre">dyn</span></code> に解釈します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ctx_t = nat -&gt; dyn
+
+<span class="k">let</span> shift (ctx:ctx_t) (v:dyn) 
+  : ctx_t
+  = <span class="k">fun</span> n -&gt; <span class="k">if</span> n = 0 <span class="k">then</span> v <span class="k">else</span> ctx (n - 1)
+
+<span class="k">let</span> <span class="k">rec</span> denote (t:term) (ctx:ctx_t)
+  : <span class="k">Dv</span> dyn 
+  = <span class="k">match</span> t <span class="k">with</span>
+    | Var v -&gt; ctx v
+    | Int i -&gt; DInt i
+    | Lam t -&gt; DFun (<span class="k">fun</span> v -&gt; denote t (shift ctx v))
+    | App t0 t1 -&gt; 
+      <span class="k">match</span> denote t0 ctx <span class="k">with</span>
+      | DFun f -&gt; f (denote t1 ctx)
+      | DErr msg -&gt; DErr msg
+      | DInt <span class="k">_</span> -&gt; DErr &quot;Cannot apply an integer&quot;
+</pre></div>
+</div>
+<p>各場合を詳しく見ます。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Var</span></code> の場合、解釈は単にコンテキストを参照します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">term</span></code> の整数定数は、そのまま <code class="docutils literal notranslate"><span class="pre">dyn</span></code> の整数に解釈されます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Lam</span></code> の場合が最も興味深いです。<code class="docutils literal notranslate"><span class="pre">term</span></code> のラムダ抽象は F* の関数 <code class="docutils literal notranslate"><span class="pre">dyn</span> <span class="pre">-&gt;</span> <span class="pre">Dv</span> <span class="pre">dyn</span></code> に解釈され、適用時に本体へ再帰的にデノテーション関数を呼びます。ここで <code class="docutils literal notranslate"><span class="pre">DFun</span></code> の非正性が効いており、関数を <code class="docutils literal notranslate"><span class="pre">dyn</span></code> 型に詰め込めます。</p></li>
+<li><p>最後に適用のケースでは、<code class="docutils literal notranslate"><span class="pre">term</span></code> の構文上の適用を F* の関数適用に解釈します（先頭が関数でなければ型エラーになります）。</p></li>
+</ul>
+</div></blockquote>
+<section id="id4">
+<h4>演習<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<p>この演習は前のものと似ており、型を豊かにすることで <code class="docutils literal notranslate"><span class="pre">denote</span></code> の簡単な性質を証明できることを示す目的です。</p>
+<p>閉じた項は空のコンテキストで解釈できることを証明できますか？</p>
+<p>まず、コンテキストの型を洗練し、一部の変数にのみ解釈を与えるようにしましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ctx_t (i:int) = x:nat{x &lt;= i} -&gt; dyn
+</pre></div>
+</div>
+<p>次に、項中の自由変数の最大インデックスを計算する <code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">t</span></code> を定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> max (x y:int) : int = <span class="k">if</span> x &lt; y <span class="k">then</span> y <span class="k">else</span> x
+<span class="k">let</span> <span class="k">rec</span> free (t:term)
+  : int
+  = <span class="k">match</span> t <span class="k">with</span>
+    | Var x -&gt; x
+    | Int <span class="k">_</span> -&gt; -1
+    | Lam t -&gt; free t - 1
+    | App t0 t1 -&gt; max (free t0) (free t1)
+</pre></div>
+</div>
+<p>先ほどの <code class="docutils literal notranslate"><span class="pre">denote</span></code> 関数に、次の型を与えられますか？</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> denote (t:term) (ctx:ctx_t (free t))
+  : <span class="k">Dv</span> dyn
+</pre></div>
+</div>
+<p>次に、以下のように空のコンテキストを定義しなさい。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> empty_context : ctx_t (-1) = <span class="k">fun</span> <span class="k">_</span> -&gt; false_elim ()
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">closed</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">(free</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">-1)</span></code> を満たす閉じた項 <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">:</span> <span class="pre">term</span> <span class="pre">{</span> <span class="pre">closed</span> <span class="pre">t</span> <span class="pre">}</span></code> が与えられたとき、空のコンテキストで <code class="docutils literal notranslate"><span class="pre">denote</span></code> により解釈を与えられますか？</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> Part4.UTLCEx2
+<span class="k">let</span> var = nat
+<span class="k">type</span> term = 
+  | Var  : var -&gt; term
+  | Int  : int -&gt; term
+  | Lam  : term -&gt; term
+  | App  : term -&gt; term -&gt; term
+
+<span class="c">//SNIPPET_START: free$</span>
+<span class="k">let</span> max (x y:int) : int = <span class="k">if</span> x &lt; y <span class="k">then</span> y <span class="k">else</span> x
+<span class="k">let</span> <span class="k">rec</span> free (t:term)
+  : int
+  = <span class="k">match</span> t <span class="k">with</span>
+    | Var x -&gt; x
+    | Int <span class="k">_</span> -&gt; -1
+    | Lam t -&gt; free t - 1
+    | App t0 t1 -&gt; max (free t0) (free t1)
+<span class="c">//SNIPPET_END: free$</span>
+
+<span class="k">noeq</span>
+<span class="k">type</span> dyn = 
+  | DErr  : string -&gt; dyn
+  | DInt  : int -&gt; dyn
+  | DFun  : (dyn -&gt; <span class="k">Dv</span> dyn) -&gt; dyn
+
+<span class="c">//SNIPPET_START: ctx_t$</span>
+<span class="k">let</span> ctx_t (i:int) = x:nat{x &lt;= i} -&gt; dyn
+<span class="c">//SNIPPET_END: ctx_t$</span>
+
+<span class="k">let</span> shift #i (ctx:ctx_t i) (v:dyn) 
+  : ctx_t (i + 1)
+  = <span class="k">fun</span> n -&gt; <span class="k">if</span> n = 0 <span class="k">then</span> v <span class="k">else</span> ctx (n - 1)
+
+<span class="c">(* This is similar to the interpreter, but</span>
+<span class="c">   &quot;interprets&quot; terms into the F* type dyn</span>
+<span class="c">    rather than just reducing syntax to syntax *)</span>
+<span class="k">let</span> <span class="k">rec</span> denote (t:term)
+               (ctx:ctx_t (free t))
+  : <span class="k">Dv</span> dyn 
+  = <span class="k">match</span> t <span class="k">with</span>
+    | Var v -&gt; ctx v
+    | Int i -&gt; DInt i
+    | Lam t -&gt; DFun (<span class="k">fun</span> v -&gt; denote t (shift ctx v))
+    | App t0 t1 -&gt; 
+      <span class="k">match</span> denote t0 ctx <span class="k">with</span>
+      | DFun f -&gt; f (denote t1 ctx)
+      | DErr msg -&gt; DErr msg
+      | DInt <span class="k">_</span> -&gt; DErr &quot;Cannot apply an integer&quot;
+
+<span class="c">//SNIPPET_START: empty_context$</span>
+<span class="k">let</span> empty_context : ctx_t (-1) = <span class="k">fun</span> <span class="k">_</span> -&gt; false_elim ()
+<span class="c">//SNIPPET_END: empty_context$</span>
+
+<span class="k">let</span> closed t = free t = -1
+<span class="k">let</span> denote_closed (t:term { closed t }) 
+  : <span class="k">Dv</span> dyn
+  = denote t empty_context
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="shallowly-embedded-dynamically-typed-programming">
+<h3>浅い埋め込みによる動的型付けプログラミング<a class="headerlink" href="#shallowly-embedded-dynamically-typed-programming" title="Link to this heading"></a></h3>
+<p>前の例では、型なしラムダ項の構文を F* の <code class="docutils literal notranslate"><span class="pre">dyn</span></code> 型に解釈する方法を見ました。ここでは構文という間接化を経ず、<code class="docutils literal notranslate"><span class="pre">dyn</span></code> 型を直接使って、F* 内に小さなチューリング完全な動的型付き言語を埋め込む方法を示します。</p>
+<p>まず、F* の整数や関数に対する操作を <code class="docutils literal notranslate"><span class="pre">dyn</span></code> 上の（失敗しうる）操作に持ち上げます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(* Lifting operations on integers to operations on dyn *)</span>
+<span class="k">let</span> lift (op: int -&gt; int -&gt; int) (n m:dyn) : dyn
+  = <span class="k">match</span> n, m <span class="k">with</span>
+    | DInt i, DInt j -&gt; DInt (op i j)
+    | <span class="k">_</span> -&gt; DErr &quot;Expected integers&quot;
+<span class="k">let</span> mul = lift op_Multiply
+<span class="k">let</span> sub = lift op_Subtraction
+<span class="k">let</span> add = lift op_Addition
+<span class="k">let</span> div (n m:dyn)
+  = <span class="k">match</span> n, m <span class="k">with</span>
+    | DInt i, DInt j -&gt; 
+      <span class="k">if</span> j = 0 <span class="k">then</span> DErr &quot;Division <span class="k">by</span> zero&quot;
+      <span class="k">else</span> DInt (i / j)
+    | <span class="k">_</span> -&gt; DErr &quot;Expected integers&quot;
+<span class="k">let</span> mod (n m:dyn)
+  = <span class="k">match</span> n, m <span class="k">with</span>
+    | DInt i, DInt j -&gt; 
+      <span class="k">if</span> j = 0 <span class="k">then</span> DErr &quot;Division <span class="k">by</span> zero&quot;
+      <span class="k">else</span> DInt (i % j)
+    | <span class="k">_</span> -&gt; DErr &quot;Expected integers&quot;
+</pre></div>
+</div>
+<p>また、<code class="docutils literal notranslate"><span class="pre">dyn</span></code> 型の整数の比較や分岐のための操作も用意し、<code class="docutils literal notranslate"><span class="pre">0</span></code> を <code class="docutils literal notranslate"><span class="pre">false</span></code> と見なします。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(* Branching *)</span>
+<span class="k">let</span> if_ (d:dyn) (then_ else_:dyn) =
+  <span class="k">match</span> d <span class="k">with</span>
+  | DInt b -&gt; 
+    <span class="k">if</span> b&lt;&gt;0 <span class="k">then</span> then_ <span class="k">else</span> else_
+  | <span class="k">_</span> -&gt; DErr &quot;Can only branch on integers&quot;
+
+<span class="c">(* comparison *)</span>
+<span class="k">let</span> eq_ (d:dyn) (d&#39;:dyn)
+  : dyn 
+  = <span class="k">match</span> d, d&#39; <span class="k">with</span>
+    | DInt i, DInt j -&gt; DInt (<span class="k">if</span> i = j <span class="k">then</span> 1 <span class="k">else</span> 0)
+    | <span class="k">_</span> -&gt; DErr &quot;Can only compare integers&quot;
+</pre></div>
+</div>
+<p>関数については、関数適用のコンビネータに加え、一般再帰を与える <code class="docutils literal notranslate"><span class="pre">fix</span></code> コンビネータを提供します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(* Dynamically typed application *)</span>
+<span class="k">let</span> app (f:dyn) (x:dyn)
+  : <span class="k">Dv</span> dyn
+  = <span class="k">match</span> f <span class="k">with</span>
+    | DFun f -&gt; f x
+    | <span class="k">_</span> -&gt; DErr &quot;Can only apply a <span class="k">function</span>&quot;
+<span class="c">(* general recursion *)</span>
+<span class="k">let</span> <span class="k">rec</span> fix (f: (dyn -&gt; <span class="k">Dv</span> dyn) -&gt; dyn -&gt; <span class="k">Dv</span> dyn) (n:dyn)
+  : <span class="k">Dv</span> dyn
+  = f (fix f) n
+</pre></div>
+</div>
+<p>再帰関数の引数個数に関する余談：なぜ不要な抽象を外した下の <code class="docutils literal notranslate"><span class="pre">fix_alt</span></code> ではなく、示した <code class="docutils literal notranslate"><span class="pre">fix</span></code> を定義するのか疑問に思うかもしれません。理由は、<code class="docutils literal notranslate"><span class="pre">fix_alt</span></code> では再帰定義で停止性検査を無効化することを F* に示すため、追加の <code class="docutils literal notranslate"><span class="pre">Dv</span></code> 注釈が必要になるからです。値呼び意味論で <code class="docutils literal notranslate"><span class="pre">fixalt</span> <span class="pre">f</span></code> を評価すると無条件に無限ループになりますが、<code class="docutils literal notranslate"><span class="pre">fix</span> <span class="pre">f</span></code> は直ちに <code class="docutils literal notranslate"><span class="pre">fun</span> <span class="pre">n</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">(fix</span> <span class="pre">f)</span> <span class="pre">n</span></code> というラムダを返します。言い換えると、発散があるとき η 簡約（冗長な関数適用の除去）は意味を保存しません。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> fix_alt (f: (dyn -&gt; <span class="k">Dv</span> dyn) -&gt; dyn -&gt; <span class="k">Dv</span> dyn) 
+  : <span class="k">Dv</span> (dyn -&gt; <span class="k">Dv</span> dyn)
+  = f (fix_alt f)
+</pre></div>
+</div>
+<p>これにより、以下のように F* の内部で非自明な動的型付きの一般再帰プログラムを記述できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(* shorthands *)</span>
+<span class="k">let</span> i (i:int) : dyn = DInt i
+<span class="k">let</span> lam (f:dyn -&gt; <span class="k">Dv</span> dyn) : dyn = DFun f
+<span class="c">(* a dynamically typed analog of collatz *)</span>
+<span class="k">let</span> collatz_dyn 
+  : dyn 
+  = lam (fix (<span class="k">fun</span> collatz n -&gt;
+                if_ (eq_ n (i 1))
+                    (i 1)
+                    (if_ (eq_ (mod n (i 2)) (i 0))
+                         (collatz (div n (i 2)))
+                         (collatz (add (mul n (i 3)) (i 1))))))
+</pre></div>
+</div>
+<p>要するに、<code class="docutils literal notranslate"><span class="pre">Dv</span></code> を用いた一般再帰と非正のデータ型により、F* は ML、Haskell、Lisp、Scheme などの関数型言語と同様の汎用プログラミング言語になり得ることを示しています。</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part4_ghost.html" class="btn btn-neutral float-left" title="消去とゴースト効果" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part4_pure.html" class="btn btn-neutral float-right" title="プリミティブ効果の精錬（リファインメント）" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

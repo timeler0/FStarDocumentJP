@@ -1,0 +1,159 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>依存関係を追跡する計算型 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="Total な計算の効果" href="part4_computation_types_and_tot.html" />
+    <link rel="prev" title="計算効果" href="part4.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part4.html">計算効果</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">依存関係を追跡する計算型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part4_computation_types_and_tot.html">Total な計算の効果</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part4_ghost.html">消去とゴースト効果</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part4_div.html">発散（非停止）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part4_pure.html">プリミティブ効果の精錬（リファインメント）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part4.html">計算効果</a></li>
+      <li class="breadcrumb-item active">依存関係を追跡する計算型</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="computation-types-to-track-dependences">
+<span id="part4-background"></span><h1>依存関係を追跡する計算型<a class="headerlink" href="#computation-types-to-track-dependences" title="Link to this heading"></a></h1>
+<p>F* の効果システムの主な目標は、プログラム各部の間の*依存関係を追跡する*ことです。たとえば、常に停止することが証明された total な部分が、（無限ループする可能性のある）divergent な部分の関数を決して呼ばないように保証します。また、コンパイラによって消去されるゴースト計算に、コンパイル後の実行時挙動が依存しないことも保証します。</p>
+<p>1999 年の論文 <a class="reference external" href="https://dl.acm.org/doi/pdf/10.1145/292540.292555">A Core Calculus of Dependency</a> で Abadi らは、依存関係を汎用的に追跡する言語 DCC を提示しました。DCC の型システムは、束（lattice）の要素である添字 <span class="math notranslate nohighlight">\(l\)</span> を持つインデックス付きモナド型 <span class="math notranslate nohighlight">\(T_l\)</span> を含み、添字は半順序で整列しています。DCC では、型 <span class="math notranslate nohighlight">\(T_l\)</span> の計算が、型 <span class="math notranslate nohighlight">\(T_m\)</span> の計算に依存できるのは、束の半順序で <span class="math notranslate nohighlight">\(m \leq l\)</span> が成り立つ場合に限られます。F* の効果システムは DCC に触発され、Swamy らの 2011 年の論文 <a class="reference external" href="https://dl.acm.org/doi/10.1145/2034574.2034778">Lightweight Monadic Programming in ML</a> を基盤として、ML 風言語向けの DCC 風システムを発展させています。</p>
+<p>F* の効果システムの中心には、次の 3 要素があります。</p>
+<p><strong>計算型（Computation Types）</strong>：F* の型システムには <em>計算型</em> の概念があり、<code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">t</span></code> の形で表します。ここで <code class="docutils literal notranslate"><span class="pre">M</span></code> は*効果ラベル*、<code class="docutils literal notranslate"><span class="pre">t</span></code> は計算の戻り型です。項 <code class="docutils literal notranslate"><span class="pre">e</span></code> が実行時に高々 <code class="docutils literal notranslate"><span class="pre">M</span></code> の効果を示し、（場合によって）型 <code class="docutils literal notranslate"><span class="pre">t</span></code> の値を返すとき、<code class="docutils literal notranslate"><span class="pre">e</span></code> に <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">t</span></code> を与えられます（この直観は後でより厳密にします）。これに対し、これまで見てきた <code class="docutils literal notranslate"><span class="pre">unit</span></code>、<code class="docutils literal notranslate"><span class="pre">bool</span></code>、<code class="docutils literal notranslate"><span class="pre">int</span></code>、<code class="docutils literal notranslate"><span class="pre">list</span> <span class="pre">int</span></code>、その他の帰納型、精製型、関数型などは*値型*と呼びます。</p>
+<p><strong>半順序な効果ラベル</strong>：計算型の効果ラベルは、ユーザが拡張可能なラベル集合から取り、ラベル間はユーザが定める半順序で整列されます。たとえば、条件の下で <code class="docutils literal notranslate"><span class="pre">M</span></code> を <code class="docutils literal notranslate"><span class="pre">N</span></code> のサブ効果（<code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">&lt;</span> <span class="pre">N</span></code>）と定義できます。任意のラベル <code class="docutils literal notranslate"><span class="pre">M</span></code> と <code class="docutils literal notranslate"><span class="pre">N</span></code> に対し、（存在すれば）両者以上の最小ラベルを与える部分関数 <a href="#id1"><span class="problematic" id="id2">``</span></a>lub M N``（least upper bound）が定義されます。</p>
+<p><strong>依存関係を追跡する型付け規則</strong>：効果システムの要は、<code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">e1</span> <span class="pre">in</span> <span class="pre">e2</span></code> による逐次合成の規則です。<code class="docutils literal notranslate"><span class="pre">e1</span> <span class="pre">:</span> <span class="pre">M</span> <span class="pre">t1</span></code>、かつ <code class="docutils literal notranslate"><span class="pre">x:t1</span></code> の下で <code class="docutils literal notranslate"><span class="pre">e2</span> <span class="pre">:</span> <span class="pre">N</span> <span class="pre">t2</span></code> とすると、合成 <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">e1</span> <span class="pre">in</span> <span class="pre">e2</span></code> は <code class="docutils literal notranslate"><span class="pre">L</span> <span class="pre">t2</span></code> を持ち、<code class="docutils literal notranslate"><span class="pre">L</span> <span class="pre">=</span> <span class="pre">lub</span> <span class="pre">M</span> <span class="pre">N</span></code> です――もし <code class="docutils literal notranslate"><span class="pre">lub</span> <span class="pre">M</span> <span class="pre">N</span></code> が未定義なら、その <code class="docutils literal notranslate"><span class="pre">let</span></code> は拒否されます。さらに、<code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">&lt;</span> <span class="pre">N</span></code> のとき、<code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">t</span></code> の計算は暗黙に <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">t</span></code> とみなせます。すなわち、効果階層を上に上げることは常に許されます。この型付け規律により、DCC と同様の依存追跡が実現されます：<code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">t</span></code> の計算が <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">t</span></code> に依存できるのは <code class="docutils literal notranslate"><span class="pre">lub</span> <span class="pre">M</span> <span class="pre">N</span> <span class="pre">=</span> <span class="pre">M</span></code> のときだけです。</p>
+<p>一般には、F* の計算型は単なる効果ラベル <code class="docutils literal notranslate"><span class="pre">M</span></code> と結果型（<code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">t</span></code>）よりも複雑で、F* の依存型に基づき、依存追跡以上のことを表現できます。たとえば、計算型は完全な関数的正しさの仕様を与えることもできます。以下に挙げる論文が背景を提供しており、本章を通してその要素を取り上げます。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://dl.acm.org/doi/10.1145/2499370.2491978">Verifying Higher-order Programs with the Dijkstra Monad</a> は、効果付き計算の最弱事前条件推論を体系化するための構成である Dijkstra モナドの概念を導入します。</p></li>
+<li><p>2016 年の論文 <a class="reference external" href="https://fstar-lang.org/papers/mumon/">Dependent Types and Multi-Monadic Effects in F*</a> は F* の標準的な参考文献となっており、複数の Dijkstra モナドを DCC 風システムと組み合わせる方法を示します。</p></li>
+<li><p><a class="reference external" href="https://dl.acm.org/doi/10.1145/3009837.3009878">Dijkstra Monads for Free</a> は、単純なモナドの一群に対して Dijkstra モナドを自動生成するアルゴリズムを提示します。</p></li>
+<li><p><a class="reference external" href="https://dl.acm.org/doi/abs/10.1145/3341708">Dijkstra Monads for All</a> は、モナド準同型で結ばれる限り、任意の計算モナドを仕様モナドに対応付ける一般化を与えます。</p></li>
+<li><p><a class="reference external" href="https://fstar-lang.org/papers/indexedeffects/">Programming and Proving with Indexed Effects</a> は、F* のユーザ定義効果システムを最も一般的な形で記述し、Dijkstra モナドを含むあらゆるインデックス付き効果（および他の構成）に適用できることを示します。</p></li>
+</ul>
+</div></blockquote>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part4.html" class="btn btn-neutral float-left" title="計算効果" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part4_computation_types_and_tot.html" class="btn btn-neutral float-right" title="Total な計算の効果" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,710 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>並列インクリメント &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="抽出（エクストラクション）" href="pulse_extraction.html" />
+    <link rel="prev" title="スピンロック" href="pulse_spin_lock.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">並列インクリメント</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#parallel-blocks">並列ブロック</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-first-take-with-locks">第一案：ロックによる実装</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modularity-with-higher-order-ghost-code">高階ゴーストコードによるモジュール性</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exercise">演習</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#a-version-with-invariants">不変条件（invariant）版</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cancellable-invariants">キャンセル可能な不変条件</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#an-increment-operation">インクリメント操作</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add2-v3"><code class="docutils literal notranslate"><span class="pre">add2_v3</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">演習</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">並列インクリメント</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="parallel-increment">
+<span id="pulse-parallel-increment"></span><h1>並列インクリメント<a class="headerlink" href="#parallel-increment" title="Link to this heading"></a></h1>
+<p>この章では、Susan Owicki と David Gries による古典的な論文 <a class="reference external" href="https://dl.acm.org/doi/10.1145/360051.360224">Verifying properties of parallel programs: an axiomatic approach</a> で最初に研究された例を扱います。課題は、整数参照 <code class="docutils literal notranslate"><span class="pre">r</span></code> を並列に 2 回、原子的にインクリメントするプログラムが、正しく <code class="docutils literal notranslate"><span class="pre">r</span></code> に 2 を加えることを証明することです。これを行う方法は多数ありますが、Owicki と Gries の手法は現代的な分離ロジックに適応され、追加のゴースト状態を用いて証明をモジュール的に構成する方法を提供します。</p>
+<p>これは非常に単純なプログラムですが、並行性がもたらす推論上の課題の本質を捉えています。2 つのスレッドが共有リソースに対して、順序が定まらない形で寄与し、その全体挙動を、理想的にはすべてのインターリーブを個別に解析することなく推論したい、という状況です。</p>
+<section id="parallel-blocks">
+<h2>並列ブロック<a class="headerlink" href="#parallel-blocks" title="Link to this heading"></a></h2>
+<p>Pulse は新しいスレッドを作るためのいくつかのプリミティブを提供します。最も基本的なのは、以下に示す並列合成です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">parallel</span>
+<span class="k">requires</span> p1 <span class="k">and</span> p2
+<span class="k">ensures</span> q1 <span class="k">and</span> q2
+{ e1 }
+{ e2 }
+</pre></div>
+</div>
+<p>この構成子の型付け規則は次を要求します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> e1 : stt a p1 q1
+<span class="k">val</span> e2 : stt b p2 q2
+</pre></div>
+</div>
+<p>すると <code class="docutils literal notranslate"><span class="pre">parallel</span></code> ブロック自体は次の型を持ちます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>stt (a &amp; b) (p1 ** p2) (<span class="k">fun</span> (x, y) -&gt; q1 x ** q2 y)
+</pre></div>
+</div>
+<p>言い換えると、現在のコンテキストが <code class="docutils literal notranslate"><span class="pre">e1</span></code> と <code class="docutils literal notranslate"><span class="pre">e2</span></code> の事前条件を満たすように <code class="docutils literal notranslate"><span class="pre">p1</span></code> と <code class="docutils literal notranslate"><span class="pre">p2</span></code> に分割できるなら、並列ブロックは <code class="docutils literal notranslate"><span class="pre">e1</span></code> と <code class="docutils literal notranslate"><span class="pre">e2</span></code> を並行に実行し、両者の終了を待ち、両方が完了したらそれぞれの結果を対として返し、各結果には対応する事後条件が成り立ちます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">parallel</span></code> を使えば、次の <code class="docutils literal notranslate"><span class="pre">par</span></code> コンビネータを容易に記述できます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> par (#pf #pg #qf #qg:<span class="k">_</span>)
+       (f: unit -&gt; stt unit pf (<span class="k">fun</span> <span class="k">_</span> -&gt; qf))
+       (g: unit -&gt; stt unit pg (<span class="k">fun</span> <span class="k">_</span> -&gt; qg))
+<span class="k">requires</span> pf ** pg
+<span class="k">ensures</span> qf ** qg
+{
+  <span class="k">parallel</span> 
+  <span class="k">requires</span> pf <span class="k">and</span> pg
+  <span class="k">ensures</span> qf <span class="k">and</span> qg
+  { f () }
+  { g () };
+  ()
+}
+</pre></div>
+</div>
+<p><a class="reference internal" href="pulse.html#partpulse"><span class="std std-ref">Pulse の導入</span></a> で見たように、別々の 2 つの参照を並列にインクリメントするのは簡単です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> par_incr (x y:ref int)
+<span class="k">requires</span> pts_to x &#39;i ** pts_to y &#39;j
+<span class="k">ensures</span> pts_to x (&#39;i + 1) ** pts_to y (&#39;j + 1)
+{
+   par (<span class="k">fun</span> <span class="k">_</span> -&gt; incr x)
+       (<span class="k">fun</span> <span class="k">_</span> -&gt; incr y)
+}
+</pre></div>
+</div>
+<p>しかし、同じ参照を 2 本のスレッドからインクリメントしたい場合はどうでしょうか。つまり次のようなプログラムです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> add2 (x:ref int)
+<span class="k">requires</span> pts_to x &#39;i
+<span class="k">ensures</span> pts_to x (&#39;i + 2)
+{
+   par (<span class="k">fun</span> <span class="k">_</span> -&gt; incr x)
+       (<span class="k">fun</span> <span class="k">_</span> -&gt; incr x)
+}
+</pre></div>
+</div>
+<p>しかしこのプログラムは検査に通りません。問題は、<code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">'i</span></code> が 1 つしかなく、両スレッドが更新のために <code class="docutils literal notranslate"><span class="pre">x</span></code> への全権限を必要とするため、これを分割して共有できないからです。</p>
+<p>さらに、<code class="docutils literal notranslate"><span class="pre">x</span></code> に正しく <code class="docutils literal notranslate"><span class="pre">2</span></code> を加えるには、各インクリメントが原子的でなければなりません。例えば次の 2 断片を並行に実行すると、両方が最初に <code class="docutils literal notranslate"><span class="pre">x</span></code> の初期値を読み取り、<code class="docutils literal notranslate"><span class="pre">`v</span></code> に束縛し、双方が <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">+</span> <span class="pre">1</span></code> に更新してしまう可能性があります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> v = !x;      ||    <span class="k">let</span> v = !x;
+x := v + 1;      ||    x := v + 1;
+</pre></div>
+</div>
+<p>さらに悪いことに、同期が無ければ、弱いメモリモデルの現代的なプロセッサではさまざまな挙動が起こり得ます。</p>
+<p>同期を強制するにはロックを使えます。例えば次のようにします。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> attempt (x:ref int)
+<span class="k">requires</span> pts_to x &#39;i
+<span class="k">ensures</span> <span class="k">exists</span>* v. pts_to x v
+{
+  <span class="k">let</span> l = L.new_lock (<span class="k">exists</span>* v. pts_to x v);
+  <span class="k">fn</span> incr ()
+  <span class="k">requires</span> L.lock_alive l #0.5R (<span class="k">exists</span>* v. pts_to x v)
+  <span class="k">ensures</span> L.lock_alive l #0.5R (<span class="k">exists</span>* v. pts_to x v)
+  {
+    L.acquire l;
+    <span class="k">let</span> v = !x;
+    x := v + 1;
+    L.release l
+  };
+  L.share l;
+  par incr incr;
+  L.gather l;
+  L.acquire l;
+  L.free l
+}
+</pre></div>
+</div>
+<p>このプログラムは型的に正しく、データ競合もありません。ですが、ロックが <code class="docutils literal notranslate"><span class="pre">x</span></code> への権限のすべてを保持するため、この関数に精密な事後条件を与えることができません。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>この節では、Pulse ライブラリの Pulse.Lib.SpinLock にあるスピンロック実装を使います。前章の自作版と異なり、これらのロックは分数添字付きの権限 <code class="docutils literal notranslate"><span class="pre">lock_alive</span> <span class="pre">l</span> <span class="pre">#f</span> <span class="pre">p</span></code> を採用します。さらに、ロック取得状態を示す述語 <code class="docutils literal notranslate"><span class="pre">lock_acquired</span> <span class="pre">l</span></code> も提供されます。ロックに対する全権限と <code class="docutils literal notranslate"><span class="pre">lock_acquired</span> <span class="pre">l</span></code> があれば、ロックを解放して基礎メモリを回収できます。また <code class="docutils literal notranslate"><span class="pre">lock_acquired</span></code> は二重解放が起きないことを保証します。このように <code class="docutils literal notranslate"><span class="pre">Pulse.Lib.SpinLock</span></code> は前章のスピンロックの問題を解決し、同章の演習の解にもなります。</p>
+</div>
+</section>
+<section id="a-first-take-with-locks">
+<h2>第一案：ロックによる実装<a class="headerlink" href="#a-first-take-with-locks" title="Link to this heading"></a></h2>
+<p>Owicki と Gries の発想は、仕様目的にのみ用いる補助変数、すなわちゴースト状態をプログラムに付加することでした。各スレッドは自身のゴースト状態を持ち、共有変数の現在値にどれだけ寄与したかを記録します。これを Pulse でどのように行うか見ていきます。</p>
+<p>要点は、ロックで保護される述語の型 <code class="docutils literal notranslate"><span class="pre">lock_inv</span></code> によって表されます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> contributions (left right: GR.ref int) (i v:int) : timeless_slprop =
+  <span class="k">exists</span>* (vl vr:int).
+    GR.pts_to left #0.5R vl **
+    GR.pts_to right #0.5R vr **
+    pure (v == i + vl + vr)
+
+<span class="k">let</span> lock_inv (x:ref int) (init:int) (left right:GR.ref int) : timeless_slprop =
+  <span class="k">exists</span>* v. 
+    pts_to x v **
+    contributions left right init v
+</pre></div>
+</div>
+<p>先ほどのたたき台では <code class="docutils literal notranslate"><span class="pre">lock</span> <span class="pre">(exists*</span> <span class="pre">v.</span> <span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">v)</span></code> のような型でした。ここでは <code class="docutils literal notranslate"><span class="pre">v</span></code> を精密化するための連言を追加します。述語 <code class="docutils literal notranslate"><span class="pre">contributions</span> <span class="pre">l</span> <span class="pre">r</span> <span class="pre">init</span> <span class="pre">v</span></code> は、ロックで保護された <code class="docutils literal notranslate"><span class="pre">x</span></code> の現在値（すなわち <code class="docutils literal notranslate"><span class="pre">v</span></code>）が <code class="docutils literal notranslate"><span class="pre">init</span> <span class="pre">+</span> <span class="pre">vl</span> <span class="pre">+</span> <span class="pre">vr</span></code> に等しいことを述べます。ここで <code class="docutils literal notranslate"><span class="pre">init</span></code> は <code class="docutils literal notranslate"><span class="pre">x</span></code> の初期値、<code class="docutils literal notranslate"><span class="pre">vl</span></code> は「左」スレッドのゴースト状態、<code class="docutils literal notranslate"><span class="pre">vr</span></code> は「右」スレッドのゴースト状態です。つまり <code class="docutils literal notranslate"><span class="pre">contributions</span> <span class="pre">l</span> <span class="pre">r</span> <span class="pre">init</span> <span class="pre">v</span></code> は、<code class="docutils literal notranslate"><span class="pre">v</span></code> が常に各スレッドの寄与を反映していることを保証します。</p>
+<p>ただし <code class="docutils literal notranslate"><span class="pre">contributions</span></code> は左右のゴースト変数に対して半分の権限しか保持しません。残りの半分はロックの外側に保持し、仕様の中で各スレッドの寄与を追跡できるようにします。</p>
+<p>左スレッド <code class="docutils literal notranslate"><span class="pre">incr_left</span></code> のコードは次のとおりです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> incr_left (x:ref int)
+             (#p:perm)
+             (#left:GR.ref int)
+             (#right:GR.ref int)
+             (#i:erased int)
+             (lock:L.lock )
+<span class="k">requires</span> L.lock_alive lock #p (lock_inv x i left right) ** GR.pts_to left #0.5R &#39;vl
+<span class="k">ensures</span> L.lock_alive lock #p (lock_inv x i left right) ** GR.pts_to left #0.5R (&#39;vl + 1)
+{
+  L.acquire lock;
+  <span class="k">unfold</span> lock_inv;
+  <span class="k">unfold</span> contributions;
+  <span class="k">let</span> v = !x;
+  x := v + 1;
+  GR.gather left;
+  GR.write left (&#39;vl + 1);
+  GR.share left;
+  <span class="k">fold</span> (contributions left right i (v + 1));
+  <span class="k">fold</span> lock_inv;
+  L.release lock
+}
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Its arguments include <code class="docutils literal notranslate"><span class="pre">x</span></code> and the <code class="docutils literal notranslate"><span class="pre">lock</span></code>, but also both pieces
+of ghost state, <code class="docutils literal notranslate"><span class="pre">left</span></code> and <code class="docutils literal notranslate"><span class="pre">right</span></code>, and an erased value <code class="docutils literal notranslate"><span class="pre">i</span></code>
+for the initial value of <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p>事前条件ではゴースト参照 <code class="docutils literal notranslate"><span class="pre">left</span></code> への半分の権限を保持します。</p></li>
+<li><p>事後条件では <code class="docutils literal notranslate"><span class="pre">left</span></code> への半権限を返しますが、その値がインクリメントされた（すなわち左スレッドの寄与が 1 増えた）ことを証明します。</p></li>
+</ul>
+<p>半権限しか持っていないのに <code class="docutils literal notranslate"><span class="pre">left</span></code> を更新できると仕様が述べている点に注意してください。これは、ロックの取得により必要な残り半分の権限を得られるからです。</p>
+<ul class="simple">
+<li><p>ロックを取得し、<code class="docutils literal notranslate"><span class="pre">x</span></code> に格納された値をインクリメントします。</p></li>
+<li><p>その後、いくつかのゴースト手順を続けます。</p>
+<ul>
+<li><p>事前条件の半権限と、ロックから得た半権限を合わせて <code class="docutils literal notranslate"><span class="pre">left</span></code> への全権限を得ます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">left</span></code> をインクリメントします。</p></li>
+<li><p>再びそれを分割し、ロック解放時に半権限をロック側へ戻します。</p></li>
+</ul>
+</li>
+<li><p>最後に、呼び出し側へ返すための事後条件として <code class="docutils literal notranslate"><span class="pre">GR.pts_to</span> <span class="pre">left</span> <span class="pre">#one_half</span> <span class="pre">(`vl</span> <span class="pre">+</span> <span class="pre">1)</span></code> を残します。</p></li>
+</ul>
+<p>右スレッド側のコードは対称ですが、この第一案では本質的に同じコードを繰り返すことになります。これを解消する方法を後で見ていきます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> incr_right (x:ref int)
+              (#p:perm)
+              (#left:GR.ref int)
+              (#right:GR.ref int)
+              (#i:erased int)
+              (lock:L.lock)
+<span class="k">requires</span> L.lock_alive lock #p (lock_inv x i left right) ** GR.pts_to right #0.5R &#39;vl
+<span class="k">ensures</span> L.lock_alive lock #p (lock_inv x i left right) ** GR.pts_to right #0.5R (&#39;vl + 1)
+{
+  L.acquire lock;
+  <span class="k">unfold</span> lock_inv;
+  <span class="k">unfold</span> contributions;
+  <span class="k">let</span> v = !x;
+  x := v + 1;
+  GR.gather right;
+  GR.write right (&#39;vl + 1);
+  GR.share right;
+  <span class="k">fold</span> (contributions left right i (v + 1));
+  <span class="k">fold</span> (lock_inv x i left right);
+  L.release lock
+}
+</pre></div>
+</div>
+<p>最後に、望む仕様で <code class="docutils literal notranslate"><span class="pre">add2</span></code> を実装できます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> add2 (x:ref int)
+<span class="k">requires</span> pts_to x &#39;i
+<span class="k">ensures</span>  pts_to x (&#39;i + 2)
+{
+  <span class="k">let</span> left = GR.alloc 0;
+  <span class="k">let</span> right = GR.alloc 0;
+  GR.share left;
+  GR.share right;
+  <span class="k">fold</span> (contributions left right &#39;i &#39;i);
+  <span class="k">fold</span> (lock_inv x &#39;i left right);
+  <span class="k">let</span> lock = L.new_lock (lock_inv x &#39;i left right);
+  L.share lock;
+  par (<span class="k">fun</span> <span class="k">_</span> -&gt; incr_left x lock)
+      (<span class="k">fun</span> <span class="k">_</span> -&gt; incr_right x lock);
+  L.gather lock;
+  L.acquire lock;
+  L.free lock;
+  <span class="k">unfold</span> lock_inv;
+  <span class="k">unfold</span> contributions;
+  GR.gather left;
+  GR.gather right;
+  GR.free left;
+  GR.free right;
+}
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">left</span></code> と <code class="docutils literal notranslate"><span class="pre">right</span></code> のゴースト参照を割り当て、<code class="docutils literal notranslate"><span class="pre">0</span></code> で初期化します。</p></li>
+<li><p>それらを分割し、半分の権限をロックに入れ、残り半分を保持します。</p></li>
+<li><p>それから <code class="docutils literal notranslate"><span class="pre">incr_left</span></code> と <code class="docutils literal notranslate"><span class="pre">incr_right</span></code> の 2 つのスレッドを起こし、事後条件として両スレッドの寄与がそれぞれ 1 ずつ増えたことを得ます。</p></li>
+<li><p>Finally, we acquire the lock, get <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">v</span></code>, for some <code class="docutils literal notranslate"><span class="pre">v</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">contributions</span> <span class="pre">left</span> <span class="pre">right</span> <span class="pre">i</span> <span class="pre">v</span></code>. Once we gather up the
+permission on <code class="docutils literal notranslate"><span class="pre">left</span></code> and <code class="docutils literal notranslate"><span class="pre">right</span></code>, and now the <code class="docutils literal notranslate"><span class="pre">contributions</span>
+<span class="pre">left</span> <span class="pre">right</span> <span class="pre">i</span> <span class="pre">v</span></code> tells us that <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">==</span> <span class="pre">i</span> <span class="pre">+</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">1</span></code>, which is what we
+need to conclude.</p></li>
+</ul>
+</section>
+<section id="modularity-with-higher-order-ghost-code">
+<h2>高階ゴーストコードによるモジュール性<a class="headerlink" href="#modularity-with-higher-order-ghost-code" title="Link to this heading"></a></h2>
+<p>次の試みでは、<code class="docutils literal notranslate"><span class="pre">incr_left</span></code> と <code class="docutils literal notranslate"><span class="pre">incr_right</span></code> の代わりに単一の関数 <code class="docutils literal notranslate"><span class="pre">incr</span></code> を書き、より抽象的でモジュール的な仕様を与えます。ここで用いるスタイルは、Bart Jacobs と Frank Piessens による論文 <a class="reference external" href="https://dl.acm.org/doi/10.1145/1926385.1926417">Expressive modular fine-grained concurrency specification</a> の発想に基づきます。</p>
+<p>要点は、<code class="docutils literal notranslate"><span class="pre">incr_left</span></code> と <code class="docutils literal notranslate"><span class="pre">incr_right</span></code> の違いは実行するゴーストコードだけだという観察です。Pulse は高階なので、関数を <code class="docutils literal notranslate"><span class="pre">incr</span></code> でパラメータ化し、呼び出し側が異なるゴーストコードで 2 回インスタンス化すればよいのです。ついでに、<code class="docutils literal notranslate"><span class="pre">contributions</span></code> と <code class="docutils literal notranslate"><span class="pre">left/right</span></code> に固定せず、任意の抽象述語で機能するように <code class="docutils literal notranslate"><span class="pre">incr</span></code> の仕様も一般化します。方法は次の通りです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@erasable]
+<span class="k">let</span> incr_f (x: ref int) (refine aspec: int -&gt; slprop) =
+  v:int -&gt; vq:int -&gt; stt_ghost unit emp_inames
+    (refine v ** aspec vq ** pts_to x (v + 1))
+    (<span class="k">fun</span> <span class="k">_</span> -&gt; refine (v + 1) ** aspec (vq + 1) ** pts_to x (v + 1))
+<span class="k">fn</span> incr (x: ref int)
+        (#p:perm)
+        (#refine #aspec: int -&gt; slprop)
+        (l:L.lock)
+        (ghost_steps: incr_f x refine aspec)
+<span class="k">requires</span> L.lock_alive l #p (<span class="k">exists</span>* v. pts_to x v ** refine v) ** aspec &#39;i
+<span class="k">ensures</span> L.lock_alive l #p (<span class="k">exists</span>* v. pts_to x v ** refine v) ** aspec (&#39;i + 1)
+ {
+    L.acquire l;
+    <span class="k">let</span> vx = !x;
+    x := vx + 1;
+    ghost_steps vx &#39;i;
+    L.release l;
+}
+</pre></div>
+</div>
+<p>以前と同様に <code class="docutils literal notranslate"><span class="pre">incr</span></code> は <code class="docutils literal notranslate"><span class="pre">x</span></code> と <code class="docutils literal notranslate"><span class="pre">lock</span></code> を必要としますが、今回は次でパラメータ化されます。</p>
+<ul class="simple">
+<li><p>述語 <code class="docutils literal notranslate"><span class="pre">refine</span></code>：先の <code class="docutils literal notranslate"><span class="pre">contributions</span></code> を一般化し、<code class="docutils literal notranslate"><span class="pre">x</span></code> が指す値を精密化します。</p></li>
+<li><p>述語 <code class="docutils literal notranslate"><span class="pre">aspec</span></code>：呼び出し側が選ぶ抽象仕様で、<code class="docutils literal notranslate"><span class="pre">incr</span></code> の主仕様として、<code class="docutils literal notranslate"><span class="pre">aspec</span> <span class="pre">'i</span></code> から <code class="docutils literal notranslate"><span class="pre">aspec</span> <span class="pre">('i</span> <span class="pre">+</span> <span class="pre">1)</span></code> への遷移を表します。</p></li>
+<li><p>そして最後に、ゴースト関数 <code class="docutils literal notranslate"><span class="pre">ghost_steps</span></code>。これは <code class="docutils literal notranslate"><span class="pre">refine</span></code>・<code class="docutils literal notranslate"><span class="pre">aspec</span></code>・<code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span></code> の関係で抽象的に指定され、要するに <code class="docutils literal notranslate"><span class="pre">x</span></code> を更新したら抽象述語 <code class="docutils literal notranslate"><span class="pre">refine</span></code> と <code class="docutils literal notranslate"><span class="pre">aspec</span></code> も更新できることを述べます。</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">incr</span></code> を一般化したことで、作業の一部は呼び出し側へ移りました。しかし一度検証された <code class="docutils literal notranslate"><span class="pre">incr</span></code> は、インスタンス化を変えるだけで多様な呼び出し側から再利用できます。例えば 3 本並列のインクリメントをしたくなっても <code class="docutils literal notranslate"><span class="pre">incr</span></code> はそのまま使えます。一方、第一案では <code class="docutils literal notranslate"><span class="pre">incr_left</span></code>/<code class="docutils literal notranslate"><span class="pre">incr_right</span></code> がゴースト参照を 2 つと仮定しているため全面的な書き換えが必要でした。</p>
+<p><code class="docutils literal notranslate"><span class="pre">add2</span></code> と同じ仕様を証明する形で <code class="docutils literal notranslate"><span class="pre">incr</span></code> をインスタンス化する一例を挙げます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> add2_v2 (x: ref int)
+<span class="k">requires</span> pts_to x &#39;i
+<span class="k">ensures</span> pts_to x (&#39;i + 2)
+{
+    <span class="k">let</span> left = GR.alloc 0;
+    <span class="k">let</span> right = GR.alloc 0;
+    GR.share left;
+    GR.share right;
+    <span class="k">fold</span> (contributions left right &#39;i &#39;i);
+    <span class="k">let</span> lock = L.new_lock (
+      <span class="k">exists</span>* (v:int).
+        pts_to x v ** contributions left right &#39;i v
+    );
+    <span class="k">ghost</span>
+    <span class="k">fn</span> step
+        (lr:GR.ref int)
+        (b:bool { <span class="k">if</span> b <span class="k">then</span> lr == left <span class="k">else</span> lr == right })
+      : incr_f x
+        (<span class="k">fun</span> v -&gt; contributions left right &#39;i v)
+        (<span class="k">fun</span> vq -&gt; GR.pts_to lr #0.5R vq)
+      = v vq
+    { 
+      <span class="k">unfold</span> contributions;
+      <span class="k">if</span> b
+      {
+        <span class="k">with</span> _p _v. <span class="k">rewrite</span> (GR.pts_to lr #_p _v) as (GR.pts_to left #_p _v);
+        GR.gather left;
+        GR.write left (vq + 1);
+        GR.share left;      
+        <span class="k">with</span> _p _v. <span class="k">rewrite</span> (GR.pts_to left #_p _v) as (GR.pts_to lr #_p _v);
+        <span class="k">fold</span> (contributions left right &#39;i (v + 1));
+      }
+      <span class="k">else</span>
+      {
+        <span class="k">with</span> _p _v. <span class="k">rewrite</span> (GR.pts_to lr #_p _v) as (GR.pts_to right #_p _v);
+        GR.gather right;
+        GR.write right (vq + 1);
+        GR.share right;      
+        <span class="k">with</span> _p _v. <span class="k">rewrite</span> (GR.pts_to right #_p _v) as (GR.pts_to lr #_p _v);
+        <span class="k">fold</span> (contributions left right &#39;i (v + 1));
+      }
+    };
+    L.share lock;
+    par (<span class="k">fun</span> <span class="k">_</span> -&gt; incr x lock (step left <span class="k">true</span>))
+        (<span class="k">fun</span> <span class="k">_</span> -&gt; incr x lock (step right <span class="k">false</span>));
+    L.gather lock;
+    L.acquire lock;
+    L.free lock;
+    <span class="k">unfold</span> (contributions left right &#39;i);
+    GR.gather left;
+    GR.gather right;
+    GR.free left;
+    GR.free right;
+}
+</pre></div>
+</div>
+<p>コード自体は先ほどの再配置で、<code class="docutils literal notranslate"><span class="pre">incr_left</span></code>/<code class="docutils literal notranslate"><span class="pre">incr_right</span></code> にあったゴーストコードを <code class="docutils literal notranslate"><span class="pre">step</span></code> というゴースト関数にまとめただけです。スレッドを起動するとき、左寄与か右寄与を更新するゴーストコードを渡します。</p>
+<p>このコードにはまだ 2 つ問題があります。</p>
+<ul class="simple">
+<li><p>ゴースト関数 <code class="docutils literal notranslate"><span class="pre">step</span></code> が肥大しています。条件分岐の各枝で本質的に同じコードと証明を 2 回書いています。これは Pulse の可換部分モノイド（PCM）を用いたカスタムのゴースト状態定義で改善できますが、これは別章の話題です。</p></li>
+<li><p>ロックのためにメモリを確保・解放しており非効率です——代わりにアトミック操作でできないでしょうか。次にその改善を行います。</p></li>
+</ul>
+<section id="exercise">
+<h3>演習<a class="headerlink" href="#exercise" title="Link to this heading"></a></h3>
+<p>ゴースト関数を明示的に渡す代わりに、量化された trade（取引）を用いなさい。</p>
+</section>
+</section>
+<section id="a-version-with-invariants">
+<h2>不変条件（invariant）版<a class="headerlink" href="#a-version-with-invariants" title="Link to this heading"></a></h2>
+<p>最後の例として、この節ではロックではなく不変条件とアトミック操作を使って <code class="docutils literal notranslate"><span class="pre">add2</span></code> を実装する方法を示します。</p>
+<p>これを正しく行うには、アトミック操作をサポートする唯一の型である境界付きの機械整数（例：<code class="docutils literal notranslate"><span class="pre">U32.t</span></code>）を用いる必要があります。しかし主眼を示すため、ここでは無限精度整数に対する 2 つのアトミック操作があると仮定し、オーバーフローを気にしないことにします。<code class="docutils literal notranslate"><span class="pre">U32.t</span></code> への適用は演習とします。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">assume</span>
+<span class="k">val</span> atomic_read (r:ref int) (#p:<span class="k">_</span>) (#i:erased int)
+  : stt_atomic int emp_inames 
+    (pts_to r #p i)
+    (<span class="k">fun</span> v -&gt; pts_to r #p i ** pure (reveal i == v))
+
+<span class="k">assume</span>
+<span class="k">val</span> cas (r:ref int) (u v:int) (#i:erased int)
+  : stt_atomic bool emp_inames 
+    (pts_to r i)
+    (<span class="k">fun</span> b -&gt;
+      cond b (pts_to r v ** pure (reveal i == u)) 
+             (pts_to r i))
+</pre></div>
+</div>
+<section id="cancellable-invariants">
+<h3>キャンセル可能な不変条件<a class="headerlink" href="#cancellable-invariants" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">add2</span></code> の証明の主眼は、ロックの代わりに不変条件を使うことです。先のコード同様、まず不変条件を確保し、その中に <code class="docutils literal notranslate"><span class="pre">exists*</span> <span class="pre">v.</span> <span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">v</span> <span class="pre">**</span> <span class="pre">contribution</span> <span class="pre">left</span> <span class="pre">right</span> <span class="pre">i</span> <span class="pre">v</span></code> を入れます。そして別スレッドで 2 回 <code class="docutils literal notranslate"><span class="pre">incr</span></code> を呼びます。ところが最後に、以前ならロックを獲得していた箇所で <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">(v</span> <span class="pre">+</span> <span class="pre">2)</span></code> を取り戻すには通常の invariant では詰まります。<code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">v</span></code> の権限が不変条件の内部にあり、呼び出し側へ返すために取り出せないからです。</p>
+<p>不変条件 <code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span></code> は、性質 <code class="docutils literal notranslate"><span class="pre">p</span></code> が真であり、プログラムの残りの実行中ずっと真であることを保証します。しかし、有限の期間だけ <code class="docutils literal notranslate"><span class="pre">p</span></code> を不変として課し、その後取り消したい場合はどうでしょうか。これを提供するのが <code class="docutils literal notranslate"><span class="pre">Pulse.Lib.CancellableInvariant</span></code> です。API の要点は次のとおりです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@ erasable]
+<span class="k">val</span> cinv : Type0
+<span class="k">val</span> iref_of (c:cinv) : <span class="k">GTot</span> iref
+</pre></div>
+</div>
+<p>主要な型は、キャンセル可能な不変条件の名を表す <code class="docutils literal notranslate"><span class="pre">cinv</span></code> です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> new_cancellable_invariant (v:boxable)
+<span class="k">requires</span> v
+<span class="k">returns</span> c:cinv
+<span class="k">ensures</span> inv (iref_of c) (cinv_vp c v) ** active c 1.0R
+</pre></div>
+</div>
+<p>キャンセル可能な不変条件の確保は通常の不変条件と似ていますが、抽象述語 <code class="docutils literal notranslate"><span class="pre">cinv_cp</span> <span class="pre">c</span> <span class="pre">v</span></code> に対する invariant と、スレッド間で共有・結合可能にする分数添字付き述語 <code class="docutils literal notranslate"><span class="pre">active</span> <span class="pre">c</span> <span class="pre">1.0R</span></code> を受け取る点が異なります。</p>
+<p><code class="docutils literal notranslate"><span class="pre">cinv_cp</span> <span class="pre">c</span> <span class="pre">v</span></code> は <code class="docutils literal notranslate"><span class="pre">active</span></code> と併用することで、基礎の述語 <code class="docutils literal notranslate"><span class="pre">v</span></code> を取り出せます——ただし不変条件がまだキャンセルされていない場合に限ります。これを可能にするのが <code class="docutils literal notranslate"><span class="pre">unpack_cinv_vp</span></code> とその逆の <code class="docutils literal notranslate"><span class="pre">pack_cinv_vp</span></code> です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> unpack_cinv_vp (#p:perm) (#v:slprop) (c:cinv)
+<span class="k">requires</span> cinv_vp c v ** active c p
+<span class="k">ensures</span> v ** unpacked c ** active c p
+
+<span class="k">ghost</span>
+<span class="k">fn</span> pack_cinv_vp (#v:slprop) (c:cinv)
+<span class="k">requires</span> v ** unpacked c
+<span class="k">ensures</span> cinv_vp c v
+</pre></div>
+</div>
+<p>最後に、不変条件への全権限（<code class="docutils literal notranslate"><span class="pre">active</span> <span class="pre">c</span> <span class="pre">1.0R</span></code>）があれば、それをキャンセルして、基礎述語 <code class="docutils literal notranslate"><span class="pre">v</span></code> を事後条件として得られます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> cancel (#v:slprop) (c:cinv)
+<span class="k">requires</span> inv (iref_of c) (cinv_vp c v) ** active c 1.0R
+<span class="k">ensures</span> v
+<span class="k">opens</span> add_inv emp_inames (iref_of c)
+</pre></div>
+</div>
+</section>
+<section id="an-increment-operation">
+<h3>インクリメント操作<a class="headerlink" href="#an-increment-operation" title="Link to this heading"></a></h3>
+<p>最初のステップとして、<code class="docutils literal notranslate"><span class="pre">atomic_read</span></code> と <code class="docutils literal notranslate"><span class="pre">cas</span></code> を組み合わせてインクリメント操作を作ります。仕様は次の通りです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> incr_atomic
+        (x: ref int)
+        (#p:perm)
+        (#refine #aspec: int -&gt; slprop)
+        (c:C.cinv)
+        (f: incr_f x refine aspec)
+<span class="k">requires</span> inv (C.iname_of c) (C.cinv_vp c (<span class="k">exists</span>* v. pts_to x v ** refine v)) ** aspec &#39;i ** C.active c p
+<span class="k">ensures</span> inv (C.iname_of c) (C.cinv_vp c (<span class="k">exists</span>* v. pts_to x v ** refine v)) ** aspec (&#39;i + 1) ** C.active c p
+</pre></div>
+</div>
+<p>仕様のスタイルは先の <code class="docutils literal notranslate"><span class="pre">incr</span></code> と同様の一般化スタイルですが、ロックの代わりにキャンセル可能な不変条件を使います。</p>
+<p>実装の主眼は、現在の <code class="docutils literal notranslate"><span class="pre">x</span></code> の値（<code class="docutils literal notranslate"><span class="pre">v</span></code> とする）を繰り返し読み、まだ <code class="docutils literal notranslate"><span class="pre">v</span></code> のままなら <code class="docutils literal notranslate"><span class="pre">v+1</span></code> を <code class="docutils literal notranslate"><span class="pre">cas</span></code> で書き込む、というものです。</p>
+<p><code class="docutils literal notranslate"><span class="pre">read</span></code> 関数は比較的簡単です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>  <span class="k">atomic</span>
+  <span class="k">fn</span> read ()
+  <span class="k">requires</span> inv (C.iname_of c) (C.cinv_vp c (<span class="k">exists</span>* v. pts_to x v ** refine v)) ** C.active c p ** later_credit 1
+  <span class="k">opens</span> [C.iname_of c]
+  <span class="k">returns</span> v:int
+  <span class="k">ensures</span> inv (C.iname_of c) (C.cinv_vp c (<span class="k">exists</span>* v. pts_to x v ** refine v)) ** C.active c p
+  {
+    <span class="k">with_invariants</span> (C.iname_of c)
+    {
+        later_elim <span class="k">_</span>;
+        C.unpack_cinv_vp #p c;
+        <span class="k">let</span> v = atomic_read x;
+        C.pack_cinv_vp #(<span class="k">exists</span>* v. pts_to x v ** refine v) c;
+        later_intro (C.cinv_vp c (<span class="k">exists</span>* v. pts_to x v ** refine v));
+        v
+    }
+  };
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>不変条件 <code class="docutils literal notranslate"><span class="pre">l</span></code> を開き、まだアクティブであることからアンパックし、値 <code class="docutils literal notranslate"><span class="pre">v</span></code> を読み、再びパックして、<code class="docutils literal notranslate"><span class="pre">v</span></code> を返します。</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">incr_atomic</span></code> の主ループは次のとおりです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>  <span class="k">let</span> <span class="k">mut</span> continue = <span class="k">true</span>;
+  <span class="k">fold</span> (cond <span class="k">true</span> (aspec &#39;i) (aspec (&#39;i + 1)));
+  <span class="k">while</span> (!continue)
+  <span class="k">invariant</span> b.
+    inv (C.iname_of c) (C.cinv_vp c (<span class="k">exists</span>* v. pts_to x v ** refine v)) **
+    pts_to continue b **
+    C.active c p **
+    cond b (aspec &#39;i) (aspec (&#39;i + 1))
+  {
+    later_credit_buy 1;
+    <span class="k">let</span> v = read ();
+    later_credit_buy 1;
+    <span class="k">let</span> next = 
+      <span class="k">with_invariants</span> (C.iname_of c)
+      <span class="k">returns</span> b1:bool
+      <span class="k">ensures</span> later (C.cinv_vp c (<span class="k">exists</span>* v. pts_to x v ** refine v))
+          ** cond b1 (aspec &#39;i) (aspec (&#39;i + 1))
+          ** pts_to continue <span class="k">true</span>
+          ** C.active c p
+      {
+        later_elim <span class="k">_</span>;
+        C.unpack_cinv_vp c;
+        <span class="k">unfold</span> cond;
+        <span class="k">let</span> b = cas x v (v + 1);
+        <span class="k">if</span> b
+        { 
+          <span class="k">unfold</span> cond;
+          <span class="k">with</span> vv. <span class="k">assert</span> (refine vv);
+          f vv <span class="k">_</span>;
+          C.pack_cinv_vp #(<span class="k">exists</span>* v. pts_to x v ** refine v) c;
+          <span class="k">fold</span> (cond <span class="k">false</span> (aspec &#39;i) (aspec (&#39;i + 1)));
+          later_intro (C.cinv_vp c (<span class="k">exists</span>* v. pts_to x v ** refine v));
+          <span class="k">false</span>
+        }
+        <span class="k">else</span>
+        {
+          <span class="k">unfold</span> cond;
+          C.pack_cinv_vp #(<span class="k">exists</span>* v. pts_to x v ** refine v) c;
+          <span class="k">fold</span> (cond <span class="k">true</span> (aspec &#39;i) (aspec (&#39;i + 1)));
+          later_intro (C.cinv_vp c (<span class="k">exists</span>* v. pts_to x v ** refine v));
+          <span class="k">true</span>
+        }
+      };
+    continue := next
+  };
+</pre></div>
+</div>
+<p>ループ不変条件は次を述べます。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>不変条件がアクティブなままであること。</p></li>
+<li><p>ローカル変数 <code class="docutils literal notranslate"><span class="pre">continue</span></code> がループ継続の可否を表すこと。</p></li>
+<li><p>そして、ループ継続中は <code class="docutils literal notranslate"><span class="pre">aspec</span> <span class="pre">'i</span></code> が維持され、ループ終了時には <code class="docutils literal notranslate"><span class="pre">aspec</span> <span class="pre">('i</span> <span class="pre">+</span> <span class="pre">1)</span></code> が得られること。</p></li>
+</ul>
+</div></blockquote>
+<p>ループ本体も興味深く、2 つのアトミック操作から成ります。まず <code class="docutils literal notranslate"><span class="pre">x</span></code> の値を <code class="docutils literal notranslate"><span class="pre">v</span></code> に <code class="docutils literal notranslate"><span class="pre">read</span></code> し、再度不変条件を開いて <code class="docutils literal notranslate"><span class="pre">v+1</span></code> の <code class="docutils literal notranslate"><span class="pre">cas</span></code> を試みます。成功したら <code class="docutils literal notranslate"><span class="pre">with_invariants</span></code> ブロックから <code class="docutils literal notranslate"><span class="pre">false</span></code> を、失敗なら <code class="docutils literal notranslate"><span class="pre">true</span></code> を返します。最後に <code class="docutils literal notranslate"><span class="pre">with_invariants</span></code> の外側で <code class="docutils literal notranslate"><span class="pre">continue</span></code> を設定します。<code class="docutils literal notranslate"><span class="pre">with_invariants</span></code> は高々 1 つのアトミック操作しか許さないため、<code class="docutils literal notranslate"><span class="pre">cas</span></code> を行った以上、ブロック内で <code class="docutils literal notranslate"><span class="pre">continue</span></code> まで設定することはできない点に注意してください。</p>
+</section>
+<section id="add2-v3">
+<h3><code class="docutils literal notranslate"><span class="pre">add2_v3</span></code><a class="headerlink" href="#add2-v3" title="Link to this heading"></a></h3>
+<p>最後に、並列インクリメント <code class="docutils literal notranslate"><span class="pre">add2_v3</span></code> を、不変条件を用いる形で再実装します。仕様は以前と同じです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> add2_v3 (x: ref int)
+<span class="k">requires</span> pts_to x &#39;i
+<span class="k">ensures</span> pts_to x (&#39;i + 2)
+{
+    <span class="k">let</span> left = GR.alloc 0;
+    <span class="k">let</span> right = GR.alloc 0;
+    GR.share left;
+    GR.share right;
+    <span class="k">fold</span> (contributions left right &#39;i &#39;i);
+    <span class="k">let</span> c = C.new_cancellable_invariant (
+      <span class="k">exists</span>* (v:int).
+          pts_to x v **
+          contributions left right &#39;i v
+    );
+    <span class="k">ghost</span>
+    <span class="k">fn</span> step
+        (lr:GR.ref int)
+        (b:bool { <span class="k">if</span> b <span class="k">then</span> lr == left <span class="k">else</span> lr == right })
+      : incr_f x
+        (<span class="k">fun</span> v -&gt; contributions left right &#39;i v)
+        (<span class="k">fun</span> vq -&gt; GR.pts_to lr #0.5R vq)
+      = v vq
+    { 
+      <span class="k">unfold</span> contributions;
+      <span class="k">if</span> b
+      {
+        <span class="k">with</span> _p _v. <span class="k">rewrite</span> (GR.pts_to lr #_p _v) as (GR.pts_to left #_p _v);
+        GR.gather left;
+        GR.write left (vq + 1);
+        GR.share left;      
+        <span class="k">with</span> _p _v. <span class="k">rewrite</span> (GR.pts_to left #_p _v) as (GR.pts_to lr #_p _v);
+        <span class="k">fold</span> (contributions left right &#39;i (v + 1));
+      }
+      <span class="k">else</span>
+      {
+        <span class="k">with</span> _p _v. <span class="k">rewrite</span> (GR.pts_to lr #_p _v) as (GR.pts_to right #_p _v);
+        GR.gather right;
+        GR.write right (vq + 1);
+        GR.share right;      
+        <span class="k">with</span> _p _v. <span class="k">rewrite</span> (GR.pts_to right #_p _v) as (GR.pts_to lr #_p _v);
+        <span class="k">fold</span> (contributions left right &#39;i (v + 1));
+      }
+    };
+    C.share c;
+    <span class="k">with</span> pred. <span class="k">assert</span> (inv (C.iname_of c) (C.cinv_vp c (<span class="k">exists</span>* v. pts_to x v ** pred v)));
+    dup_inv (C.iname_of c) (C.cinv_vp c (<span class="k">exists</span>* v. pts_to x v ** pred v));
+    par (<span class="k">fun</span> <span class="k">_</span> -&gt; incr_atomic x c (step left <span class="k">true</span>))
+        (<span class="k">fun</span> <span class="k">_</span> -&gt; incr_atomic x c (step right <span class="k">false</span>));
+    
+    C.gather c;
+    later_credit_buy 1;
+    C.cancel c;
+    <span class="k">unfold</span> contributions;
+    GR.gather left;
+    GR.gather right;
+    GR.free left;
+    GR.free right;
+    drop_ (inv <span class="k">_</span> <span class="k">_</span>)
+}
+</pre></div>
+</div>
+<p>コードも <code class="docutils literal notranslate"><span class="pre">add2_v2</span></code> とよく似ていますが、ロックを確保する代わりにキャンセル可能な不変条件を確保します。そして最後はロックを取得（しリーク）する代わりに、不変条件をキャンセルして終了します。</p>
+</section>
+</section>
+<section id="id1">
+<h2>演習<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">U32.t</span></code> に対する <code class="docutils literal notranslate"><span class="pre">add2</span></code> を実装しなさい。事前条件として <code class="docutils literal notranslate"><span class="pre">'i</span> <span class="pre">+</span> <span class="pre">2</span> <span class="pre">&lt;</span> <span class="pre">pow2</span> <span class="pre">32</span></code> が必要であり、各インクリメントがオーバーフローしないことを示すよう不変条件も強化すること。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_spin_lock.html" class="btn btn-neutral float-left" title="スピンロック" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_extraction.html" class="btn btn-neutral float-right" title="抽出（エクストラクション）" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

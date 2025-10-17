@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>多相と型推論 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="等値性（Equality）" href="part1_equality.html" />
+    <link rel="prev" title="まずは始めてみよう" href="part1_getting_off_the_ground.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part1.html">全域関数によるプログラミングと証明</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part1_getting_off_the_ground.html">まずは始めてみよう</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">多相と型推論</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#type-the-type-of-types">Type：型の型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parametric-polymorphism-or-generics">パラメトリック多相（ジェネリクス）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exercises">練習問題</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#type-inference-basics">型推論：基本</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implicit-arguments">暗黙引数</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part1_equality.html">等値性（Equality）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_prop_assertions.html">SMT ソルバとの連携</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_inductives.html">帰納的データ型とパターンマッチ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_termination.html">停止性の証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_lemmas.html">補題と帰納法による証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_quicksort.html">ケーススタディ：クイックソート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_execution.html">プログラムの実行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_wrap.html">まとめ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part1.html">全域関数によるプログラミングと証明</a></li>
+      <li class="breadcrumb-item active">多相と型推論</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="polymorphism-and-type-inference">
+<span id="part1-polymorphism-and-inference"></span><h1>多相と型推論<a class="headerlink" href="#polymorphism-and-type-inference" title="Link to this heading"></a></h1>
+<p>この章では、型多相な関数の定義、すなわちジェネリックな型の扱い方を学びます。</p>
+<section id="type-the-type-of-types">
+<span id="part1-type-of-types"></span><h2>Type：型の型<a class="headerlink" href="#type-the-type-of-types" title="Link to this heading"></a></h2>
+<p>F*（および他の多くの依存型付き言語）の特徴の一つは、プログラムとその型を単一の構文体系の中で一様に扱う点です。この様式の型システムは <a href="#id1"><span class="problematic" id="id2">*</span></a>Pure Type System*（PTS）と呼ばれます。</p>
+<p>F*（他の PTS と同様）では、型にも型があり、関数は型を引数に取り、型を結果として返すこともできます。とりわけ、型の型は <code class="docutils literal notranslate"><span class="pre">Type</span></code> です（例：<code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">:</span> <span class="pre">Type</span></code>、<code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">:</span> <span class="pre">Type</span></code>、<code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">-&gt;</span> <span class="pre">int</span> <span class="pre">:</span> <span class="pre">Type</span></code>）。実のところ <code class="docutils literal notranslate"><span class="pre">Type</span></code> 自体にも型があり、それは <em>universe</em> を学ぶ際に登場します。</p>
+</section>
+<section id="parametric-polymorphism-or-generics">
+<h2>パラメトリック多相（ジェネリクス）<a class="headerlink" href="#parametric-polymorphism-or-generics" title="Link to this heading"></a></h2>
+<p>多くの近代的な静的型付き言語はジェネリック型を備えています。たとえば C# や Java のジェネリクス、C++ のテンプレート、OCaml や Haskell の各種多相型などです。</p>
+<p>F* では、既に学んだ <a class="reference internal" href="part1_getting_off_the_ground.html#part1-ch1-arrows"><span class="std std-ref">矢印型</span></a> の特別な場合として、型ジェネリック／多相な関数が自然に表現できます。たとえば、多相な恒等関数は次のとおりです。:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">let</span> <span class="nb">id</span> <span class="p">:</span> <span class="n">a</span><span class="p">:</span><span class="n">Type</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">fun</span> <span class="n">a</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span>
+</pre></div>
+</div>
+<p>ここで注目すべき点がいくつかあります。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">id</span></code> の型は 2 つの引数をもつ矢印型です。第 1 引数は <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">Type</span></code>、第 2 引数は型 <code class="docutils literal notranslate"><span class="pre">a</span></code> の項、戻り値も同じく型 <code class="docutils literal notranslate"><span class="pre">a</span></code> です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">id</span></code> の定義は 2 つの引数 <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">Type``（第</span> <span class="pre">1</span> <span class="pre">引数の型に対応）と</span> <span class="pre">``x</span> <span class="pre">:</span> <span class="pre">a</span></code> を取るラムダ項です。関数は <code class="docutils literal notranslate"><span class="pre">x</span></code> をそのまま返します—第 2 引数に対する恒等関数です。</p></li>
+</ul>
+<p>他の関数と同様、次のようにも書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> id (a:Type) (x:a) : a = x
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">id</span></code> を呼び出すには、まず型を適用し、その後でその型の値を適用します。例：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">_</span> : bool = id bool <span class="k">true</span>
+<span class="k">let</span> <span class="k">_</span> : bool = id bool <span class="k">false</span>
+<span class="k">let</span> <span class="k">_</span> : int = id int (-1)
+<span class="k">let</span> <span class="k">_</span> : nat = id nat 17
+<span class="k">let</span> <span class="k">_</span> : string = id string &quot;hello&quot;
+<span class="k">let</span> <span class="k">_</span> : int -&gt; int = id (int -&gt; int) (id int)
+</pre></div>
+</div>
+<p>任意の型 <code class="docutils literal notranslate"><span class="pre">a</span></code> に対し <code class="docutils literal notranslate"><span class="pre">x:a</span></code> に適用できる関数を定義しました。最後の行は少し読み返しが必要かもしれません：<code class="docutils literal notranslate"><span class="pre">id</span></code> を <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code> にインスタンス化し、それを <code class="docutils literal notranslate"><span class="pre">int</span></code> にインスタンス化した <code class="docutils literal notranslate"><span class="pre">id</span></code> に適用しています。</p>
+</section>
+<section id="exercises">
+<h2>練習問題<a class="headerlink" href="#exercises" title="Link to this heading"></a></h2>
+<p>いくつか簡単な練習をしてみましょう。演習ファイルは <a class="reference external" href="../code/exercises/Part1.Poly.fst">こちら</a>。</p>
+<p>次のシグネチャをもつ関数を定義してみましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> apply (a b:Type) (f:a -&gt; b) : a -&gt; b
+<span class="k">val</span> compose (a b c:Type) (f: b -&gt; c) (g : a -&gt; b) : a -&gt; c
+</pre></div>
+</div>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> apply a b f = <span class="k">fun</span> x -&gt; f x
+<span class="k">let</span> compose a b c f g = <span class="k">fun</span> x -&gt; f (g x)
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">twice</span></code> のシグネチャを書いてみましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> twice a f x = compose a a a f f x
+</pre></div>
+</div>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> twice (a:Type) (f: a -&gt; a) (x:a) : a
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">id</span></code> に最初の型引数を毎回明示するのは面倒です。そこで役立つのが、暗黙引数と型推論です。</p>
+</section>
+<section id="type-inference-basics">
+<h2>型推論：基本<a class="headerlink" href="#type-inference-basics" title="Link to this heading"></a></h2>
+<p id="inference"><a class="reference external" href="https://en.wikipedia.org/wiki/ML_%28programming_language%29">Milner 系 ML</a> の系譜にある多くの言語と同様、F* の設計でも型推論は中心的な要素です。</p>
+<p>他言語の型推論に慣れているかもしれません。そこでは（変数やジェネリック関数の利用時などの）型注釈を省略すると、コンパイラが文脈から適切な型を決めます。F* の型推論もそれを含みますが、はるかに強力です。他の依存型言語と同様に、F* の推論エンジンは <a class="reference external" href="https://en.wikipedia.org/wiki/Unification_(computer_science)#Higher-order_unification">高階単一化</a> に基づき、変数の型注釈に限らず、プログラムテキストの任意の断片に対して推論を行えます。</p>
+<p>先ほどの恒等関数の定義と使用の簡単な例をもう一度見てみましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> id (a:Type) (x:a) : a = x
+</pre></div>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">_</span> : bool = id bool <span class="k">true</span>
+<span class="k">let</span> <span class="k">_</span> : bool = id bool <span class="k">false</span>
+<span class="k">let</span> <span class="k">_</span> : int = id int (-1)
+<span class="k">let</span> <span class="k">_</span> : nat = id nat 17
+<span class="k">let</span> <span class="k">_</span> : string = id string &quot;hello&quot;
+<span class="k">let</span> <span class="k">_</span> : int -&gt; int = id (int -&gt; int) (id int)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">id</span></code> を適用する際、最初の型引数を明示せず、型引数をアンダースコア <code class="docutils literal notranslate"><span class="pre">_</span></code> に置き換えて次のように書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">_</span> : bool = id <span class="k">_</span> <span class="k">true</span>
+<span class="k">let</span> <span class="k">_</span> : bool = id <span class="k">_</span> <span class="k">false</span>
+<span class="k">let</span> <span class="k">_</span> : int = id <span class="k">_</span> (-1)
+<span class="k">let</span> <span class="k">_</span> : nat = id <span class="k">_</span> 17
+<span class="k">let</span> <span class="k">_</span> : string = id <span class="k">_</span> &quot;hello&quot;
+<span class="k">let</span> <span class="k">_</span> : int -&gt; int = id <span class="k">_</span> (id <span class="k">_</span>)
+</pre></div>
+</div>
+<p>アンダースコアはワイルドカード、すなわちプログラム中の“穴”であり、F* の型検査器がその穴を埋めます。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>プログラムの穴は非常に強力な概念で、F* に組み込まれたメタプログラミング／タクティクス基盤である Meta-F* の土台でもあります。穴については後の節でさらに扱います。</p>
+</div>
+</section>
+<section id="implicit-arguments">
+<h2>暗黙引数<a class="headerlink" href="#implicit-arguments" title="Link to this heading"></a></h2>
+<p>毎回 <code class="docutils literal notranslate"><span class="pre">_</span></code> と書くのは面倒なので、F* には <em>暗黙引数</em> の概念があります。関数定義時に注釈を付け、特定の引数は呼び出し側で省略し、型検査器に自動推論させられます。</p>
+<p>例えば次のように書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> id (#a:Type) (x:a) : a = x
+</pre></div>
+</div>
+<p>第 1 引数 <code class="docutils literal notranslate"><span class="pre">a</span></code> に <code class="docutils literal notranslate"><span class="pre">#</span></code> を付けて暗黙引数であることを示します。すると呼び出し側では次のように簡潔に書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">_</span> : bool = id <span class="k">true</span>
+<span class="k">let</span> <span class="k">_</span> : bool = id <span class="k">false</span>
+<span class="k">let</span> <span class="k">_</span> : int = id (-1)
+<span class="k">let</span> <span class="k">_</span> : nat = id 17
+<span class="k">let</span> <span class="k">_</span> : string = id &quot;hello&quot;
+<span class="k">let</span> <span class="k">_</span> : int -&gt; int = id id
+</pre></div>
+</div>
+<p>F* が欠けている第 1 引数のインスタンス化を自動で行います。</p>
+<p>場合によっては、F* に任せず暗黙引数をあえて明示したいこともあります。例えば次のように書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">_</span> = id #nat 0
+<span class="k">let</span> <span class="k">_</span> = id #(x:int{x == 0}) 0
+<span class="k">let</span> <span class="k">_</span> = id #(x:int{x &lt;&gt; 1}) 0
+</pre></div>
+</div>
+<p>いずれの場合も、<code class="docutils literal notranslate"><span class="pre">#</span></code> を付けて <code class="docutils literal notranslate"><span class="pre">id</span></code> の第 1 引数を明示し、穴を生成して自動補完させるのではなく、ユーザーが与えた項をそのまま使うよう F* に指示しています。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part1_getting_off_the_ground.html" class="btn btn-neutral float-left" title="まずは始めてみよう" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part1_equality.html" class="btn btn-neutral float-right" title="等値性（Equality）" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>プログラムの実行 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="まとめ" href="part1_wrap.html" />
+    <link rel="prev" title="ケーススタディ：クイックソート" href="part1_quicksort.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part1.html">全域関数によるプログラミングと証明</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part1_getting_off_the_ground.html">まずは始めてみよう</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_polymorphism.html">多相と型推論</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_equality.html">等値性（Equality）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_prop_assertions.html">SMT ソルバとの連携</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_inductives.html">帰納的データ型とパターンマッチ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_termination.html">停止性の証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_lemmas.html">補題と帰納法による証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_quicksort.html">ケーススタディ：クイックソート</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">プログラムの実行</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#interpreting-f-programs">F* プログラムのインタプリタ実行</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compiling-to-ocaml">OCaml へのコンパイル</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#producing-an-ocaml-library">OCaml ライブラリの生成</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compiling-an-ocaml-library">OCaml ライブラリのビルド</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#adding-a-main">「main」を追加する</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#compiling-to-other-languages">他言語へのコンパイル</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part1_wrap.html">まとめ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part1.html">全域関数によるプログラミングと証明</a></li>
+      <li class="breadcrumb-item active">プログラムの実行</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="executing-programs">
+<span id="part1-execution"></span><h1>プログラムの実行<a class="headerlink" href="#executing-programs" title="Link to this heading"></a></h1>
+<p>これまでに複数の章を通して F* の中核となる概念を学んできましたが、プログラムのコンパイルと実行についてはまだ触れていません。ここまでは主に F* の論理と、プログラムに関する性質の証明に焦点を当ててきたからです。</p>
+<p>F* にはプログラムを実行する方法がいくつかあります。ここでは <a class="reference external" href="../code/Part1.Quicksort.Generic.fst">Quicksort</a> を通例の例として、概要を手短に紹介します。</p>
+<section id="interpreting-f-programs">
+<h2>F* プログラムのインタプリタ実行<a class="headerlink" href="#interpreting-f-programs" title="Link to this heading"></a></h2>
+<p><a class="reference internal" href="../intro.html#part1-symbolic-computation"><span class="std std-ref">カプセル要約</span></a> で述べたように、F* には <a href="#id1"><span class="problematic" id="id2">*</span></a>正規化器*（normalizer）と呼ばれる、計算を記号的に簡約するエンジンが備わっています。正規化器の活用方法は今後もたくさん登場しますが、基本的な使い方の一つがプログラムのインタプリタ実行です。</p>
+<p>emacs の <a class="reference internal" href="part1_getting_off_the_ground.html#part1-editors"><span class="std std-ref">fstar-mode.el</span></a> を使えばインタプリタの起動は簡単です。emacs の F* メニューから <em>Interactive queries</em> → <em>Evaluate an expression</em> を選ぶ（または C-c C-s C-e）と、評価したい式の入力を求められます。<code class="docutils literal notranslate"><span class="pre">sort</span> <span class="pre">(</span> <span class="pre">&lt;=</span> <span class="pre">)</span> <span class="pre">[4;3;2;1]</span></code> と入力して Enter を押すと、<code class="docutils literal notranslate"><span class="pre">sort</span> <span class="pre">(</span> <span class="pre">&lt;=</span> <span class="pre">)</span> <span class="pre">[4;3;2;1]</span></code> <span class="math notranslate nohighlight">\(\downarrow\beta\delta\iota\zeta\)</span> <code class="docutils literal notranslate"><span class="pre">[1;</span> <span class="pre">2;</span> <span class="pre">3;</span> <span class="pre">4]</span> <span class="pre">&lt;:</span> <span class="pre">Prims.Tot</span> <span class="pre">(list</span> <span class="pre">int)</span></code> のように表示され、与えた項が型 <code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">(list</span> <span class="pre">int)</span></code> を持つ <code class="docutils literal notranslate"><span class="pre">[1;</span> <span class="pre">2;</span> <span class="pre">3;</span> <span class="pre">4]</span></code> に簡約されたことが分かります。</p>
+<p><span class="math notranslate nohighlight">\(\downarrow\beta\delta\iota\zeta\)</span> は一見難解に見えますが、項の解釈に用いた簡約戦略を示しています。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\beta\)</span> は関数適用（β-簡約）を行ったことを意味します。</p></li>
+<li><p><span class="math notranslate nohighlight">\(\delta\)</span> は定義の展開（δ-簡約）を行ったことを意味します。</p></li>
+<li><p><span class="math notranslate nohighlight">\(\iota\)</span> はパターンマッチの実行（ι-簡約）を意味します。</p></li>
+<li><p><span class="math notranslate nohighlight">\(\zeta\)</span> は再帰関数の展開（ζ-簡約）を意味します。</p></li>
+</ul>
+</div></blockquote>
+<p>これらの簡約段階の意味や、用途に応じたカスタマイズ方法は後の章で改めて説明します。</p>
+</section>
+<section id="compiling-to-ocaml">
+<h2>OCaml へのコンパイル<a class="headerlink" href="#compiling-to-ocaml" title="Link to this heading"></a></h2>
+<p>F* プログラムを実行する主な方法は、OCaml にコンパイル（<em>抽出</em>）し、OCaml のビルドシステムと実行環境で実行ファイルを作って動かすことです。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>ここで紹介する手順は数ファイル程度のシンプルなプロジェクト向けです。大規模プロジェクトでは、Makefile 用の依存関係を生成できる依存解析や、ファイル単位で検査して結果をキャッシュ・再利用できる分割コンパイルを利用できます。これらの活用法や大規模ビルドの構成については以下を参照してください。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://github.com/FStarLang/FStar/wiki/Dealing-with-F%E2%98%85-dependencies">依存関係の扱い</a></p></li>
+<li><p><a class="reference external" href="https://github.com/FStarLang/FStar/wiki/Caching-verified-modules">検証済みモジュールのキャッシュ</a></p></li>
+<li><p><a class="reference external" href="https://github.com/FStarLang/FStar/tree/master/examples/hello/multifile">複数ファイルのプロジェクト例</a></p></li>
+</ul>
+</div></blockquote>
+</div>
+<section id="producing-an-ocaml-library">
+<h3>OCaml ライブラリの生成<a class="headerlink" href="#producing-an-ocaml-library" title="Link to this heading"></a></h3>
+<p>F* プログラムから OCaml コードを抽出するには、以下のようにコマンドラインオプションを使います。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fstar</span> <span class="o">--</span><span class="n">codegen</span> <span class="n">OCaml</span> <span class="o">--</span><span class="n">extract</span> <span class="n">Part1</span><span class="o">.</span><span class="n">Quicksort</span> <span class="o">--</span><span class="n">odir</span> <span class="n">out</span> <span class="n">Part1</span><span class="o">.</span><span class="n">Quicksort</span><span class="o">.</span><span class="n">Generic</span><span class="o">.</span><span class="n">fst</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--codegen</span></code> は OCaml コードの生成を指示します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--extract</span></code> は指定した名前空間内のモジュールのみを抽出する指定です。ここでは <code class="docutils literal notranslate"><span class="pre">Part1.Quicksort</span></code> 配下のすべてが対象です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--odir</span></code> は生成物の出力先ディレクトリを指定します（ここでは <code class="docutils literal notranslate"><span class="pre">out</span></code>）。</p></li>
+<li><p>最後の引数は検査と抽出の対象となるソースファイルです。</p></li>
+</ul>
+<p>The resulting OCaml code is in the file
+<code class="docutils literal notranslate"><span class="pre">Part1_Quicksort_Generic.ml</span></code>, where the F* <code class="docutils literal notranslate"><span class="pre">dot</span></code>-separated name is
+transformed to OCaml's naming convention for modules. The generated code is <a class="reference external" href="../code/out/Part1_Quicksort_Generic.ml">here</a></p>
+<p>抽出コードに関する注意点：</p>
+<ul>
+<li><p>抽出対象は実行可能コードに対応する定義のみです。補題など証明専用の部分は消去されます。消去（erasure）については後の章で詳しく扱います。</p></li>
+<li><p>F* の型は OCaml の型に翻訳されます。F* の型は OCaml より精密なので、翻訳には不可避の情報落ちが伴います。例えば <code class="docutils literal notranslate"><span class="pre">Part1.Quicksort.Generic.fst</span></code> における全順序の型は次のとおりですが、</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> total_order_t (a:Type) = f:(a -&gt; a -&gt; bool) { total_order f }
+</pre></div>
+</div>
+<p>OCaml では次のようになります。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span> <span class="s1">&#39;a total_order_t = &#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="s1">&#39;a -&gt; Prims.bool</span>
+</pre></div>
+</div>
+<p>つまり、未検証の OCaml コードから抽出した F* 関数を呼ぶ際は注意が必要です。F* 側が全順序を期待する箇所に、OCaml 側で全順序でない関数を渡してもコンパイラは警告してくれません。</p>
+</li>
+</ul>
+</section>
+<section id="compiling-an-ocaml-library">
+<h3>OCaml ライブラリのビルド<a class="headerlink" href="#compiling-an-ocaml-library" title="Link to this heading"></a></h3>
+<p>抽出されたコードは（<code class="docutils literal notranslate"><span class="pre">sort</span></code> などの）トップレベル関数を提供しますが、<code class="docutils literal notranslate"><span class="pre">main</span></code> は含みません。したがってライブラリとしてのみビルドできます。</p>
+<p>簡単な用途であれば、以下のように <code class="docutils literal notranslate"><span class="pre">ocamlbuild</span></code> を用いて、生成コードを OCaml のネイティブライブラリ（cmxa）にビルドできます。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>OCAMLPATH=$FSTAR_HOME/lib ocamlbuild -use-ocamlfind -pkg batteries -pkg fstar.lib Part1_Quicksort_Generic.cmxa
+</pre></div>
+</div>
+<p>注意点：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>必要なライブラリ探索に使われる <code class="docutils literal notranslate"><span class="pre">OCAMLPATH</span></code> を設定する必要があります。F* プロジェクトでは、F* リリースの <code class="docutils literal notranslate"><span class="pre">bin</span></code> ディレクトリを``OCAMLPATH`` に含めてください。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-use-ocamlfind</span></code> は OCaml ライブラリ探索ユーティリティの利用を有効にします。</p></li>
+<li><p>抽出された F* プログラムは <code class="docutils literal notranslate"><span class="pre">batteries</span></code> と <code class="docutils literal notranslate"><span class="pre">fstar.lib</span></code> の 2 つのライブラリに依存します。<code class="docutils literal notranslate"><span class="pre">-pkg</span></code> オプションで指定しています。</p></li>
+<li><p>最後に、<code class="docutils literal notranslate"><span class="pre">Part1_Quicksort_Generic.cmxa</span></code> は対応する <code class="docutils literal notranslate"><span class="pre">.ml</span></code> の名前に <code class="docutils literal notranslate"><span class="pre">.cmxa</span></code> 拡張子を付けたもので、ライブラリとしてビルドすることを示します。</p></li>
+</ul>
+</div></blockquote>
+<p>生成された .cmxa は他の OCaml プロジェクトから利用できます。</p>
+</section>
+<section id="adding-a-main">
+<h3>「main」を追加する<a class="headerlink" href="#adding-a-main" title="Link to this heading"></a></h3>
+<p>これまで扱ってきたのは <em>全</em> 関数のプログラミングと証明でした。全関数は副作用を持ちません（状態の読み書きや出力などはできません）。これはライブラリには適していますが、出力を行うトップレベルのドライバ（<code class="docutils literal notranslate"><span class="pre">main</span></code>）を書くには、実際に副作用を持つ関数を書く必要があります。</p>
+<p>副作用プログラムに対する F* の支援については後の章で詳しく学びます。ここではそのさわりとして、Quicksort ライブラリを呼び出す <code class="docutils literal notranslate"><span class="pre">main</span></code> プログラムを示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> Part1.Quicksort.Main
+<span class="k">module</span> Q = Part1.Quicksort.Generic
+
+<span class="c">//Printing the elements of an integer list, using the FStar.Printf library</span>
+<span class="k">let</span> string_of_int_list l =
+  Printf.sprintf &quot;[%s]&quot;
+    (String.concat &quot;; &quot; (List.<span class="k">Tot</span>.map (Printf.sprintf &quot;%d&quot;) l))
+
+<span class="c">//A main program, which sorts a list and prints it before and after</span>
+<span class="k">let</span> main () =
+  <span class="k">let</span> orig = [42; 17; 256; 94] <span class="k">in</span>
+  <span class="k">let</span> sorted = Q.sort ( &lt;= ) orig <span class="k">in</span>
+  <span class="k">let</span> msg =
+    Printf.sprintf &quot;Original list = %s\nSorted list = %s\n&quot;
+      (string_of_int_list orig)
+      (string_of_int_list sorted)
+  <span class="k">in</span>
+  FStar.IO.print_string msg
+
+<span class="c">//Run ``main ()`` when the module loads</span>
+#push-options &quot;--warn_error -272&quot;
+<span class="k">let</span> <span class="k">_</span> = main ()
+#pop-options
+</pre></div>
+</div>
+<p>ここでの注意点：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>今回は未検証の OCaml からではなく F* から <code class="docutils literal notranslate"><span class="pre">Q.sort</span></code> を呼ぶため、前提条件（渡す比較関数 <code class="docutils literal notranslate"><span class="pre">(</span> <span class="pre">&lt;=</span> <span class="pre">)</span></code> が本当に全順序である等）を満たすことを証明する必要があります。これらは F* が自動で処理してくれます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FStar.IO.print_string</span></code> は文字列を <code class="docutils literal notranslate"><span class="pre">stdout</span></code> に出力するライブラリ関数です。型は <code class="docutils literal notranslate"><span class="pre">string</span> <span class="pre">-&gt;</span> <span class="pre">ML</span> <span class="pre">unit</span></code> で、この <code class="docutils literal notranslate"><span class="pre">ML</span></code> ラベルを持つ型は、入出力や例外などの観測可能な副作用を伴う可能性があることを示します。詳細は効果の章で扱います。</p></li>
+<li><p>ファイル末尾の <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">_</span> <span class="pre">=</span> <span class="pre">main</span> <span class="pre">()</span></code> は、実行時に（標準出力への印字という）副作用を持つトップレベル項です。複数モジュールがある場合、このようなトップレベル副作用の実行順はモジュール読み込み順に依存します。F* はこれを検出すると警告 272 を出します。本例では意図的にトップレベルの効果を持たせているため、<code class="docutils literal notranslate"><span class="pre">--warn_error</span> <span class="pre">-272</span></code> で警告を抑制します。</p></li>
+</ul>
+</div></blockquote>
+<p>このコードを <code class="docutils literal notranslate"><span class="pre">Part1.Quicksort.Generic</span></code> への依存とともに OCaml に抽出するには、次を実行します。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fstar</span> <span class="o">--</span><span class="n">codegen</span> <span class="n">OCaml</span> <span class="o">--</span><span class="n">extract</span> <span class="n">Part1</span><span class="o">.</span><span class="n">Quicksort</span> <span class="o">--</span><span class="n">odir</span> <span class="n">out</span> <span class="n">Part1</span><span class="o">.</span><span class="n">Quicksort</span><span class="o">.</span><span class="n">Main</span><span class="o">.</span><span class="n">fst</span>
+</pre></div>
+</div>
+<p>今回は <code class="docutils literal notranslate"><span class="pre">Part1.Quicksort.Generic.fst``（前と同様）に加えて</span> <span class="pre">``Part1.Quicksort.Main.fst</span></code> も OCaml に抽出され、<a class="reference external" href="../code/out/Part1_Quicksort_Main.ml">Part1_Quicksort_Main.ml</a> が生成されます。</p>
+<p>この OCaml コードは、次のようにしてネイティブ実行ファイルへビルドできます。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>OCAMLPATH=$FSTAR_HOME/lib ocamlbuild -use-ocamlfind -pkg batteries -pkg fstar.lib Part1_Quicksort_Main.native
+</pre></div>
+</div>
+<p>最後に Part1_Quicksort_Main.native を実行すると、次のような出力が得られます。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ./Part1_Quicksort_Main.native
+Original list = [42; 17; 256; 94]
+Sorted list = [17; 42; 94; 256]
+</pre></div>
+</div>
+</section>
+</section>
+<section id="compiling-to-other-languages">
+<h2>他言語へのコンパイル<a class="headerlink" href="#compiling-to-other-languages" title="Link to this heading"></a></h2>
+<p>F* は F# への抽出もサポートし、言語のサブセットについては C へのコンパイルにも対応しています。</p>
+<p>F# へ抽出するには <code class="docutils literal notranslate"><span class="pre">--codegen</span> <span class="pre">FSharp</span></code> を指定します。ただし、F# で利用する場合は Visual Studio のプロジェクト／ソリューションを用意して構成するのが一般的です。以下に例を示します。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://github.com/FStarLang/FStar/tree/master/examples/hello">簡単な例</a></p></li>
+<li><p><a class="reference external" href="https://github.com/FStarLang/FStar/tree/master/ulib/fs">F* と F# のコードを混在させた高度な例</a></p></li>
+</ul>
+</div></blockquote>
+<p>C への抽出については、<a class="reference external" href="https://fstarlang.github.io/lowstar/html/">Low* のチュートリアル</a> を参照してください。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part1_quicksort.html" class="btn btn-neutral float-left" title="ケーススタディ：クイックソート" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part1_wrap.html" class="btn btn-neutral float-right" title="まとめ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

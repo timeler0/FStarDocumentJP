@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>高階関数 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="含意と全称量化" href="pulse_implication_and_forall.html" />
+    <link rel="prev" title="ゴースト計算" href="pulse_ghost.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">高階関数</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pulse-computation-types">Pulse の計算型</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#universes">ユニバース</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#counters">カウンタ</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">高階関数</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="higher-order-functions">
+<span id="pulse-higher-order"></span><h1>高階関数<a class="headerlink" href="#higher-order-functions" title="Link to this heading"></a></h1>
+<p>F* と同様に、Pulse も高階です。つまり、Pulse の関数は第一級であり、他の関数に引数として渡したり、結果として返したり、ものによってはヒープに格納することもできます。</p>
+<section id="pulse-computation-types">
+<h2>Pulse の計算型<a class="headerlink" href="#pulse-computation-types" title="Link to this heading"></a></h2>
+<p>おそらく最も単純な高階関数の例として、関数適用を抽象化する <code class="docutils literal notranslate"><span class="pre">apply</span></code> を示します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> apply (#a:Type0)
+         (#b:a -&gt; Type0)
+         (#pre:a -&gt; slprop)
+         (#post: (x:a -&gt; b x -&gt; slprop))
+         (f: (x:a -&gt; stt (b x) (pre x) (<span class="k">fun</span> y -&gt; post x y)))
+         (x:a)
+<span class="k">requires</span> pre x
+<span class="k">returns</span> y:b x
+<span class="k">ensures</span> post x y
+{
+  f x
+}
+</pre></div>
+</div>
+<p>この関数は、引数 <code class="docutils literal notranslate"><span class="pre">x</span></code> に適用する関数 <code class="docutils literal notranslate"><span class="pre">f</span></code> の引数型・結果型・前提・事後条件に関して多相です。ここでは初めて、Pulse 関数の型を F* の型として記述します。これまでは <code class="docutils literal notranslate"><span class="pre">fn/requires/ensures</span></code> 記法で Pulse 関数の*シグネチャ*を書いてきましたが、Pulse 関数の型は次の形になります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>x:a -&gt; stt b pre (<span class="k">fun</span> y -&gt; post)
+</pre></div>
+</div>
+<p>ここで、</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>他の F* の関数型と同様、Pulse の関数も依存型であり、矢印の右側（戻り側）の型に <code class="docutils literal notranslate"><span class="pre">x</span></code> を参照できます。</p></li>
+<li><p>矢印の直後には Pulse の計算型タグが来ます。これは F* の <code class="docutils literal notranslate"><span class="pre">Tot</span></code> や <code class="docutils literal notranslate"><span class="pre">GTot</span></code> などに相当します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stt</span></code> は Pulse の計算型タグのうち最も許容的で、関数本体が状態の読み書きや無限ループなどを行えます。ただし前提は <code class="docutils literal notranslate"><span class="pre">pre</span></code>、戻り値の型は <code class="docutils literal notranslate"><span class="pre">b</span></code>、事後条件は <code class="docutils literal notranslate"><span class="pre">fun</span> <span class="pre">y</span> <span class="pre">-&gt;</span> <span class="pre">post</span></code> です。</p></li>
+</ul>
+</div></blockquote>
+<p>Pulse には他にもいくつかの計算型があります。ここで重要なのはゴースト計算用のコンストラクタです。以下に、<code class="docutils literal notranslate"><span class="pre">apply</span></code> のゴースト版である <code class="docutils literal notranslate"><span class="pre">apply_ghost</span></code> を示します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> apply_ghost 
+         (#a:Type0)
+         (#b:a -&gt; Type0)
+         (#pre:a -&gt; slprop)
+         (#post: (x:a -&gt; b x -&gt; slprop))
+         (f: (x:a -&gt; stt_ghost (b x) emp_inames (pre x) (<span class="k">fun</span> y -&gt; post x y)))
+         (x:a)
+<span class="k">requires</span> pre x
+<span class="k">returns</span> y:b x
+<span class="k">ensures</span> post x y
+{
+  f x
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">f</span></code> の型は先ほどと似ていますが、今回は次の相違があります。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>計算型タグが <code class="docutils literal notranslate"><span class="pre">stt_ghost</span></code> であり、ゴースト状態のみを読み書きし、必ず停止することを表します。</p></li>
+<li><p>戻り値の型が <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">x</span></code> であること</p></li>
+<li><p>次の引数 <code class="docutils literal notranslate"><span class="pre">emp_inames</span></code> は、その計算が開く可能性のある不変量集合を表し、<code class="docutils literal notranslate"><span class="pre">emp_inames</span></code> はいかなる不変量も開かないことを意味します。ここでは詳細は無視して構いません。</p></li>
+<li><p>前提は <code class="docutils literal notranslate"><span class="pre">pre</span> <span class="pre">x</span></code>、事後条件は <code class="docutils literal notranslate"><span class="pre">fun</span> <span class="pre">y</span> <span class="pre">-&gt;</span> <span class="pre">post</span> <span class="pre">x</span> <span class="pre">y</span></code> です。</p></li>
+</ul>
+</div></blockquote>
+<section id="universes">
+<h3>ユニバース<a class="headerlink" href="#universes" title="Link to this heading"></a></h3>
+<p>参考までに、<code class="docutils literal notranslate"><span class="pre">stt</span></code> と <code class="docutils literal notranslate"><span class="pre">stt_ghost</span></code> のシグネチャを以下に示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> stt (a:Type u#a) (i:inames) (pre:slprop) (post: a -&gt; slprop)
+  : Type u#0
+
+<span class="k">val</span> stt_ghost (a:Type u#a) (i:inames) (pre:slprop) (post: a -&gt; slprop)
+  : Type u#4
+</pre></div>
+</div>
+<p>注意点として、<code class="docutils literal notranslate"><span class="pre">stt</span></code> 計算はユニバース <code class="docutils literal notranslate"><span class="pre">u#0</span></code> に属します。<code class="docutils literal notranslate"><span class="pre">stt</span></code> は無限ループを許し、<code class="docutils literal notranslate"><span class="pre">Div</span></code> の上に構築されており、この <code class="docutils literal notranslate"><span class="pre">Div</span></code> も <code class="docutils literal notranslate"><span class="pre">u#0</span></code> に属するからです。<code class="docutils literal notranslate"><span class="pre">stt</span></code> のユニバースにより、<code class="docutils literal notranslate"><span class="pre">stt</span></code> 関数は参照に格納できます（例：<code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">(unit</span> <span class="pre">-&gt;</span> <span class="pre">stt</span> <span class="pre">unit</span> <span class="pre">p</span> <span class="pre">q)</span></code> は Pulse で正当な型です）。</p>
+<p>対照的に、<code class="docutils literal notranslate"><span class="pre">stt_ghost</span></code> 関数は全て停止し、ユニバース 4 に属します。もし <code class="docutils literal notranslate"><span class="pre">stt_ghost</span></code> 関数を状態に格納できてしまうと、<code class="docutils literal notranslate"><span class="pre">stt_ghost</span></code> の内部で停止しない関数を書けてしまうため、格納はできません。</p>
+</section>
+</section>
+<section id="counters">
+<h2>カウンタ<a class="headerlink" href="#counters" title="Link to this heading"></a></h2>
+<p>高階プログラミングのもう少し興味深い応用として、可変カウンタの実装を見てみましょう。まずカウンタの型 <code class="docutils literal notranslate"><span class="pre">ctr</span></code> から定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> ctr = {
+    inv: int -&gt; slprop;
+    next: i:erased int -&gt; stt int (inv i) (<span class="k">fun</span> y -&gt; inv (i + 1) ** pure (y == reveal i));
+    destroy: i:erased int -&gt; stt unit (inv i) (<span class="k">fun</span> <span class="k">_</span> -&gt; emp)
+}
+</pre></div>
+</div>
+<p>カウンタは次の要素をまとめたものです。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>状態上の述語 <code class="docutils literal notranslate"><span class="pre">inv</span></code>。<code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span></code> は「現在のカウンタ値が <code class="docutils literal notranslate"><span class="pre">i</span></code> である」ことを表し、実装（どのように状態を表現しているか）には立ち入りません。</p></li>
+<li><p>状態付き関数 <code class="docutils literal notranslate"><span class="pre">next</span></code>。前提として <code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span></code> を受け取り、現在値 <code class="docutils literal notranslate"><span class="pre">i</span></code> を返し、事後に <code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">(i</span> <span class="pre">+</span> <span class="pre">1)</span></code> を提供します。</p></li>
+<li><p>カウンタを解放するための状態付き関数 <code class="docutils literal notranslate"><span class="pre">destroy</span></code>。</p></li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">ctr</span></code> を実装する一つの方法は、状態をヒープ上の参照で表すことです。以下の <code class="docutils literal notranslate"><span class="pre">new_counter</span></code> はまさにそれを行います。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> new_counter ()
+<span class="k">requires</span> emp
+<span class="k">returns</span> c:ctr
+<span class="k">ensures</span> c.inv 0
+{
+    <span class="k">open</span> Pulse.Lib.Box;
+    <span class="k">let</span> x = alloc 0;
+    <span class="k">fn</span> next (i:erased int)
+    <span class="k">requires</span> pts_to x i 
+    <span class="k">returns</span> j:int
+    <span class="k">ensures</span> pts_to x (i + 1) ** pure (j == reveal i)
+    {
+        <span class="k">let</span> j = !x;
+        x := j + 1;
+        j
+    };
+    <span class="k">fn</span> destroy (i:erased int)
+    <span class="k">requires</span> pts_to x i
+    <span class="k">ensures</span> emp
+    {
+       free x
+    };
+    <span class="k">let</span> c = { inv = pts_to x; next; destroy };
+    <span class="k">rewrite</span> (pts_to x 0) as (c.inv 0);
+    c
+}
+</pre></div>
+</div>
+<p>動作は次のとおりです。</p>
+<p>まず、<code class="docutils literal notranslate"><span class="pre">0</span></code> で初期化した新しいヒープ参照 <code class="docutils literal notranslate"><span class="pre">x</span></code> を確保します。</p>
+<p>Pulse では任意のスコープ内で関数を定義できます。そこで、局所関数 <code class="docutils literal notranslate"><span class="pre">next</span></code> と <code class="docutils literal notranslate"><span class="pre">destroy</span></code> を定義します。実装と仕様は素直で、重要なのはこれらの関数がクロージャ内で <code class="docutils literal notranslate"><span class="pre">x:box</span> <span class="pre">int</span></code> を捕捉する点です。</p>
+<p>最後に、<code class="docutils literal notranslate"><span class="pre">next</span></code> と <code class="docutils literal notranslate"><span class="pre">destroy</span></code> を <code class="docutils literal notranslate"><span class="pre">c:ctr</span></code> にまとめ、<code class="docutils literal notranslate"><span class="pre">inv</span></code> を <code class="docutils literal notranslate"><span class="pre">Box.pts_to</span> <span class="pre">x</span></code> に具体化し、コンテキストの主張を <code class="docutils literal notranslate"><span class="pre">c.inv</span> <span class="pre">0</span></code> に書き換えて <code class="docutils literal notranslate"><span class="pre">c</span></code> を返します。</p>
+<p>呼び出し側（以下の <code class="docutils literal notranslate"><span class="pre">test_counter</span></code> など）からは、カウンタが単一の可変ヒープ参照で実装されている事実は完全に隠蔽されています。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> test_counter ()
+<span class="k">requires</span> emp
+<span class="k">ensures</span> emp
+{
+    <span class="k">let</span> c = new_counter ();
+    <span class="k">let</span> next = c.next;
+    <span class="k">let</span> destroy = c.destroy;
+    <span class="k">let</span> x = next <span class="k">_</span>; <span class="c">//FIXME: Should be able to write c.next</span>
+    <span class="k">assert</span> pure (x == 0);
+    <span class="k">let</span> x = next <span class="k">_</span>;
+    <span class="k">assert</span> pure (x == 1);
+    destroy <span class="k">_</span>;
+}
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_ghost.html" class="btn btn-neutral float-left" title="ゴースト計算" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_implication_and_forall.html" class="btn btn-neutral float-right" title="含意と全称量化" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

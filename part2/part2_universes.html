@@ -1,0 +1,590 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ユニバース（Universes） &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="インターフェースと型クラスによるモジュール性" href="../part3/part3.html" />
+    <link rel="prev" title="計算効果の最初のモデル" href="part2_par.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part2.html">帰納的型によるデータ・証明・計算の表現</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part2_inductive_type_families.html">帰納的型の定義</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_vectors.html">長さインデックス付きリスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_merkle.html">Merkle 木</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_equality.html">等式型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_logical_connectives.html">構成的連言と古典的連言（論理結合子）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_stlc.html">単純型付きラムダ計算（STLC）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_phoas.html">高階抽象構文（HOAS）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_well_founded.html">良基底関係と停止性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_par.html">計算効果の最初のモデル</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ユニバース（Universes）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basics">基礎</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#universe-computations-for-other-types">他の型に対するユニバース計算</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#universe-level-of-an-inductive-type-definition">帰納型定義のユニバースレベル</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#russell-s-paradox">ラッセルのパラドックス</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#breaking-the-universe-system">ユニバース体系を破る</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#encoding-russell-s-paradox">ラッセルのパラドックスの符号化</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#refinement-types-fstar-squash-prop-and-impredicativity">精緻化型、FStar.Squash、<code class="docutils literal notranslate"><span class="pre">prop</span></code> と非予言可能性</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#raising-universes-and-the-lack-of-cumulativity">ユニバースの引き上げと非累積性</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tips-for-working-with-universes">ユニバースを扱うコツ</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+      <li class="breadcrumb-item active">ユニバース（Universes）</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="universes">
+<span id="part2-universes"></span><h1>ユニバース（Universes）<a class="headerlink" href="#universes" title="Link to this heading"></a></h1>
+<p><a class="reference internal" href="../part1/part1_polymorphism.html#part1-type-of-types"><span class="std std-ref">前に述べた</span></a> とおり、<code class="docutils literal notranslate"><span class="pre">Type</span></code> は型の型です。では、<code class="docutils literal notranslate"><span class="pre">Type</span></code> 自身の型は何でしょうか？実際、次のように書くと、いかにも <code class="docutils literal notranslate"><span class="pre">Type</span></code> の型が <code class="docutils literal notranslate"><span class="pre">Type</span></code> であるかのように見えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ty : Type = Type
+</pre></div>
+</div>
+<p>しかし内部的には、F* には可算無限の型階層があり、<code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#0</span></code>, <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#1</span></code>, <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#2</span></code> … と続き、<code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#i</span></code> の型は実際には <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#(i</span> <span class="pre">+</span> <span class="pre">1)</span></code> です。<code class="docutils literal notranslate"><span class="pre">u#i</span></code> の接尾辞は <em>ユニバースレベル</em> と呼ばれ、以下のオプションを与えると、項の出力時に推論されたユニバースレベルが表示されます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--print_universes&quot;
+</pre></div>
+</div>
+<p>このオプションを有効にすると、F* の Emacs プラグイン fstar-mode.el では、記号 <code class="docutils literal notranslate"><span class="pre">ty</span></code> にホバーしたとき <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#(1</span> <span class="pre">+</span> <span class="pre">_)</span></code> と表示されます。すなわち、<code class="docutils literal notranslate"><span class="pre">ty</span></code> の型はあるユニバースメタ変数 <code class="docutils literal notranslate"><span class="pre">_</span></code> より 1 つ大きいユニバースにあり、<code class="docutils literal notranslate"><span class="pre">ty</span></code> はユニバースに関して <em>多相</em> です。――少し先取りしましたね。</p>
+<p>この章ではユニバースレベルを詳しく見ていきます。パラドックス回避に必要な理由や、ユニバースを含む定義をどう扱うかも示します。ほとんどの場合、F* は項のユニバースレベルを自動で推論するので、普段は気にする必要はありません。実際、これまで見てきた例でも舞台裏で推論されています。ただし最終的にはユニバースが顔を出す場面があり、その意味と扱い方を理解する必要が出てきます。</p>
+<p>ユニバースを学ぶための参考資料：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Agda マニュアルには、ユニバース多相も含む良い <a class="reference external" href="https://agda.readthedocs.io/en/latest/language/sort-system.html#sort-system">ユニバースの章</a> があります。</p></li>
+<li><p>Adam Chlipala の <a class="reference external" href="http://adam.chlipala.net/cpdt/html/Cpdt.Universes.html">Certified Programming with Dependent Types</a> のこの章は Coq におけるユニバースを解説しています。背景として有用ですが、F* のユニバースは Coq よりも Agda や Lean に近い設計です。</p></li>
+</ul>
+</div></blockquote>
+<section id="basics">
+<h2>基礎<a class="headerlink" href="#basics" title="Link to this heading"></a></h2>
+<p>項へのユニバース注釈は <code class="docutils literal notranslate"><span class="pre">u#l</span></code> の形で、<code class="docutils literal notranslate"><span class="pre">l</span></code> はユニバースレベルです。ユニバースレベルは次の文法の項からなります：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">k</span> <span class="p">:</span><span class="o">:=</span> <span class="mi">0</span> <span class="o">|</span> <span class="mi">1</span> <span class="o">|</span> <span class="mi">2</span> <span class="o">|</span> <span class="o">...</span>    <span class="nb">any</span> <span class="n">natural</span> <span class="n">number</span> <span class="n">constant</span>
+<span class="n">l</span> <span class="p">:</span><span class="o">:=</span> <span class="n">k</span>                  <span class="n">universe</span> <span class="n">constant</span>
+    <span class="o">|</span> <span class="n">l</span> <span class="o">+</span> <span class="n">k</span> <span class="o">|</span> <span class="n">k</span> <span class="o">+</span> <span class="n">l</span>      <span class="n">constant</span> <span class="n">offset</span> <span class="kn">from</span><span class="w"> </span><span class="nn">level</span> <span class="n">l</span>
+    <span class="o">|</span> <span class="nb">max</span> <span class="n">l1</span> <span class="n">l2</span>          <span class="n">maximum</span> <span class="n">of</span> <span class="n">two</span> <span class="n">levels</span>
+    <span class="o">|</span> <span class="n">a</span> <span class="o">|</span> <span class="n">b</span> <span class="o">|</span> <span class="n">c</span> <span class="o">|</span> <span class="o">...</span>    <span class="n">level</span> <span class="n">variables</span>
+</pre></div>
+</div>
+<p>最初の例に戻り、今度は明示的なユニバース注釈を付けてより明確にしましょう。</p>
+<p>以下ではユニバースレベル <code class="docutils literal notranslate"><span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2</span></code> の <code class="docutils literal notranslate"><span class="pre">Type</span></code> を定義し、それぞれが次のレベルの型を持つことが分かります。<code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#0</span></code> は頻出のため、F* では <code class="docutils literal notranslate"><span class="pre">Type0</span></code> と略記できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ty0 : Type u#1 = Type u#0
+<span class="k">let</span> ty0&#39; : Type u#1 = Type0
+<span class="k">let</span> ty1 : Type u#2 = Type u#1
+<span class="k">let</span> ty2 : Type u#3 = Type u#2
+</pre></div>
+</div>
+<p>下の <code class="docutils literal notranslate"><span class="pre">ty_bad</span></code> を定義しようとすると、F* は次のエラーで文句を言います：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ty_bad : Type u#0 = Type u#0
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Expected</span> <span class="n">expression</span> <span class="n">of</span> <span class="nb">type</span> <span class="s2">&quot;Type0&quot;</span><span class="p">;</span> <span class="n">got</span> <span class="n">expression</span> <span class="s2">&quot;Type0&quot;</span> <span class="n">of</span> <span class="nb">type</span> <span class="s2">&quot;Type u#1&quot;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Type</span></code> が自分自身の要素になることを禁じる制約は <em>予言可能性（predicativity）</em> と呼ばれます。反対の <em>非予言可能性（impredicativity）</em> は、適切に制限しないと論理の不整合につながります。F* では <code class="docutils literal notranslate"><span class="pre">squash</span></code> 型を通じて限定的な非予言可能性を提供しており、章末で触れます。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>もっとも、<code class="docutils literal notranslate"><span class="pre">--print_universes</span></code> を有効にしていないと、得られるエラーメッセージは残念ながら分かりづらいかもしれません：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Expected</span> <span class="n">expression</span> <span class="n">of</span> <span class="nb">type</span> <span class="s2">&quot;Type&quot;</span><span class="p">;</span> <span class="n">got</span> <span class="n">expression</span> <span class="s2">&quot;Type&quot;</span> <span class="n">of</span> <span class="nb">type</span> <span class="s2">&quot;Type&quot;</span>
+</pre></div>
+</div>
+<p>期待された型と計算された型が見た目同じに見える型エラーを理解するには、<code class="docutils literal notranslate"><span class="pre">--print_universes</span></code> と <code class="docutils literal notranslate"><span class="pre">--print_implicits</span></code> を有効にするのが有効です。</p>
+</div>
+<p>Now, instead of defining several constants like <code class="docutils literal notranslate"><span class="pre">ty0,</span> <span class="pre">ty1,</span> <span class="pre">ty2</span></code>
+etc., F* definitions can be <em>universe polymorphic</em>. Below, we define
+<code class="docutils literal notranslate"><span class="pre">ty_poly</span></code> as <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#a</span></code>, for any universe variable <code class="docutils literal notranslate"><span class="pre">a</span></code>, and so
+<code class="docutils literal notranslate"><span class="pre">ty</span></code> has type <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#(a</span> <span class="pre">+</span> <span class="pre">1)</span></code>.</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ty_poly : Type u#(a + 1) = Type u#a
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ty_poly</span></code> はユニバース変数 <code class="docutils literal notranslate"><span class="pre">a</span></code> でパラメータ化された「定義テンプレート」と考えられます。<code class="docutils literal notranslate"><span class="pre">ty_poly</span> <span class="pre">u#l</span></code> のように特定のレベル <code class="docutils literal notranslate"><span class="pre">l</span></code> でインスタンス化すると、そのレベルに特化した定義が得られます。F* は、このインスタンス化が先ほどの非多相な定義と等しいことを証明できます。多くの場合、最後の例のようにインスタンス化も自動で推論され、明示は不要です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">_</span> = <span class="k">assert</span> (ty_poly u#0 == ty0)
+<span class="k">let</span> <span class="k">_</span> = <span class="k">assert</span> (ty_poly u#1 == ty1)
+<span class="k">let</span> <span class="k">_</span> = <span class="k">assert</span> (ty_poly u#2 == ty2)
+<span class="k">let</span> <span class="k">_</span> = <span class="k">assert</span> (ty_poly == ty0)
+</pre></div>
+</div>
+</section>
+<section id="universe-computations-for-other-types">
+<h2>他の型に対するユニバース計算<a class="headerlink" href="#universe-computations-for-other-types" title="Link to this heading"></a></h2>
+<p>F* のすべての型は何らかのユニバースに属します。例えば、<code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#0</span></code> に属する一般的な型は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">_</span> : Type0 = nat
+<span class="k">let</span> <span class="k">_</span> : Type0 = bool
+<span class="k">let</span> <span class="k">_</span> : Type0 = nat -&gt; bool
+</pre></div>
+</div>
+<p><strong>関数矢印型のユニバース</strong>：一般に、矢印型 <code class="docutils literal notranslate"><span class="pre">x:t</span> <span class="pre">-&gt;</span> <span class="pre">t'</span></code> のユニバースは <code class="docutils literal notranslate"><span class="pre">t</span></code> と <code class="docutils literal notranslate"><span class="pre">t'</span></code> のユニバースの最大値です。</p>
+<p>これは、型多相な関数はより高いユニバースに属することを意味します。例えば、<a class="reference internal" href="../part1/part1_polymorphism.html#part1-polymorphism-and-inference"><span class="std std-ref">以前</span></a> に見た多相な恒等関数は、型引数のユニバースレベルに対しても多相です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> id_t : Type u#(i + 1) = a:Type u#i -&gt; a -&gt; a
+<span class="k">let</span> id : id_t = <span class="k">fun</span> a x -&gt; x
+</pre></div>
+</div>
+<p>すなわち、恒等関数 <code class="docutils literal notranslate"><span class="pre">id</span></code> の型は <code class="docutils literal notranslate"><span class="pre">id_t</span></code>、すなわち <code class="docutils literal notranslate"><span class="pre">a:Type</span> <span class="pre">u#i</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code> です。これは、ユニバース <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#i</span></code> にあるすべての型 <code class="docutils literal notranslate"><span class="pre">a</span></code> について、<code class="docutils literal notranslate"><span class="pre">id</span> <span class="pre">a</span></code> が <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code> の関数であることを意味します。</p>
+<p>さて、<code class="docutils literal notranslate"><span class="pre">id_t</span></code> 自身は <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#(i</span> <span class="pre">+</span> <span class="pre">1)</span></code> の型です。<code class="docutils literal notranslate"><span class="pre">id</span></code> は任意のユニバースの型に適用できるので、<code class="docutils literal notranslate"><span class="pre">id_t</span></code> にも適用できます。これだけ見ると「自分自身に適用できる関数」が書けそうに見えます――それは無限ループを作れ、F* の論理を壊すので良くありません。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> seemingly_self_application : id_t = id <span class="k">_</span> id
+</pre></div>
+</div>
+<p>しかしユニバースを明示すれば、実は <code class="docutils literal notranslate"><span class="pre">id</span></code> を自分自身に適用していないことが分かります。階層化されており、<code class="docutils literal notranslate"><span class="pre">u#(i</span> <span class="pre">+</span> <span class="pre">1)</span></code> の <code class="docutils literal notranslate"><span class="pre">id</span></code> を <code class="docutils literal notranslate"><span class="pre">u#i</span></code> の <code class="docutils literal notranslate"><span class="pre">id</span></code> に適用しているだけです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> stratified_application : id_t u#i = id u#(i + 1) (id_t u#i) (id u#i)
+</pre></div>
+</div>
+<p>起きていることの直観は、F* の型システムが実は無限に入れ子になっており、それぞれがユニバースを形成しているというものです。型多相な関数（<code class="docutils literal notranslate"><span class="pre">id</span></code> など）はあるユニバース <code class="docutils literal notranslate"><span class="pre">u#(a</span> <span class="pre">+</span> <span class="pre">1)</span></code> に住み、直前のユニバース <code class="docutils literal notranslate"><span class="pre">u#a</span></code> のすべての型に対してパラメータ化されています。ユニバースレベルは、<code class="docutils literal notranslate"><span class="pre">u#a</span></code> にある F* の関数がより高いユニバースの項を消費・生成できないことを保証します。</p>
+<section id="universe-level-of-an-inductive-type-definition">
+<h3>帰納型定義のユニバースレベル<a class="headerlink" href="#universe-level-of-an-inductive-type-definition" title="Link to this heading"></a></h3>
+<p>F* は帰納型定義に対してユニバースレベルを計算します。これを一般的に説明するため、<a class="reference internal" href="part2_inductive_type_families.html#part2-inductives"><span class="std std-ref">前節</span></a> に示した一般形を、各型コンストラクタのユニバースを明示して再掲します。すなわち <span class="math notranslate nohighlight">\(T_i\)</span> は <span class="math notranslate nohighlight">\(\mathsf{Type~u\#l_i}\)</span> の型を構成します。</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathsf{type}~T_1~\overline{(x_1:p_i)} : \overline{y_1:q_1} \rightarrow \mathsf{Type}~u\#l_1 = \overline{\bar D_1 : t_1} \\
+\mathsf{and}~T_n~\overline{(x_n:p_n)} : \overline{y_n:q_n} \rightarrow \mathsf{Type}~u\#l_n = \overline{\bar D_n : t_n} \\\end{split}\]</div>
+<p>各型コンストラクタ <span class="math notranslate nohighlight">\(T_i\)</span> は 0 個以上の <em>データコンストラクタ</em> <span class="math notranslate nohighlight">\(\overline{D_i:t_i}\)</span> を持ち、各データコンストラクタ <span class="math notranslate nohighlight">\(D_{ij}\)</span> の型 <span class="math notranslate nohighlight">\(t_{ij}\)</span> は <span class="math notranslate nohighlight">\(\overline{z_{ij}:s_{ij}} \rightarrow T_i~\bar{x_i}~\bar{e}\)</span> の形でなければならないことを思い出してください。</p>
+<p>通常どおり各 <span class="math notranslate nohighlight">\(t_{ij}\)</span> の型が正しいかを確認するのに加え、F* はユニバースについて次の規則で検査します。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>各 <span class="math notranslate nohighlight">\(T_i\)</span> がユニバース <span class="math notranslate nohighlight">\(l_i\)</span> を持つと仮定すると、任意のデータコンストラクタ <span class="math notranslate nohighlight">\(D_{ij}\)</span> の各引数 <span class="math notranslate nohighlight">\(z_{ijk} : s_{ijk}\)</span> について、<span class="math notranslate nohighlight">\(s_{ijk} : \mathsf{Type}~u\#l_{ijk}\)</span> かつ <span class="math notranslate nohighlight">\(l_{ijk} \leq l_i\)</span> を確認します。</p></li>
+</ul>
+</div></blockquote>
+<p>言い換えれば、各型コンストラクタのユニバースは、そのデータコンストラクタのいかなるフィールドのユニバースよりも小さくてはなりません。</p>
+<p>実際には、F* はレベルの不等式制約を集め、ユニバース上の <code class="docutils literal notranslate"><span class="pre">max</span></code> 演算で解いて <span class="math notranslate nohighlight">\(l_1, \ldots, l_n\)</span> を推論します。すなわち、<span class="math notranslate nohighlight">\(l_i\)</span> はコンストラクタ <span class="math notranslate nohighlight">\(\overline{D_i : t_i}\)</span> の全フィールドのユニバースの最大値 <span class="math notranslate nohighlight">\(max_{jk}~l_{ijk}\)</span> に設定されます。いくつか例を見ましょう。</p>
+<section id="the-list-type">
+<h4><code class="docutils literal notranslate"><span class="pre">list</span></code> 型<a class="headerlink" href="#the-list-type" title="Link to this heading"></a></h4>
+<p>以下の <code class="docutils literal notranslate"><span class="pre">list</span></code> 型は <code class="docutils literal notranslate"><span class="pre">a:Type</span> <span class="pre">u#a</span></code> をパラメータに取り、同じユニバースに型を構成します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> list (a:Type u#a) : Type u#a  =
+ | Nil : list a
+ | Cons : hd:a -&gt; tl:list a -&gt; list a
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Nil</span></code> コンストラクタはフィールドを持たないため、<code class="docutils literal notranslate"><span class="pre">list</span> <span class="pre">a</span></code> のユニバースレベルに制約を与えません。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Cons</span></code> コンストラクタには 2 つのフィールドがあります。1 つ目の <code class="docutils literal notranslate"><span class="pre">hd</span></code> は <code class="docutils literal notranslate"><span class="pre">a:</span> <span class="pre">Type</span> <span class="pre">u#a</span></code>、すなわち <code class="docutils literal notranslate"><span class="pre">u#a</span> <span class="pre">\leq</span> <span class="pre">u#a</span></code> の制約。2 つ目は仮定より <code class="docutils literal notranslate"><span class="pre">list</span> <span class="pre">a</span> <span class="pre">:</span> <span class="pre">Type</span> <span class="pre">u#a</span></code> で、やはり <code class="docutils literal notranslate"><span class="pre">u#a</span> <span class="pre">\leq</span> <span class="pre">u#a</span></code> の制約です。</p></li>
+</ul>
+<p>F* は既定で満たされる中で最小のユニバース割り当てを推論します。ただし不等式の解は多数あり、必要なら注釈で別解を選べます。例えば次のようにも書けますが、必要以上に高いユニバースに置く意味はほとんどありません（例外は <a class="reference internal" href="#part2-universes-raising"><span class="std std-ref">こちら</span></a> 参照）。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> list&#39; (a:Type u#a) : Type u#(1 + a)  =
+ | Nil&#39; : list&#39; a
+ | Cons&#39; : hd:a -&gt; tl:list&#39; a -&gt; list&#39; a
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>ユニバースレベル変数は通常の変数とは異なる名前空間から取られます。そのため <code class="docutils literal notranslate"><span class="pre">a:Type</span> <span class="pre">u#a</span></code> と書くとき、<code class="docutils literal notranslate"><span class="pre">a</span></code> は通常の変数、<code class="docutils literal notranslate"><span class="pre">u#a</span></code> は <code class="docutils literal notranslate"><span class="pre">a</span></code> の型のユニバースです。</p>
+</div>
+</section>
+<section id="the-pair-type">
+<h4><code class="docutils literal notranslate"><span class="pre">pair</span></code> 型<a class="headerlink" href="#the-pair-type" title="Link to this heading"></a></h4>
+<p>以下の <code class="docutils literal notranslate"><span class="pre">pair</span></code> 型は <code class="docutils literal notranslate"><span class="pre">a:Type</span> <span class="pre">u#a</span></code> と <code class="docutils literal notranslate"><span class="pre">b:Type</span> <span class="pre">u#b</span></code> を受け取り、<code class="docutils literal notranslate"><span class="pre">u#(max</span> <span class="pre">a</span> <span class="pre">b)</span></code> に型を構成します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> pair (a:Type u#a) (b:Type u#b) : Type u#(max a b) =
+  | Pair : fst:a -&gt; snd:b -&gt; pair a b
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fst</span></code> フィールドは <code class="docutils literal notranslate"><span class="pre">u#a</span></code> にあるので、<code class="docutils literal notranslate"><span class="pre">u#a</span> <span class="pre">\leq</span> <span class="pre">u#(max</span> <span class="pre">a</span> <span class="pre">b)</span></code> です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">snd</span></code> フィールドは <code class="docutils literal notranslate"><span class="pre">u#b</span></code> にあるので、<code class="docutils literal notranslate"><span class="pre">u#b</span> <span class="pre">\leq</span> <span class="pre">u#(max</span> <span class="pre">a</span> <span class="pre">b)</span></code> です。</p></li>
+</ul>
+</section>
+<section id="the-top-type">
+<h4><code class="docutils literal notranslate"><span class="pre">top</span></code> 型<a class="headerlink" href="#the-top-type" title="Link to this heading"></a></h4>
+<p>以下の <code class="docutils literal notranslate"><span class="pre">top</span></code> 型は、任意の型 <code class="docutils literal notranslate"><span class="pre">a:Type</span> <span class="pre">u#a</span></code> の値をその型情報とペアにして包みます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> top : Type u#(a + 1) =
+  | Top : a:Type u#a -&gt; v:a -&gt; top
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Top</span></code> の <code class="docutils literal notranslate"><span class="pre">a</span></code> フィールドは <code class="docutils literal notranslate"><span class="pre">u#(a</span> <span class="pre">+</span> <span class="pre">1)</span></code>、<code class="docutils literal notranslate"><span class="pre">v</span></code> フィールドは <code class="docutils literal notranslate"><span class="pre">u#a</span></code> にあります。よって <code class="docutils literal notranslate"><span class="pre">top</span></code> 自体は <code class="docutils literal notranslate"><span class="pre">u#(max</span> <span class="pre">(a</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">a)</span></code>、すなわち <code class="docutils literal notranslate"><span class="pre">u#(a</span> <span class="pre">+</span> <span class="pre">1)</span></code> に属します。</p></li>
+</ul>
+<p>直観的には、<code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">:</span> <span class="pre">top</span></code> から <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#a</span></code> の値（<code class="docutils literal notranslate"><span class="pre">Top?.a</span> <span class="pre">t</span></code>）を返す関数を書けるからです。もし <code class="docutils literal notranslate"><span class="pre">top</span> <span class="pre">:</span> <span class="pre">Type</span> <span class="pre">u#a</span></code> で <code class="docutils literal notranslate"><span class="pre">t:top</span></code> なら、<code class="docutils literal notranslate"><span class="pre">Top?.a</span> <span class="pre">:</span> <span class="pre">top</span> <span class="pre">-&gt;</span> <span class="pre">Type</span> <span class="pre">u#a</span></code> となり、<code class="docutils literal notranslate"><span class="pre">u#a</span></code> にある値から <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#(a</span> <span class="pre">+</span> <span class="pre">1)</span></code> の値を取り出せてしまいます。これはユニバースの階層を破り、次節で見るようなパラドックスに至ります。</p>
+<p>以下はかなり技術的です。パラドックスを避けるためにユニバース体系がある――その点だけ押さえ、パラドックスの作り方自体を細かく知る必要はありません。</p>
+</section>
+</section>
+</section>
+<section id="russell-s-paradox">
+<h2>ラッセルのパラドックス<a class="headerlink" href="#russell-s-paradox" title="Link to this heading"></a></h2>
+<p>型理論の起源は、数学と集合論の論理的基礎を探究したバートランド・ラッセルの著書 <a class="reference external" href="https://en.wikipedia.org/wiki/The_Principles_of_Mathematics">The Principles of Mathematics</a> にあります。ここでラッセルは、自分自身を含まないすべての集合を要素とする集合 <span class="math notranslate nohighlight">\(\Delta\)</span> を考え、<span class="math notranslate nohighlight">\(\Delta\)</span> 自身が <span class="math notranslate nohighlight">\(\Delta\)</span> に含まれるかを検討しました。この自己言及的構成は次の理由でパラドックスです：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\Delta \in \Delta\)</span> だとすると、<span class="math notranslate nohighlight">\(\Delta\)</span> の要素は「自分自身を含まない集合」だけなので、<span class="math notranslate nohighlight">\(\Delta \not\in \Delta\)</span> となります。</p></li>
+<li><p>逆に <span class="math notranslate nohighlight">\(\Delta \not\in \Delta\)</span> だとすると、<span class="math notranslate nohighlight">\(\Delta\)</span> は「自分自身を含まないすべての集合」を含むので、<span class="math notranslate nohighlight">\(\Delta \in \Delta\)</span> となります。</p></li>
+</ul>
+</div></blockquote>
+<p>この種のパラドックスを避けるため、ラッセルは自己言及に依存する無意味な構成を防ぐ階層化された型体系を考案しました。現代の型理論のユニバースレベルも同じ目的に仕えます。</p>
+<p>実際、以下の構成が示すように、F* でユニバースの階層を破れるなら、ラッセルの集合 <span class="math notranslate nohighlight">\(\Delta\)</span> を符号化して <code class="docutils literal notranslate"><span class="pre">False</span></code> を導けます。この構成は <a class="reference external" href="http://www.cs.nott.ac.uk/~psztxa/g53cfr/l20.html/l20.html">Thorsten Altenkirch の Agda コード</a> に由来し、Liam O'Connor による <a class="reference external" href="http://liamoc.net/posts/2015-09-10-girards-paradox.html">有用な文脈と比較</a> も参考になります。Agda では非健全な非予言可能性を有効化するコンパイラプラグマを使いますが、F* ではユーザ導入の公理でそれを模倣し、同じパラドックスを生じさせる方法を示します。</p>
+<section id="breaking-the-universe-system">
+<h3>ユニバース体系を破る<a class="headerlink" href="#breaking-the-universe-system" title="Link to this heading"></a></h3>
+<p>F* のユニバース階層を意図的に破る次の公理を考えます。以下の要素が必要です。</p>
+<ol class="arabic simple">
+<li><p>任意のユニバースの型 <code class="docutils literal notranslate"><span class="pre">a:Type</span> <span class="pre">u#a</span></code> を受け取り <code class="docutils literal notranslate"><span class="pre">u#0</span></code> の型を返す、厳密正値な型コンストラクタ <code class="docutils literal notranslate"><span class="pre">lower</span></code>。<a class="reference internal" href="part2_inductive_type_families.html#part2-strictly-positive-annotations"><span class="std std-ref">厳密正値な型関数</span></a> は前に扱いました。</p></li>
+</ol>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">assume</span>
+<span class="k">val</span> lower ([@@@strictly_positive] a:Type u#a) : Type u#0
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p><code class="docutils literal notranslate"><span class="pre">x:a</span></code> を受け取り <code class="docutils literal notranslate"><span class="pre">lower</span> <span class="pre">a</span></code> の値を返す関数 <code class="docutils literal notranslate"><span class="pre">inject</span></code> を仮定します。</p></li>
+</ol>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">assume</span>
+<span class="k">val</span> inject (#a:Type u#a) (x:a) : lower a
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p><code class="docutils literal notranslate"><span class="pre">lower</span></code> と <code class="docutils literal notranslate"><span class="pre">inject</span></code> 自体は無害です（例：<code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">lower</span> <span class="pre">_</span> <span class="pre">=</span> <span class="pre">unit</span></code>, <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">inject</span> <span class="pre">_</span> <span class="pre">=</span> <span class="pre">()</span></code>）。しかし <code class="docutils literal notranslate"><span class="pre">inject</span></code> の逆写像である <code class="docutils literal notranslate"><span class="pre">project</span></code> を仮定すると、パラドックスへの扉が開きます。</p></li>
+</ol>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">assume</span>
+<span class="k">val</span> project (#a:Type u#a) (x:lower a) : a
+
+<span class="k">assume</span>
+<span class="k">val</span> inj_proj (#a:Type u#a) (x:a)
+  : <span class="k">Lemma</span> (project (inject x) == x)
+</pre></div>
+</div>
+</section>
+<section id="encoding-russell-s-paradox">
+<h3>ラッセルのパラドックスの符号化<a class="headerlink" href="#encoding-russell-s-paradox" title="Link to this heading"></a></h3>
+<p>パラドックスを示すため、内包表記 <code class="docutils literal notranslate"><span class="pre">f:</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">set</span></code> に基づく <code class="docutils literal notranslate"><span class="pre">set</span></code> の概念を定義します。ここで <code class="docutils literal notranslate"><span class="pre">x:Type</span> <span class="pre">u#0</span></code> は内包の定義域で、集合の濃度を抑える意図です。コンストラクタ <code class="docutils literal notranslate"><span class="pre">Set</span></code> のフィールド <code class="docutils literal notranslate"><span class="pre">x:Type</span> <span class="pre">u#0</span></code> はユニバース <code class="docutils literal notranslate"><span class="pre">u#1</span></code> にあるにもかかわらず、<code class="docutils literal notranslate"><span class="pre">set</span></code> 自体を <code class="docutils literal notranslate"><span class="pre">u#0</span></code> に置くことでユニバース体系を攪乱します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> _set : Type u#1 =
+  | Set : x:Type0 -&gt; f:(x -&gt; set) -&gt; _set
+<span class="k">and</span> set : Type0 = lower _set
+</pre></div>
+</div>
+<p>この構成により多くの便利な集合を定義できます。例えば、空集合 <code class="docutils literal notranslate"><span class="pre">zero</span></code> は内包の定義域に空型 <code class="docutils literal notranslate"><span class="pre">False</span></code> を使うので要素を持ちません。唯一の要素が空集合である単集合 <code class="docutils literal notranslate"><span class="pre">one</span></code> や、<code class="docutils literal notranslate"><span class="pre">zero</span></code> と <code class="docutils literal notranslate"><span class="pre">one</span></code> を含む <code class="docutils literal notranslate"><span class="pre">two</span></code> も定義できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> zero : set = inject (Set False (<span class="k">fun</span> <span class="k">_</span> -&gt; false_elim()))
+<span class="k">let</span> one : set = inject (Set True (<span class="k">fun</span> <span class="k">_</span> -&gt; zero))
+<span class="k">let</span> two : set = inject (Set bool (<span class="k">fun</span> b -&gt; <span class="k">if</span> b <span class="k">then</span> zero <span class="k">else</span> one))
+</pre></div>
+</div>
+<p>集合所属も定義できます：集合 <code class="docutils literal notranslate"><span class="pre">a</span></code> が集合 <code class="docutils literal notranslate"><span class="pre">b</span></code> の要素であるとは、<code class="docutils literal notranslate"><span class="pre">b</span></code> の定義域型（<code class="docutils literal notranslate"><span class="pre">(project</span> <span class="pre">b).x</span></code>）の要素 <code class="docutils literal notranslate"><span class="pre">v</span></code> が存在して、内包 <code class="docutils literal notranslate"><span class="pre">(project</span> <span class="pre">b).f</span> <span class="pre">v</span></code> が <code class="docutils literal notranslate"><span class="pre">a</span></code> になるときです。</p>
+<p>例えば <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">=</span> <span class="pre">true</span></code> で <code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">zero</span> <span class="pre">two</span></code>、<code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">=</span> <span class="pre">false</span></code> で <code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">one</span> <span class="pre">two</span></code> を示せます。非所属は所属の否定です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> mem (a:set) (b:set) : Type0 =
+  (v:(project b).x &amp; (a == (project b).f v))
+
+<span class="k">let</span> not_mem (a:set) (b:set) : Type0 = mem a b -&gt; False
+</pre></div>
+</div>
+<p>これでラッセルの逆説的集合 <span class="math notranslate nohighlight">\(\Delta\)</span> を定義できます。まず大きなユニバースで <code class="docutils literal notranslate"><span class="pre">delta_big</span></code> を定義し、<code class="docutils literal notranslate"><span class="pre">inject</span></code> で <code class="docutils literal notranslate"><span class="pre">set</span> <span class="pre">:</span> <span class="pre">Type</span> <span class="pre">u#0</span></code> に落とします。<code class="docutils literal notranslate"><span class="pre">delta_big</span></code> の符号化は素直で、定義域は「集合 <code class="docutils literal notranslate"><span class="pre">s</span></code> と <code class="docutils literal notranslate"><span class="pre">s</span></code> が自分自身を含まないという証明」のペアで、内包は単に <code class="docutils literal notranslate"><span class="pre">s</span></code> を返します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> delta_big = Set (s:set &amp; not_mem s s) dfst
+<span class="k">let</span> delta : set = inject delta_big
+</pre></div>
+</div>
+<p>これで、ユニバース体系を破る不健全な公理 <code class="docutils literal notranslate"><span class="pre">inj_proj</span></code> を用いて <code class="docutils literal notranslate"><span class="pre">delta</span> <span class="pre">`mem`</span> <span class="pre">delta</span></code> と <code class="docutils literal notranslate"><span class="pre">delta</span> <span class="pre">`not_mem`</span> <span class="pre">delta</span></code> の両方を証明し、<code class="docutils literal notranslate"><span class="pre">False</span></code> を導けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> x_in_delta_x_not_in_delta (x:set) (mem_x_delta:mem x delta)
+  : not_mem x x 
+  = <span class="k">let</span> (| v, r |) = mem_x_delta <span class="k">in</span> <span class="c">// mem proofs are pairs</span>
+    <span class="k">let</span> v : (project delta).x = v <span class="k">in</span> <span class="c">// whose first component is an element of delta&#39;s comprehension domain</span>
+    <span class="k">let</span> r : (x == (project delta).f v) = r <span class="k">in</span> <span class="c">//and whose second component proves that x is equal to an element in delta</span>
+    inj_proj delta_big; <span class="c">// we use the unsound axiom to conclude that `v` is actually the domain of delta_big</span>
+    <span class="k">let</span> v : (s:set &amp; not_mem s s) = v <span class="k">in</span> <span class="c">//and now we can retype `v` this way</span>
+    <span class="k">let</span> (| s, pf |) = v <span class="k">in</span> <span class="c">//and unpack it into its components</span>
+    <span class="k">let</span> r : (x == s) = r <span class="k">in</span> <span class="c">//and the axiom also allows us to retype `r` this way</span>
+    <span class="k">let</span> pf : not_mem x x = pf <span class="k">in</span> <span class="c">//which lets us convert pf from `not_mem s s` to the goal</span>
+    pf <span class="c">//not_mem x x</span>
+
+<span class="k">let</span> delta_not_in_delta
+  : not_mem delta delta
+  = <span class="k">fun</span> (mem_delta_delta:mem delta delta) -&gt;
+      x_in_delta_x_not_in_delta 
+          delta
+          mem_delta_delta
+          mem_delta_delta
+
+<span class="k">let</span> x_not_mem_x_x_mem_delta (x:set) (x_not_mem_x:x `not_mem` x)
+  : x `mem` delta
+  = <span class="k">let</span> v : (s:set &amp; not_mem s s) = (| x, x_not_mem_x |) <span class="k">in</span> <span class="c">//an element of the domain set of delta_big</span>
+    inj_proj delta_big; <span class="c">// the unsound axiom now lets us relate it to delta</span>
+    <span class="k">let</span> s : (x == (project delta).f v) = <span class="c">//and prove that projecting delta&#39;s comprehension and applying to v return x`</span>
+        FStar.Squash.return_squash Refl
+    <span class="k">in</span>
+    (| v,  s |)
+
+<span class="k">let</span> delta_in_delta
+  : mem delta delta
+  = x_not_mem_x_x_mem_delta delta delta_not_in_delta
+  
+<span class="k">let</span> ff : False = delta_not_in_delta delta_in_delta
+</pre></div>
+</div>
+<p>証明は必要以上に詳細ですが、興味があればコメントを追ってみてください。</p>
+<p>要するに、ユニバースの階層化がなければ F* は不健全になる、ということです。</p>
+</section>
+</section>
+<section id="refinement-types-fstar-squash-prop-and-impredicativity">
+<h2>精緻化型、FStar.Squash、<code class="docutils literal notranslate"><span class="pre">prop</span></code> と非予言可能性<a class="headerlink" href="#refinement-types-fstar-squash-prop-and-impredicativity" title="Link to this heading"></a></h2>
+<p>矢印型や帰納型でのユニバース計算を見てきました。F* で型を作るもう一つの方法は精緻化型 <code class="docutils literal notranslate"><span class="pre">x:t{p}</span></code> です。以前見たように、<code class="docutils literal notranslate"><span class="pre">x:t{p}</span></code> の値 <code class="docutils literal notranslate"><span class="pre">v</span></code> は、F* の SMT 支援の古典論理において <code class="docutils literal notranslate"><span class="pre">p[v/x]</span></code> が導けるという条件付きの <code class="docutils literal notranslate"><span class="pre">v:t</span></code> に過ぎません。<code class="docutils literal notranslate"><span class="pre">x:t{p}</span></code> の証明から <code class="docutils literal notranslate"><span class="pre">p</span></code> の証明を取り出す方法はなく、精緻化型は F* における証明無関係性の仕組みです。</p>
+<p><strong>精緻化型のユニバース</strong>：精緻化型 <code class="docutils literal notranslate"><span class="pre">x:t{p}</span></code> のユニバースは <code class="docutils literal notranslate"><span class="pre">t</span></code> のユニバースと同一です。</p>
+<p>精緻化型のユニバースは <code class="docutils literal notranslate"><span class="pre">p</span></code> に依存しないため、限定的な非予言可能性を可能にします。そこで（標準ライブラリ <code class="docutils literal notranslate"><span class="pre">FStar.Squash</span></code> から要約して）次の型を定義できます：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> squash (p:Type u#p) : Type u#0 = <span class="k">_</span>:unit { p }
+<span class="k">let</span> return_squash (p:Type u#p) (x:p) : squash p = ()
+</pre></div>
+</div>
+<p>これは前節の <code class="docutils literal notranslate"><span class="pre">lower</span></code> と <code class="docutils literal notranslate"><span class="pre">inject</span></code> によく似ていますが、重要なのは <code class="docutils literal notranslate"><span class="pre">inject</span></code> を逆にする <code class="docutils literal notranslate"><span class="pre">project</span></code> が存在しない点です。実際、<code class="docutils literal notranslate"><span class="pre">FStar.Squash</span></code> は <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">p</span></code> が証明無関係、すなわち <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">p</span></code> のすべての証明が等しいことを証明しています。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> proof_irrelevance (p: Type u#p) (x y: squash p) : squash (x == y)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">FStar.Squash</span></code> は、<code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">p</span></code> を前提に <code class="docutils literal notranslate"><span class="pre">p</span></code> の証明を扱う限定的な方法として、以下の <code class="docutils literal notranslate"><span class="pre">bind_squash</span></code> を提供します。これは「任意の <code class="docutils literal notranslate"><span class="pre">a</span></code> の証明から <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">b</span></code> を作れる関数 <code class="docutils literal notranslate"><span class="pre">f</span></code> があるなら、<code class="docutils literal notranslate"><span class="pre">x:squash</span> <span class="pre">a</span></code> によって与えられる唯一の <code class="docutils literal notranslate"><span class="pre">a</span></code> の証明からも作れる」と述べます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> bind_squash (#a: Type u#a) (#b: Type u#b) (x: squash a) (f: (a -&gt; squash b)) : squash b
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">bind_squash</span></code> が <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">b</span></code> を返すことは重要で、<code class="docutils literal notranslate"><span class="pre">squash</span></code> の証明無関係性を保ちます。そうでなければ、<code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">a</span></code> から <code class="docutils literal notranslate"><span class="pre">a</span></code> の証明を取り出せてしまい、パラドックスを可能にする不健全な <code class="docutils literal notranslate"><span class="pre">project</span></code> 公理に危険なほど近づきます。</p>
+<p>この制約は、<code class="docutils literal notranslate"><span class="pre">Prop</span></code> をパターンマッチして <code class="docutils literal notranslate"><span class="pre">Prop</span></code> の外側の結果を返す関数を禁じる、Coq の <code class="docutils literal notranslate"><span class="pre">Prop</span></code> に対する制約に似ています。</p>
+<p>F* の <code class="docutils literal notranslate"><span class="pre">prop</span></code> 型（<a class="reference internal" href="../part1/part1_prop_assertions.html#part1-prop"><span class="std std-ref">以前</span></a> に登場）は、あらゆる squash 型の総称として原始的に定義されています。つまり <code class="docutils literal notranslate"><span class="pre">prop</span></code> に含まれるのは <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">p</span></code> という形の型だけであり、同値に、<code class="docutils literal notranslate"><span class="pre">t:prop</span></code> はすべて <code class="docutils literal notranslate"><span class="pre">unit</span></code> の部分型です。型の集合の型であるため、<code class="docutils literal notranslate"><span class="pre">prop</span></code> 自体は <code class="docutils literal notranslate"><span class="pre">u#1</span></code> に属します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">_</span> : Type u#1 = prop
+</pre></div>
+</div>
+<p>しかし <code class="docutils literal notranslate"><span class="pre">prop</span></code> は依然として一種の非予言可能性を提供します。例えば <code class="docutils literal notranslate"><span class="pre">prop</span></code> 全体にわたる量化を行っても <code class="docutils literal notranslate"><span class="pre">prop</span></code> のままでいられます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">_</span> : Type u#1 = a:prop -&gt; a
+<span class="k">let</span> <span class="k">_</span> : Type u#0 = squash (a:prop -&gt; a)
+<span class="k">let</span> <span class="k">_</span> : prop = <span class="k">forall</span> (a:prop). a
+<span class="k">let</span> <span class="k">_</span> : prop = <span class="k">exists</span> (a:prop). a
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>上の 1 行目は、通常どおり矢印型のユニバースが引数と結果のユニバースの最大であることを示します。この場合、引数に <code class="docutils literal notranslate"><span class="pre">prop</span> <span class="pre">:</span> <span class="pre">Type</span> <span class="pre">u#1</span></code> を含むため、矢印自体も <code class="docutils literal notranslate"><span class="pre">u#1</span></code> に属します。</p></li>
+<li><p>2 行目は、その矢印型を squash することで <code class="docutils literal notranslate"><span class="pre">u#0</span></code> に戻せることを示します。</p></li>
+<li><p>3 行目は F* でより一般的な書き方で、<code class="docutils literal notranslate"><span class="pre">forall</span> <span class="pre">(a:prop).</span> <span class="pre">a</span></code> は <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">(a:prop</span> <span class="pre">-&gt;</span> <span class="pre">a)</span></code> の糖衣構文です。これは <code class="docutils literal notranslate"><span class="pre">squash</span></code> 型なので <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#0</span></code> に属するだけでなく、型としても <code class="docutils literal notranslate"><span class="pre">prop</span></code> です。</p></li>
+<li><p>4 行目は同様のことが <code class="docutils literal notranslate"><span class="pre">exists</span></code> にも成り立つことを示します。</p></li>
+</ul>
+</section>
+<section id="raising-universes-and-the-lack-of-cumulativity">
+<span id="part2-universes-raising"></span><h2>ユニバースの引き上げと非累積性<a class="headerlink" href="#raising-universes-and-the-lack-of-cumulativity" title="Link to this heading"></a></h2>
+<p>In some type theories, notably in Coq, the universe system is
+<em>cumulative</em>, meaning that <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#i</span> <span class="pre">:</span> <span class="pre">Type</span> <span class="pre">u#(max</span> <span class="pre">(i</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">j)</span></code>;
+or, that <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#i</span></code> inhabits all universes greater than
+<code class="docutils literal notranslate"><span class="pre">i</span></code>. In contrast, in F*, as in Agda and Lean, <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#i</span> <span class="pre">:</span> <span class="pre">Type</span>
+<span class="pre">u#(i</span> <span class="pre">+</span> <span class="pre">1)</span></code>, i.e., a type resides only in the universe immediately
+above it.</p>
+<p>累積性はユニバースレベル上のサブタイプ関係であり、高いユニバースでの定義を下位のすべてで再利用できるなど有用です。しかし、ユニバース多相と累積性の両立は難しく、実際 Coq が両者を同時に提供したのは比較的最近です。</p>
+<p>累積性がない代わりに、F* はあるユニバースから高いユニバースへ項を持ち上げる <code class="docutils literal notranslate"><span class="pre">FStar.Universe</span></code> を提供します。概要は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> raise_t ([@@@ strictly_positive] t : Type u#a) : Type u#(max a b)
+
+<span class="k">val</span> raise_val (#a:Type u#a) (x:a) : raise_t u#a u#b a
+
+<span class="k">val</span> downgrade_val (#a:Type u#a) (x:raise_t u#a u#b a) : a
+
+<span class="k">val</span> downgrade_val_raise_val (#a: Type u#a) (x: a)
+  : <span class="k">Lemma</span> (downgrade_val u#a u#b (raise_val x) == x)
+
+<span class="k">val</span> raise_val_downgrade_val (#a: Type u#a) (x: raise_t u#a u#b a)
+  : <span class="k">Lemma</span> (raise_val (downgrade_val x) == x)
+</pre></div>
+</div>
+<p>型 <code class="docutils literal notranslate"><span class="pre">raise_t</span> <span class="pre">t</span></code> は <code class="docutils literal notranslate"><span class="pre">t</span></code> に関して厳密正値で、<code class="docutils literal notranslate"><span class="pre">t</span></code> を <code class="docutils literal notranslate"><span class="pre">u#a</span></code> から <code class="docutils literal notranslate"><span class="pre">u#(max</span> <span class="pre">a</span> <span class="pre">b)</span></code> に持ち上げます。<code class="docutils literal notranslate"><span class="pre">raise_val</span></code> と <code class="docutils literal notranslate"><span class="pre">downgrade_val</span></code> は <code class="docutils literal notranslate"><span class="pre">t</span></code> と <code class="docutils literal notranslate"><span class="pre">raise_t</span> <span class="pre">t</span></code> の相互逆写像です。</p>
+<p>このシグネチャは、ラッセルのパラドックスで使った不健全な <code class="docutils literal notranslate"><span class="pre">lower,</span> <span class="pre">inject,</span> <span class="pre">project</span></code> と構造が似ています。しかし決定的に異なるのは、<code class="docutils literal notranslate"><span class="pre">raise_t</span></code> のユニバースが必ず <em>増える</em> ことで、階層の破壊を防いでいる点です。</p>
+<p>実際、このシグネチャは F* で容易に実装できます。以下のように <code class="docutils literal notranslate"><span class="pre">raise_t</span></code> のユニバース注釈で、最小の <code class="docutils literal notranslate"><span class="pre">u#a</span></code> ではなく、より高い <code class="docutils literal notranslate"><span class="pre">u#(max</span> <span class="pre">a</span> <span class="pre">b)</span></code> に明示的に型を置きます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> raise_t (a : Type u#a) : Type u#(max a b) =
+  | Ret : a -&gt; raise_t a
+
+<span class="k">let</span> raise_val #a x = Ret x
+<span class="k">let</span> downgrade_val #a x = <span class="k">match</span> x <span class="k">with</span> Ret x0 -&gt; x0
+<span class="k">let</span> downgrade_val_raise_val #a x = ()
+<span class="k">let</span> raise_val_downgrade_val #a x = ()
+</pre></div>
+</div>
+</section>
+<section id="tips-for-working-with-universes">
+<span id="part2-tips-for-universes"></span><h2>ユニバースを扱うコツ<a class="headerlink" href="#tips-for-working-with-universes" title="Link to this heading"></a></h2>
+<p>Whenever you write <code class="docutils literal notranslate"><span class="pre">Type</span></code> in F*, you are implicitly writing <code class="docutils literal notranslate"><span class="pre">Type</span>
+<span class="pre">u#?x</span></code>, where <code class="docutils literal notranslate"><span class="pre">?x</span></code> is a universe <em>metavariable</em> left for F* to infer. When
+left implicit, this means that F* may sometimes infer universes for
+your definition that are not what you expect---they may be too general
+or not general enough. We conclude this section with a few tips to
+detect and fix such problems.</p>
+<ul>
+<li><p>分かりづらいエラーが出たら、次のプラグマを有効にしましょう：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--print_implicits --print_universes&quot;
+</pre></div>
+</div>
+<p>これにより F* はエラーメッセージで大きな項まで出力します。普段は不要ですが、「expected type t; got type t」のような錯覚系エラーに遭遇したときに役立ちます。</p>
+</li>
+<li><p>組み込みの <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#a</span></code>、<code class="docutils literal notranslate"><span class="pre">-&gt;</span></code>、精緻化型を除けば、ユニバース多相な F* の項はトップレベル定義だけです。すなわち、トップレベルで <code class="docutils literal notranslate"><span class="pre">i</span></code> を定義すれば多相に使えますが：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> i (#a:Type) (x:a) = x
+<span class="k">let</span> <span class="k">_</span> = i u#0 0, i u#1 nat, i u#2 (Type u#0)
+</pre></div>
+</div>
+<p>同じことは非トップレベルのスコープではできません：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> no_universe_poly_locally () = 
+  <span class="k">let</span> i (#a:Type) (x:a) = x <span class="k">in</span>
+  <span class="k">let</span> <span class="k">_</span> = i u#0 0, i u#1 nat, i u#2 (Type u#0) <span class="k">in</span>
+  ()
+</pre></div>
+</div>
+<p>もちろん、ユニバース多相でない定義はどのスコープでも機能します。例えばここでは <code class="docutils literal notranslate"><span class="pre">i</span></code> はユニバース <code class="docutils literal notranslate"><span class="pre">u#0</span></code> のすべての型に対して多相です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> type_poly_locally () = 
+  <span class="k">let</span> i (#a:Type) (x:a) = x <span class="k">in</span>
+  <span class="k">let</span> <span class="k">_</span> = i #unit (), i #bool <span class="k">true</span>, i #nat 0 <span class="k">in</span>
+  ()
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">val</span> <span class="pre">f</span> <span class="pre">:</span> <span class="pre">t</span></code> と宣言すると、F* は <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">f</span> <span class="pre">=</span> <span class="pre">e</span></code> や <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">f</span> <span class="pre">=</span></code> の定義と独立に、型 <code class="docutils literal notranslate"><span class="pre">t</span></code> に対して最も一般的なユニバースを計算します。</p>
+<p>この挙動の簡単な例を示します。次のように <code class="docutils literal notranslate"><span class="pre">tup2</span></code> を宣言したとします。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> tup2 (a:Type) (b:Type) : Type
+</pre></div>
+</div>
+<p>この宣言に対し、F* は <code class="docutils literal notranslate"><span class="pre">val</span> <span class="pre">tup2</span> <span class="pre">(a:Type</span> <span class="pre">u#a)</span> <span class="pre">(b:Type</span> <span class="pre">u#b)</span> <span class="pre">:</span> <span class="pre">Type</span> <span class="pre">u#c</span></code> を推論し、最も一般的な型を割り当てます。</p>
+<p>ここで <code class="docutils literal notranslate"><span class="pre">tup2</span></code> を定義しようとすると、</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> tup2 a b = a &amp; b
+</pre></div>
+</div>
+<p>F* は次のエラーを出します（<code class="docutils literal notranslate"><span class="pre">--print_universes</span></code> 有効時）：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Type</span> <span class="n">u</span><span class="c1">#(max uu___43588 uu___43589) is not a subtype of the expected type Type u#uu___43590</span>
+</pre></div>
+</div>
+<p>つまり、定義から推論された <code class="docutils literal notranslate"><span class="pre">tup2</span> <span class="pre">a</span> <span class="pre">b</span></code> の型は <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#(max</span> <span class="pre">a</span> <span class="pre">b)</span></code> で、<code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">u#c</span></code> とは同じでない、ということです。しかもエラーメッセージの自動生成名は分かりやすくしてくれません。</p>
+<p>理由は、<code class="docutils literal notranslate"><span class="pre">val</span> <span class="pre">f</span> <span class="pre">:</span> <span class="pre">t</span></code> は <code class="docutils literal notranslate"><span class="pre">f</span></code> の定義が現れない状況でも書けるので、その場合 F* は <code class="docutils literal notranslate"><span class="pre">t</span></code> に何らかのユニバースを割り当てねばならず、最も一般的なものを選ぶからです。ところが実装しようとすると、その“最も一般的”が過剰なことがあります。</p>
+<p>経験則は次のとおりです：</p>
+<ul>
+<li><p><a class="reference internal" href="../part3/part3_interfaces.html#part3-interfaces"><span class="std std-ref">インタフェース</span></a> を書くのでない限り、<code class="docutils literal notranslate"><span class="pre">val</span></code> 宣言は避けましょう。代わりに期待する型を注釈して <code class="docutils literal notranslate"><span class="pre">let</span></code> や <code class="docutils literal notranslate"><span class="pre">type</span></code> を直接書く方が無難です。例えば、<code class="docutils literal notranslate"><span class="pre">val</span> <span class="pre">tup2</span></code> と <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">tup2</span></code> を分けず、以下のように一緒に書けば、F* は適切なユニバースを推論します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> tuple2 (a:Type) (b:Type) : Type = a &amp; b
+</pre></div>
+</div>
+</li>
+<li><p>どうしても <code class="docutils literal notranslate"><span class="pre">val</span> <span class="pre">f</span> <span class="pre">:</span> <span class="pre">t</span></code> が必要（型 <code class="docutils literal notranslate"><span class="pre">t</span></code> が巨大、インタフェースを作成中等）な場合は、ユニバースを明示しましょう。そうすれば、実装時にどの程度一般化すべきか明確ですし、利用者もユニバース多相性の度合いを把握できます。例：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> tup2_again (a:Type u#a) (b:Type u#b) : Type u#(max a b)
+<span class="k">let</span> tup2_again a b = a &amp; b
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+<li><p>帰納型を定義する際は、インデックスよりもパラメータを使う方が望ましいです。通常、型パラメータの方が低いユニバースに収まるからです。例えば、次のようにリストを定義したくなるかもしれません：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> list_alt : Type u#a -&gt; Type u#(a + 1) = 
+  | NilAlt: a:Type -&gt; list_alt a
+  | ConsAlt: a:Type -&gt; hd:a -&gt; tl:list_alt a -&gt; list_alt a
+</pre></div>
+</div>
+<p>これは意味論的には通常のリストと同値ですが、</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> list (a:Type u#a) : Type u#a  =
+ | Nil : list a
+ | Cons : hd:a -&gt; tl:list a -&gt; list a
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">NilAlt</span></code> と <code class="docutils literal notranslate"><span class="pre">ConsAlt</span></code> の両方が <code class="docutils literal notranslate"><span class="pre">a:Type</span> <span class="pre">u#a</span></code> のフィールドを持つため、<code class="docutils literal notranslate"><span class="pre">list_alt</span></code> は <code class="docutils literal notranslate"><span class="pre">u#(a</span> <span class="pre">+</span> <span class="pre">1)</span></code> に属します。したがって、コンストラクタ間で型のインデックスが変化しない限り、インデックスではなくパラメータを使いましょう。</p>
+<p>とはいえ、重要なのは帰納型のコンストラクタのフィールドだという点を思い出してください。型をどのユニバースの型でインデックスしても、（そのフィールドに現れない限り）結果の型には影響しません。人工的な例を挙げます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> t : Type u#100 -&gt; Type u#0 = 
+  | T : unit -&gt; t (FStar.Universe.raise_t unit)
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part2_par.html" class="btn btn-neutral float-left" title="計算効果の最初のモデル" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../part3/part3.html" class="btn btn-neutral float-right" title="インターフェースと型クラスによるモジュール性" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

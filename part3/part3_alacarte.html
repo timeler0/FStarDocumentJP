@@ -1,0 +1,722 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>型クラスで遊ぶ：Datatypes à la Carte &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="計算効果" href="../part4/part4.html" />
+    <link rel="prev" title="型クラス" href="part3_typeclasses.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part3.html">インターフェースと型クラスによるモジュール性</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part3_interfaces.html">インターフェース</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part3_typeclasses.html">型クラス</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">型クラスで遊ぶ：Datatypes à la Carte</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#getting-started">はじめに</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#smart-constructors-with-injections-and-projections">射入と射影によるスマートコンストラクタ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#evaluating-expressions">式の評価</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#provably-correct-optimizations">証明可能に正しい最適化</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exercises">演習</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exercise-1">演習 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exercise-2">演習 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exercise-3">演習 3</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part3.html">インターフェースと型クラスによるモジュール性</a></li>
+      <li class="breadcrumb-item active">型クラスで遊ぶ：Datatypes à la Carte</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="fun-with-typeclasses-datatypes-a-la-carte">
+<span id="part3-alacarte"></span><h1>型クラスで遊ぶ：Datatypes à la Carte<a class="headerlink" href="#fun-with-typeclasses-datatypes-a-la-carte" title="Link to this heading"></a></h1>
+<p>1998 年の古典的な投稿で Phil Wadler は、言語やライブラリ設計における難題――データ型とその型に対する操作を、どのようにモジュール的に拡張するか――を述べました。Wadler はこれを <a class="reference external" href="https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt">Expression Problem</a> と呼び、次のように述べています。</p>
+<blockquote>
+<div><p>Expression Problem は古くからある問題に新しい名前を与えたものです。目標は、場合分けでデータ型を定義し、既存コードを再コンパイルすることなくその型に新たな場合を追加でき、かつその型上の新たな関数も追加でき、さらに静的な型安全性（例：キャストなし）を保つことです。</p>
+</div></blockquote>
+<p>Expression Problem には多くの解法がありますが、特に洗練されているのが Wouter Swierstra の <a class="reference external" href="https://www.cambridge.org/core/journals/journal-of-functional-programming/article/data-types-a-la-carte/14416CB20C4637164EA9F77097909409">Data Types à la Carte</a> です。この論文はまさに関数プログラミングの真珠で、強くおすすめします――本章に入る前の背景として有益でしょうが、ここでも順を追って説明します。彼の解法は型クラスによる拡張性の好例であり、本章では F* の型クラスを使ってこの手法を適用する方法を示します。なにより、取り組んで楽しい題材です。</p>
+<p>Swierstra の論文は Haskell を用いているため、関数の停止性は証明していません。F* でも <a class="reference internal" href="../part4/part4_div.html#part4-div"><span class="std std-ref">divergence</span></a> 効果を使えば同様にできますが、本章では全関数と厳密に正の帰納的定義のみで全体を成り立たせる方法を示します。さらにおまけとして、Swierstra が構築する様々なプログラムの正当性証明も示します。</p>
+<section id="getting-started">
+<h2>はじめに<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<p>導入として、次のような単純な算術式の型と、式を整数に評価する関数 <code class="docutils literal notranslate"><span class="pre">evaluate</span></code> を考えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> exp =
+| V <span class="k">of</span> int
+| Plus : exp -&gt; exp -&gt; exp
+
+<span class="k">let</span> <span class="k">rec</span> evaluate = <span class="k">function</span>
+| V i -&gt; i
+| Plus e1 e2 -&gt; evaluate e1 + evaluate e2
+</pre></div>
+</div>
+<p>これは素直に定義できますが、拡張性に問題があります。</p>
+<p>別の式、例えば <code class="docutils literal notranslate"><span class="pre">Mul</span> <span class="pre">:</span> <span class="pre">exp</span> <span class="pre">-&gt;</span> <span class="pre">exp</span> <span class="pre">-&gt;</span> <span class="pre">exp</span></code> を追加したい場合、型 <code class="docutils literal notranslate"><span class="pre">exp</span></code> に新しい場合を加えるだけでなく、その場合を処理するように <code class="docutils literal notranslate"><span class="pre">evaluate</span></code> も再定義しなければなりません。</p>
+<p>Expression Problem の解法は、<code class="docutils literal notranslate"><span class="pre">exp</span></code> 型に場合を追加でき、各場合を処理する関数を個別に段階的に定義できるようにするものです。</p>
+<p>Swierstra の発想は、型コンストラクタでパラメータ化された汎用データ型を 1 つ定義し、一般に有限深さの木を表現できるようにすることです。分岐構造やデータはジェネリックのままにします。F* での最初の試みは次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>[@@expect_failure]
+<span class="k">noeq</span>
+<span class="k">type</span> expr (f : (Type -&gt; Type)) =
+  | In <span class="k">of</span> f (expr f)
+</pre></div>
+</div>
+<p>残念ながら、この定義は必ずしも良基底ではないため F* には受け入れられません。<a class="reference internal" href="../part2/part2_inductive_type_families.html#part2-strictly-positive-annotations"><span class="std std-ref">厳密に正の定義</span></a> の節で見たように、注意しないとこの手の定義から <code class="docutils literal notranslate"><span class="pre">False</span></code> を証明できてしまいます。特に、型コンストラクタ引数 <code class="docutils literal notranslate"><span class="pre">f</span></code> を <em>厳密に正</em> に制約する必要があります。次のようにします。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> expr (f : ([@@@strictly_positive]Type -&gt; Type)) =
+  | In <span class="k">of</span> f (expr f)
+</pre></div>
+</div>
+<p>最初は面食らうかもしれませんが、実のところかなり単純です。例を考えると分かりやすいでしょう：<code class="docutils literal notranslate"><span class="pre">expr</span> <span class="pre">list</span></code> 型の値は <code class="docutils literal notranslate"><span class="pre">In</span> <span class="pre">:</span> <span class="pre">list</span> <span class="pre">(expr</span> <span class="pre">list)</span> <span class="pre">-&gt;</span> <span class="pre">expr</span> <span class="pre">list</span></code> の形、すなわち分岐数が可変で深さが任意の木になります（下の例のように）。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> list ([@@@strictly_positive]a:Type) =
+| Nil
+| Cons : a -&gt; list a -&gt; list a
+
+<span class="k">let</span> elist = expr list
+
+<span class="c">(*</span>
+<span class="c">   .___ Nil</span>
+<span class="c">  /</span>
+<span class="c"> .</span>
+<span class="c">  \.___.____Nil</span>
+<span class="c">*)</span>
+<span class="k">let</span> elist_ex1 = 
+  In (Cons (In Nil) 
+           (Cons (In (Cons (In Nil) Nil)) 
+            Nil))
+</pre></div>
+</div>
+<p>次に、型コンストラクタ <code class="docutils literal notranslate"><span class="pre">f</span></code> と <code class="docutils literal notranslate"><span class="pre">g</span></code> があれば、その <a href="#id1"><span class="problematic" id="id2">*</span></a>和*（余積）を取れます。これは <a class="reference internal" href="../part1/part1_inductives.html#part1-ch3"><span class="std std-ref">第 1 部</span></a> で見た <code class="docutils literal notranslate"><span class="pre">either</span></code> 型に類似しますが、型そのものではなく“型コンストラクタの”次元で行います。<code class="docutils literal notranslate"><span class="pre">coprod</span> <span class="pre">f</span> <span class="pre">g</span></code> を <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">++</span> <span class="pre">g</span></code> と書くことにします。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> coprod (f g: ([@@@strictly_positive]Type -&gt; Type)) ([@@@strictly_positive]a:Type) =
+  | Inl <span class="k">of</span> f a
+  | Inr <span class="k">of</span> g a
+<span class="k">let</span> ( ++ ) f g = coprod f g
+</pre></div>
+</div>
+<p>これらの抽象化を用いると、次のように定義できます。ここで <code class="docutils literal notranslate"><span class="pre">expr</span> <span class="pre">(value</span> <span class="pre">++</span> <span class="pre">add)</span></code> は冒頭の <code class="docutils literal notranslate"><span class="pre">exp</span></code> 型と同型です。算術式の各ケースを独立に定義し、<code class="docutils literal notranslate"><span class="pre">++</span></code> で合成できるようになった点に注目してください。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> value ([@@@strictly_positive]a:Type) =
+  | Val <span class="k">of</span> int
+
+<span class="k">type</span> add ([@@@strictly_positive]a:Type) =
+  | Add : a -&gt; a -&gt; add a
+
+<span class="k">let</span> addExample : expr (value ++ add) = In (Inr (Add (In (Inl (Val 118))) (In (Inl (Val 1219)))))
+</pre></div>
+</div>
+<p>とはいえ、<code class="docutils literal notranslate"><span class="pre">expr</span> <span class="pre">(value</span> <span class="pre">++</span> <span class="pre">add)</span></code> の値を素で作るのはひどく煩雑です。次に型クラスを用いて、これを快適にする方法を見ていきます。</p>
+</section>
+<section id="smart-constructors-with-injections-and-projections">
+<h2>射入と射影によるスマートコンストラクタ<a class="headerlink" href="#smart-constructors-with-injections-and-projections" title="Link to this heading"></a></h2>
+<p>データコンストラクタ（例：<code class="docutils literal notranslate"><span class="pre">Inl</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">either</span> <span class="pre">a</span> <span class="pre">b</span></code>）は <code class="docutils literal notranslate"><span class="pre">a</span></code> から <code class="docutils literal notranslate"><span class="pre">either</span> <span class="pre">a</span> <span class="pre">b</span></code> への単射です。つまり各 <code class="docutils literal notranslate"><span class="pre">x:a</span></code> は一意に <code class="docutils literal notranslate"><span class="pre">Inl</span> <span class="pre">x</span> <span class="pre">:</span> <span class="pre">either</span> <span class="pre">a</span> <span class="pre">b</span></code> に写ります。また <code class="docutils literal notranslate"><span class="pre">either</span> <span class="pre">a</span> <span class="pre">b</span></code> から元の <code class="docutils literal notranslate"><span class="pre">a</span></code> を射影することもできますが、これは部分関数です。射入と射影を抽象化すれば、拡張可能な式型の値を汎用的に構築できます。</p>
+<p>まず、いくつかの略記を定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> inj_t (f g:Type -&gt; Type) = #a:Type -&gt; f a -&gt; g a
+<span class="k">let</span> proj_t (f g:Type -&gt; Type) = #a:Type -&gt; x:g a -&gt; option (f a)
+</pre></div>
+</div>
+<p>型コンストラクタ <code class="docutils literal notranslate"><span class="pre">f</span></code> が <code class="docutils literal notranslate"><span class="pre">g</span></code> 以下であるとは、任意の <code class="docutils literal notranslate"><span class="pre">a</span></code> について <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span></code> から <code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">a</span></code> への射入があることを意味します。これを次の型クラスで表現します：<code class="docutils literal notranslate"><span class="pre">inj</span></code> と <code class="docutils literal notranslate"><span class="pre">proj</span></code> をもち、<code class="docutils literal notranslate"><span class="pre">proj</span></code> は <code class="docutils literal notranslate"><span class="pre">inj</span></code> の逆、そして <code class="docutils literal notranslate"><span class="pre">inj</span></code> は <code class="docutils literal notranslate"><span class="pre">proj</span></code> の部分逆です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> leq (f g : [@@@strictly_positive]Type -&gt; Type) = {
+  inj: inj_t f g;
+  proj: proj_t f g;
+  inversion: unit
+   -&gt; <span class="k">Lemma</span> (
+    (<span class="k">forall</span> (a:Type) (x:g a).
+      <span class="k">match</span> proj x <span class="k">with</span>
+      | Some y -&gt; inj y == x
+      | <span class="k">_</span> -&gt; True) /\
+    (<span class="k">forall</span> (a:Type) (x:f a). 
+      proj (inj x) == Some x)
+  )
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">leq</span></code> のインスタンスをいくつか定義できます。まず当然ながら反射律が成り立ち、逆写像の補題は F* が SMT で容易に証明します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> leq_refl f : leq f f = {
+  inj=(<span class="k">fun</span> #<span class="k">_</span> x -&gt; x);
+  proj=(<span class="k">fun</span> #<span class="k">_</span> x -&gt; Some x);
+  inversion=(<span class="k">fun</span> <span class="k">_</span> -&gt; ())
+}
+</pre></div>
+</div>
+<p>さらに興味深いことに、<code class="docutils literal notranslate"><span class="pre">f</span></code> は左に <code class="docutils literal notranslate"><span class="pre">g</span></code> を拡張した <code class="docutils literal notranslate"><span class="pre">(f</span> <span class="pre">++</span> <span class="pre">g)</span></code> 以下であることを証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> leq_ext_left f g
+: leq f (g ++ f)
+= <span class="k">let</span> inj : inj_t f (g ++ f) = Inr <span class="k">in</span> 
+  <span class="k">let</span> proj : proj_t f (g ++ f) = <span class="k">fun</span> #a x -&gt;
+    <span class="k">match</span> x <span class="k">with</span>
+    | Inl <span class="k">_</span> -&gt; None
+    | Inr x -&gt; Some x
+  <span class="k">in</span>
+  { inj; proj; inversion=(<span class="k">fun</span> <span class="k">_</span> -&gt; ()) }
+</pre></div>
+</div>
+<p>右側に対する同様の <code class="docutils literal notranslate"><span class="pre">leq_ext_right</span></code> も証明できますが、意図的にインスタンスは与えません。まもなく見るように、ここで与えるインスタンスは型推論がうまく働くように選ばれています。インスタンスを増やすと曖昧さが生じ、推論アルゴリズムを混乱させます。</p>
+<p>その代わり、少し一般化した形を与えます。すなわち、<code class="docutils literal notranslate"><span class="pre">f</span></code> が <code class="docutils literal notranslate"><span class="pre">h</span></code> 以下なら、<code class="docutils literal notranslate"><span class="pre">f</span></code> は右に <code class="docutils literal notranslate"><span class="pre">g</span></code> を拡張した <code class="docutils literal notranslate"><span class="pre">(h</span> <span class="pre">++</span> <span class="pre">g)</span></code> の以下でもある、という合同則です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> leq_cong_right 
+  f g h
+  {| f_inj:leq f h |}
+: leq f (h ++ g)
+= <span class="k">let</span> inj : inj_t f (h ++ g) = <span class="k">fun</span> #a x -&gt; Inl (f_inj.inj x) <span class="k">in</span>
+  <span class="k">let</span> proj : proj_t f (h ++ g) = <span class="k">fun</span> #a x -&gt; 
+    <span class="k">match</span> x <span class="k">with</span>
+    | Inl x -&gt; f_inj.proj x
+    | <span class="k">_</span> -&gt; None
+  <span class="k">in</span>
+  { inj; proj; inversion=(<span class="k">fun</span> <span class="k">_</span> -&gt; f_inj.inversion()) }
+</pre></div>
+</div>
+<p>これで、任意の <code class="docutils literal notranslate"><span class="pre">leq</span> <span class="pre">f</span> <span class="pre">g</span></code> が成り立つ型コンストラクタ対について、対応する射入・射影を拡張可能な式型へ持ち上げ、往復（ラウンドトリップ）補題を証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> compose (#a #b #c:Type) (f:b -&gt; c) (g: a -&gt; b) (x:a) : c = f (g x)
+<span class="k">let</span> inject #f #g {| gf: leq g f |}
+: g (expr f) -&gt; expr f 
+= compose In gf.inj
+
+<span class="k">let</span> project #g #f {| gf: leq g f |}
+: x:expr f -&gt; option (g (expr f)) 
+= <span class="k">fun</span> (In x) -&gt; gf.proj x
+
+<span class="k">let</span> inject_project 
+  #f #g {| gf: leq g f |}
+  (x:expr f)
+: <span class="k">Lemma</span> (
+    <span class="k">match</span> project #g #f x <span class="k">with</span>
+    | Some y -&gt; inject y == x
+    | <span class="k">_</span> -&gt; True
+) [<span class="k">SMTPat</span> (project #g #f x)]
+= gf.inversion()
+
+<span class="k">let</span> project_inject #f #g {| gf: leq g f |} (x:g (expr f))
+: <span class="k">Lemma</span> (
+    project #g #f (inject x) == Some x
+) [<span class="k">SMTPat</span> (project #g #f (inject x))]
+= gf.inversion()
+</pre></div>
+</div>
+<p>準備が整ったので、いよいよ楽しい部分です。<code class="docutils literal notranslate"><span class="pre">expr</span></code> の各ケースに対して汎用のスマートコンストラクタを定義し、そのケースより一般な任意の型へ持ち上げられるようにします。</p>
+<p>例えばスマートコンストラクタ <code class="docutils literal notranslate"><span class="pre">v</span></code> は、<code class="docutils literal notranslate"><span class="pre">Val</span> <span class="pre">x</span></code> を <code class="docutils literal notranslate"><span class="pre">value</span></code> 以上の任意の型 <code class="docutils literal notranslate"><span class="pre">expr</span> <span class="pre">f</span></code> に持ち上げます。同様に <code class="docutils literal notranslate"><span class="pre">(+^)</span></code> は <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">x</span> <span class="pre">y</span></code> を <code class="docutils literal notranslate"><span class="pre">add</span></code> 以上の任意の型へ持ち上げます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> v #f {| vf: leq value f |} (x:int)
+: expr f
+= inject (Val x)
+
+<span class="k">let</span> ( +^ ) #f {| vf : leq add f |} (x y: expr f)
+: expr f
+= inject (Add x y)
+</pre></div>
+</div>
+<p>これで先ほどの例の値を、以前よりずっと見通し良く書けます：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ex1 : expr (value ++ add) = v 118 +^ v 1219
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ex1</span> <span class="pre">:</span> <span class="pre">expr</span> <span class="pre">(value</span> <span class="pre">++</span> <span class="pre">add)</span></code> の型注釈は重要です。これにより、型推論は各 <code class="docutils literal notranslate"><span class="pre">v</span></code> と <code class="docutils literal notranslate"><span class="pre">(+^)</span></code> の汎用パラメータ <code class="docutils literal notranslate"><span class="pre">f</span></code> を <code class="docutils literal notranslate"><span class="pre">(value</span> <span class="pre">++</span> <span class="pre">add)</span></code> に具体化できます。すると型クラスの探索は、<code class="docutils literal notranslate"><span class="pre">leq_cong_right</span></code> と <code class="docutils literal notranslate"><span class="pre">leq_left</span></code> を用いて <code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">`leq`</span> <span class="pre">(value</span> <span class="pre">++</span> <span class="pre">add)</span></code> を、<code class="docutils literal notranslate"><span class="pre">leq_ext_left</span></code> を用いて <code class="docutils literal notranslate"><span class="pre">add</span> <span class="pre">`leq`</span> <span class="pre">(value</span> <span class="pre">++</span> <span class="pre">add)</span></code> を見つけられます。</p>
+<p>この仕組みにより、拡張はスムーズに機能します。掛け算のケースを追加し、そのためのスマートコンストラクタを定義し、値・加算・乗算を含む式を簡単に構築できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> mul ([@@@strictly_positive]a:Type) =
+  | Mul : a -&gt; a -&gt; mul a
+
+<span class="k">let</span> ( *^ ) #f {| vf : leq mul f |} (x y: expr f)
+: expr f
+= inject (Mul x y)
+
+<span class="k">let</span> ex2 : expr (value ++ add ++ mul) = v 1001 +^ v 1833 +^ v 13713 *^ v 24
+</pre></div>
+</div>
+</section>
+<section id="evaluating-expressions">
+<h2>式の評価<a class="headerlink" href="#evaluating-expressions" title="Link to this heading"></a></h2>
+<p>式を構築する方法が整ったので、次は拡張可能な形でインタプリタを定義する方法を見ます。インタプリタは式木を走査し、結果を畳み込みながら操作を適用し、最終的な累積値を返します。言い換えれば、式木に対する <em>fold</em> が必要ですが、これを拡張可能かつ汎用的に行いたいのです。</p>
+<p>そのためにはファンクタの概念を定義します。<a class="reference internal" href="part3_typeclasses.html#part3-monadic-syntax"><span class="std std-ref">前の節</span></a> で簡単に触れましたし、Haskell で馴染みがあるかもしれません。</p>
+<p>以下のファンクタ定義は一般的なものと少し異なります。通常は、型コンストラクタ <code class="docutils literal notranslate"><span class="pre">t</span></code> が <code class="docutils literal notranslate"><span class="pre">fmap</span> <span class="pre">:</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">t</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">t</span> <span class="pre">b</span></code> を備えるときファンクタと呼びます。ここでは引数の順序を反転し、<code class="docutils literal notranslate"><span class="pre">fmap</span> <span class="pre">x</span> <span class="pre">f</span></code> が <code class="docutils literal notranslate"><span class="pre">x</span></code> の部分項に対してのみ <code class="docutils literal notranslate"><span class="pre">f</span></code> を呼ぶことを要請します――これにより帰納的に定義されたデータ型上でも拡張可能にファンクタを組み立てつつ、関数の停止性を証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> functor (f:[@@@strictly_positive]Type -&gt; Type) = {
+  fmap : (#a:Type -&gt; #b:Type -&gt; x:f a -&gt; (y:a{y &lt;&lt; x} -&gt; b) -&gt; f b)
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">value</span></code>、<code class="docutils literal notranslate"><span class="pre">add</span></code>、<code class="docutils literal notranslate"><span class="pre">mul</span></code> のファンクタインスタンスは容易に定義できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> functor_value : functor value =
+  <span class="k">let</span> fmap (#a #b:Type) (x:value a) (f:(y:a{y&lt;&lt;x} -&gt; b)) : value b =
+    <span class="k">let</span> Val x = x <span class="k">in</span> Val x
+  <span class="k">in</span>
+  { fmap }
+</pre></div>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> functor_add : functor add =
+  <span class="k">let</span> fmap (#a #b:Type) (x:add a) (f:(y:a{y&lt;&lt;x} -&gt; b)) : add b =
+    <span class="k">let</span> Add x y = x <span class="k">in</span>
+    Add (f x) (f y)
+  <span class="k">in</span>
+  { fmap }
+</pre></div>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> functor_mul : functor mul = 
+  <span class="k">let</span> fmap (#a #b:Type) (x:mul a) (f:(y:a{y&lt;&lt;x} -&gt; b)) : mul b =
+    <span class="k">let</span> Mul x y = x <span class="k">in</span>
+    Mul (f x) (f y)
+  <span class="k">in</span>
+  { fmap }
+</pre></div>
+</div>
+<p>より興味深いのは余積（ファンクタの和）のインスタンスです。すなわち <code class="docutils literal notranslate"><span class="pre">f</span></code> と <code class="docutils literal notranslate"><span class="pre">g</span></code> がともにファンクタなら、<code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">++</span> <span class="pre">g</span></code> もファンクタです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> functor_coprod 
+    #f #g
+    {| ff: functor f |} {| fg: functor g |}
+: functor (coprod f g)
+= <span class="k">let</span> fmap (#a #b:Type) (x:coprod f g a) (a2b:(y:a{y &lt;&lt; x} -&gt; b)) 
+  : coprod f g b
+  = <span class="k">match</span> x <span class="k">with</span>
+    | Inl x -&gt; Inl (ff.fmap x a2b)
+    | Inr x -&gt; Inr (fg.fmap x a2b)
+  <span class="k">in</span>
+  { fmap }
+</pre></div>
+</div>
+<p>これで、式に対する汎用的な fold を定義できます。<code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span></code> を結果 <code class="docutils literal notranslate"><span class="pre">a</span></code> に写す関数 <code class="docutils literal notranslate"><span class="pre">alg</span></code> を与えると、<code class="docutils literal notranslate"><span class="pre">fold_expr</span></code> は木の各ノードに <code class="docutils literal notranslate"><span class="pre">alg</span></code> を適用した結果を畳み込みつつ <code class="docutils literal notranslate"><span class="pre">expr</span> <span class="pre">f</span></code> を走査します。ここで <code class="docutils literal notranslate"><span class="pre">fmap</span></code> の型に事前条件 <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;&lt;</span> <span class="pre">t</span></code> を課した重要性が分かります：<code class="docutils literal notranslate"><span class="pre">fold_expr</span></code> の再帰呼び出しが停止するのは、F* の組み込みの良基底順序で引数 <code class="docutils literal notranslate"><span class="pre">x</span></code> が <code class="docutils literal notranslate"><span class="pre">t</span></code> に先行することが保証されるからです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> fold_expr #f #a {| ff : functor f |}
+    (alg:f a -&gt; a) (e:expr f)
+: a
+= <span class="k">let</span> In t = e <span class="k">in</span>
+  alg (fmap t (<span class="k">fun</span> x -&gt; fold_expr alg x))
+</pre></div>
+</div>
+<p>式木に対する一般的な fold が得られたので、次は各種ノードの評価器を拡張可能に定義する必要があります。そのために、ノード型 <code class="docutils literal notranslate"><span class="pre">f</span></code> に対する評価器の型クラス <code class="docutils literal notranslate"><span class="pre">eval</span> <span class="pre">f</span></code> を定義します。先の 3 種類のノードそれぞれに対して、互いに独立に <code class="docutils literal notranslate"><span class="pre">eval</span></code> のインスタンスを与えられます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> eval (f: [@@@strictly_positive]Type -&gt; Type) = {
+  evalAlg : f int -&gt; int
+}
+
+<span class="k">instance</span> eval_val : eval value =
+  <span class="k">let</span> evalAlg : value int -&gt; int = <span class="k">fun</span> (Val x) -&gt; x <span class="k">in</span>
+  { evalAlg }
+
+<span class="k">instance</span> eval_add : eval add =
+  <span class="k">let</span> evalAlg : add int -&gt; int = <span class="k">fun</span> (Add x y) -&gt; x + y <span class="k">in</span>
+  { evalAlg }
+
+<span class="k">instance</span> eval_mul : eval mul=
+  <span class="k">let</span> evalAlg : mul int -&gt; int = <span class="k">fun</span> (Mul x y) -&gt; x * y <span class="k">in</span>
+  {  evalAlg }
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">f</span></code> と <code class="docutils literal notranslate"><span class="pre">g</span></code> の評価器があれば、<code class="docutils literal notranslate"><span class="pre">f++g</span></code> の評価器を組み立てられます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> eval_coprod 
+    #f #g
+    {| ef: eval f |}
+    {| eg: eval g |} 
+: eval (coprod f g)
+= <span class="k">let</span> evalAlg (x:coprod f g int) : int =
+    <span class="k">match</span> x <span class="k">with</span>
+    | Inl x -&gt; ef.evalAlg x
+    | Inr y -&gt; eg.evalAlg y
+  <span class="k">in</span>
+  { evalAlg }
+</pre></div>
+</div>
+<p>最後に、式に対する汎用評価器を構築できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> eval_expr  #f {| eval f |} {| functor f |} (x:expr f)
+: int = fold_expr evalAlg x
+</pre></div>
+</div>
+<p>やった、動きます！F* に正規化させ、結果が期待どおりであることを確認できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> test = <span class="k">assert_norm</span> (eval_expr ex1 == 1337)
+<span class="k">let</span> test2 = <span class="k">assert_norm</span> (eval_expr ex2 == ((1001 + 1833 + 13713 * 24)))
+</pre></div>
+</div>
+</section>
+<section id="provably-correct-optimizations">
+<h2>証明可能に正しい最適化<a class="headerlink" href="#provably-correct-optimizations" title="Link to this heading"></a></h2>
+<p>次に、通常の算術法則（例：乗法の加法分配則）に基づいて式を書き換え、最適化したいとします。Swierstra はその方法を示していますが、Haskell では正しさの証明はありません。しかし F* なら、式の書き換え規則が評価意味を保存するという意味で、その正しさを証明できます。</p>
+<p>まず、書き換え規則の型と、その健全性（sound）とは何を意味するかを定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> rewrite_rule f = expr f -&gt; option (expr f)
+<span class="k">let</span> rewrite_rule_soundness #f (r:rewrite_rule f)
+  {| eval f |} {| functor f |} (x:expr f)
+= <span class="k">match</span> r x <span class="k">with</span>
+  | None -&gt; True
+  | Some y -&gt; eval_expr x == eval_expr y
+  
+<span class="k">noeq</span>
+<span class="k">type</span> rewrite_t (f:<span class="k">_</span>) {| eval f |} {| functor f |} = {
+  rule: rewrite_rule f;
+  soundness: unit -&gt; <span class="k">Lemma</span> (<span class="k">forall</span> x. rewrite_rule_soundness rule x)
+}
+</pre></div>
+</div>
+<p>書き換え規則は失敗する場合がありますが、<code class="docutils literal notranslate"><span class="pre">x</span></code> を <code class="docutils literal notranslate"><span class="pre">y</span></code> に書き換えられたなら、<code class="docutils literal notranslate"><span class="pre">x</span></code> と <code class="docutils literal notranslate"><span class="pre">y</span></code> は同じ結果に評価されなければなりません。規則とその健全性証明はレコード <code class="docutils literal notranslate"><span class="pre">rewrite_t</span></code> にまとめられます。</p>
+<p>書き換え規則をいくつか定義するにあたり、失敗の可能性を扱うための記法があると便利です――<a class="reference internal" href="part3_typeclasses.html#part3-monadic-syntax"><span class="std std-ref">前に示した</span></a> モナディックな記法を使います。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> (<span class="k">let</span>?) 
+    (x:option &#39;a) 
+    (g:(y:&#39;a { Some y == x} -&gt; option &#39;b))
+: option &#39;b =
+  <span class="k">match</span> x <span class="k">with</span>
+  | None -&gt; None
+  | Some y -&gt; g y
+
+<span class="k">let</span> return (x:&#39;a) : option &#39;a = Some x
+
+<span class="k">let</span> dflt (y:&#39;a) (x:option &#39;a) : &#39;a =
+  <span class="k">match</span> x <span class="k">with</span>
+  | None -&gt; y
+  | Some x -&gt; x
+
+<span class="k">let</span> or_else (x:option &#39;a)
+            (or_else: squash (None? x) -&gt; &#39;a)
+: &#39;a
+= <span class="k">match</span> x <span class="k">with</span>
+  | None -&gt; or_else ()
+  | Some y -&gt; y
+</pre></div>
+</div>
+<p>次に各ケースの書き換え規則を定義するため、そのケースを含む式木に対する評価器について、何が成り立つべきか（期待値）を定義します。</p>
+<p>例えば <code class="docutils literal notranslate"><span class="pre">Add</span></code> ノードを評価するなら、その結果は各部分木を評価した結果の和になる、という期待です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ev_val_sem #f (ev: eval f) {| functor f |} {| leq value f |} =
+  <span class="k">forall</span> (x:expr f). dflt True 
+    (<span class="k">let</span>? Val a = project x <span class="k">in</span>
+     Some (eval_expr x == a))
+
+<span class="k">let</span> ev_add_sem #f (ev: eval f) {| functor f |} {| leq add f |} =
+  <span class="k">forall</span> (x:expr f). dflt True 
+    (<span class="k">let</span>? Add a b = project x <span class="k">in</span>
+     Some (eval_expr x == eval_expr a + eval_expr b))
+
+<span class="k">let</span> ev_mul_sem #f (ev: eval f) {| functor f |} {| leq mul f |} =
+  <span class="k">forall</span> (x:expr f). dflt True 
+    (<span class="k">let</span>? Mul a b = project x <span class="k">in</span>
+     Some (eval_expr x == eval_expr a * eval_expr b))
+</pre></div>
+</div>
+<p>これで 2 つの例示的な書き換え規則を定義できます。1 つ目は <code class="docutils literal notranslate"><span class="pre">(a</span> <span class="pre">*</span> <span class="pre">(c</span> <span class="pre">+</span> <span class="pre">d))</span></code> を <code class="docutils literal notranslate"><span class="pre">(a</span> <span class="pre">*</span> <span class="pre">c</span> <span class="pre">+</span> <span class="pre">a</span> <span class="pre">*</span> <span class="pre">d)</span></code> に、2 つ目は <code class="docutils literal notranslate"><span class="pre">(c</span> <span class="pre">+</span> <span class="pre">d)</span> <span class="pre">*</span> <span class="pre">b</span></code> を <code class="docutils literal notranslate"><span class="pre">(c</span> <span class="pre">*</span> <span class="pre">b</span> <span class="pre">+</span> <span class="pre">d</span> <span class="pre">*</span> <span class="pre">b)</span></code> に書き換えます。評価器が期待どおり振る舞うという仮定の下で、ノード <code class="docutils literal notranslate"><span class="pre">f</span></code> に <code class="docutils literal notranslate"><span class="pre">add</span></code> と <code class="docutils literal notranslate"><span class="pre">mul</span></code> を含む任意の式木型について、どちらも健全であることを容易に証明できます。</p>
+<p>書き換え規則は汎用的に合成できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> compose_rewrites #f
+    {| ev: eval f |} {| functor f |}
+    (r0 r1: rewrite_t f)
+: rewrite_t f
+= <span class="k">let</span> rule : expr f -&gt; option (expr f) = <span class="k">fun</span> x -&gt;
+    <span class="k">match</span> r0.rule x <span class="k">with</span>
+    | None -&gt; r1.rule x
+    | x -&gt; x
+  <span class="k">in</span>
+  <span class="k">let</span> soundness <span class="k">_</span> 
+    : <span class="k">Lemma</span> (<span class="k">forall</span> x. rewrite_rule_soundness rule x)
+    = r0.soundness(); r1.soundness()
+  <span class="k">in</span>
+  { rule; soundness }
+</pre></div>
+</div>
+<p>そして任意の規則 <code class="docutils literal notranslate"><span class="pre">l</span></code> を与えると、適用可能な箇所でボトムアップに規則を適用しながら、式全体を fold できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> rewrite_alg #f {| eval f |} {| functor f |} 
+                  (l:rewrite_t f) (x:f (expr f))
+= dflt (In x) &lt;| l.rule (In x)
+
+<span class="k">let</span> rewrite #f {| eval f |} {| functor f |} 
+               (l:rewrite_t f) (x:expr f)
+= fold_expr (rewrite_alg l) x
+</pre></div>
+</div>
+<p>評価器と同様に、例に対して F* に書き換えを実行させ、正しく動くかをテストできます。まず両方の分配則の規則を適用する <code class="docutils literal notranslate"><span class="pre">rewrite_distr</span></code> を定義し、<code class="docutils literal notranslate"><span class="pre">ex6</span></code> を書き換えると <code class="docutils literal notranslate"><span class="pre">ex6'</span></code> になることを主張（アサート）します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> rewrite_distr
+  #f
+  {| ev: eval f |} {| functor f |}
+  {| leq add f |} {| leq mul f |}
+  (pf: squash (ev_add_sem ev /\ ev_mul_sem ev))
+  (x:expr f)
+: expr f
+= rewrite (compose_rewrites (distr_mul_l pf) (distr_mul_r pf)) x
+
+<span class="k">let</span> ex5_l : expr (value ++ add ++ mul) = v 3 *^ (v 1 +^ v 2)
+<span class="k">let</span> ex5_r : expr (value ++ add ++ mul) = (v 1 +^ v 2) *^ v 3
+<span class="k">let</span> ex6 = ex5_l +^ ex5_r
+
+<span class="k">let</span> ex5&#39;_l : expr (value ++ add ++ mul) = (v 3 *^ v 1) +^ (v 3 *^ v 2)
+<span class="k">let</span> ex5&#39;_r : expr (value ++ add ++ mul) = (v 1 *^ v 3) +^ (v 2 *^ v 3)
+<span class="k">let</span> ex6&#39; = ex5&#39;_l +^ ex5&#39;_r 
+
+<span class="k">let</span> test56 = <span class="k">assert_norm</span> (rewrite_distr () ex6 == ex6&#39;)
+</pre></div>
+</div>
+<p>もちろんテスト以上のことができます。実際、任意の書き換え規則を式木全体に適用しても、その意味が保存されることを証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> rewrite_soundness 
+    (x:expr (value ++ add ++ mul))
+    (l:rewrite_t (value ++ add ++ mul))
+: <span class="k">Lemma</span> (eval_expr x == eval_expr (rewrite l x))
+= <span class="k">match</span> project #value x <span class="k">with</span>
+  | Some (Val <span class="k">_</span>) -&gt;
+    l.soundness()
+  | <span class="k">_</span> -&gt;
+    <span class="k">match</span> project #add x <span class="k">with</span>
+    | Some (Add a b) -&gt; 
+      rewrite_soundness a l; rewrite_soundness b l;
+      l.soundness()
+    | <span class="k">_</span> -&gt;
+      <span class="k">let</span> Some (Mul a b) = project #mul x <span class="k">in</span>
+      rewrite_soundness a l; rewrite_soundness b l;
+      l.soundness()
+</pre></div>
+</div>
+<p>この開発の中で、ここだけは式ノード型に対して完全に汎用ではありません。値・加算・乗算を含む式という特定の場合についての証明になっています。これをさらに一般化する方法はまだ見つけられていません。おそらく <code class="docutils literal notranslate"><span class="pre">fold_expr</span></code> と同構造の汎用的な帰納原理を定義する必要があるでしょう――それはまた別の日の悩みどころです。もし簡単な方法をご存じならぜひ教えてください！</p>
+<p>とはいえ、証明自体はかなり素直で気持ちのよいものです。各場合にマッチし、部分木があれば帰納法の仮定を使い、最後に書き換え規則の健全性補題を適用します。多くの推論は F* と Z3 が自動化してくれます。例えば最後のケースでは、既に他の 2 つのケースにマッチ済みなので、必ず <code class="docutils literal notranslate"><span class="pre">Mul</span></code> ノードであることが分かります。</p>
+<p>もちろん、任意の規則に対して書き換えが健全である以上、分配則による書き換えも健全です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> rewrite_distr_soundness 
+    (x:expr (value ++ add ++ mul))
+: <span class="k">Lemma</span> (eval_expr x == eval_expr (rewrite_distr () x))
+= rewrite_soundness x (compose_rewrites (distr_mul_l ()) (distr_mul_r ()))
+</pre></div>
+</div>
+</section>
+<section id="exercises">
+<h2>演習<a class="headerlink" href="#exercises" title="Link to this heading"></a></h2>
+<p>必要な定義はこの <a class="reference external" href="../code/exercises/Part3.DataTypesALaCarte.fst">ファイル</a> にあります。</p>
+<section id="exercise-1">
+<h3>演習 1<a class="headerlink" href="#exercise-1" title="Link to this heading"></a></h3>
+<p>式を文字列として表示する関数 <code class="docutils literal notranslate"><span class="pre">to_string_specific``（型は</span> <span class="pre">``expr</span> <span class="pre">(value</span> <span class="pre">++</span> <span class="pre">add</span> <span class="pre">++</span> <span class="pre">mul)</span> <span class="pre">-&gt;</span> <span class="pre">string</span></code>）を書きなさい。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> functor (f:[@@@strictly_positive]Type -&gt; Type) = {
+  fmap : (#a:Type -&gt; #b:Type -&gt; x:f a -&gt; (y:a{y &lt;&lt; x} -&gt; b) -&gt; f b)
+}
+</pre></div>
+</div>
+</div>
+</section>
+<section id="exercise-2">
+<h3>演習 2<a class="headerlink" href="#exercise-2" title="Link to this heading"></a></h3>
+<p>次に、任意の <code class="docutils literal notranslate"><span class="pre">expr</span> <span class="pre">f</span></code> を汎用的に文字列化する <code class="docutils literal notranslate"><span class="pre">to_string</span></code> 関数を持つクラス <code class="docutils literal notranslate"><span class="pre">render</span> <span class="pre">f</span></code> を定義しなさい。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> render (f: [@@@strictly_positive]Type -&gt; Type) = {
+  to_string : 
+    #g:<span class="k">_</span> -&gt;
+    x:f (expr g) -&gt;
+    (y:g (expr g) { y &lt;&lt; x } -&gt; string) -&gt;
+    string
+}
+
+<span class="k">instance</span> render_value : render value =
+  <span class="k">let</span> to_string #g (x:value (expr g)) <span class="k">_</span> : string =
+    <span class="k">match</span> x <span class="k">with</span>
+    | Val x -&gt; string_of_int x
+  <span class="k">in</span>
+  { to_string }
+
+
+<span class="k">instance</span> render_add : render add =
+  <span class="k">let</span> to_string #g (x:add (expr g)) (to_str0: (y:g (expr g) {y &lt;&lt; x} -&gt; string)) : string =
+    <span class="k">match</span> x <span class="k">with</span>
+    | Add x y -&gt;
+      <span class="k">let</span> In x = x <span class="k">in</span>
+      <span class="k">let</span> In y = y <span class="k">in</span>
+      &quot;(&quot; ^ to_str0 x ^ &quot; + &quot; ^ to_str0 y ^ &quot;)&quot;
+  <span class="k">in</span>
+  { to_string }
+
+<span class="k">instance</span> render_mul : render mul =
+  <span class="k">let</span> to_string #g (x:mul (expr g)) (to_str0: (y:g (expr g) {y &lt;&lt; x} -&gt; string)) : string =
+    <span class="k">match</span> x <span class="k">with</span>
+    | Mul x y -&gt;
+      <span class="k">let</span> In x = x <span class="k">in</span>
+      <span class="k">let</span> In y = y <span class="k">in</span>
+      &quot;(&quot; ^ to_str0 x ^ &quot; * &quot; ^ to_str0 y ^ &quot;)&quot;
+  <span class="k">in</span>
+  { to_string }
+
+<span class="k">instance</span> render_coprod (f g: <span class="k">_</span>)
+  {| rf: render f |} 
+  {| rg: render g |}
+: render (coprod f g)
+= <span class="k">let</span> to_string #h (x:coprod f g (expr h)) (rc: (y:h (expr h) { y &lt;&lt; x }) -&gt; string): string =
+    <span class="k">match</span> x <span class="k">with</span>
+    | Inl x -&gt; rf.to_string #h x rc
+    | Inr y -&gt; rg.to_string #h y rc
+  <span class="k">in</span>
+  { to_string }
+
+<span class="k">let</span> <span class="k">rec</span> render0_render
+    (#f: <span class="k">_</span>)
+    {| rf: render f |}
+    (x: f (expr f))
+: string
+= rf.to_string #f x render0_render
+
+<span class="k">let</span> pretty #f (e:expr f) {| rf: render f |} : string =
+  <span class="k">let</span> In e = e <span class="k">in</span>
+  rf.to_string e render0_render
+
+<span class="c">//SNIPPET_START: lift$</span>
+<span class="c">(* lift allows promoting terms defined in a smaller type to a bigger one *)</span>
+<span class="k">let</span> <span class="k">rec</span> lift #f #g
+    {| ff: functor f |} 
+    {| fg: leq f g |}
+    (x: expr f)
+: expr g
+= <span class="k">let</span> In xx = x <span class="k">in</span>
+  <span class="k">let</span> xx : f (expr f) = xx <span class="k">in</span>
+  <span class="k">let</span> yy : f (expr g) = ff.fmap xx lift <span class="k">in</span> 
+  In (fg.inj yy)
+
+<span class="c">(* reuse addExample by lifting it *)</span>
+<span class="k">let</span> ex3 : expr (value ++ add ++ mul) = lift addExample *^ v 2
+<span class="k">let</span> test3 = <span class="k">assert_norm</span> (eval_expr ex3 == (1337 * 2))
+<span class="c">//SNIPPET_END: lift$</span>
+
+<span class="k">let</span> test4 = pretty ex3
+<span class="k">let</span> tt = <span class="k">assert_norm</span> (pretty ex3 == &quot;((118 + 1219) * 2)&quot;)
+</pre></div>
+</div>
+</div>
+</section>
+<section id="exercise-3">
+<h3>演習 3<a class="headerlink" href="#exercise-3" title="Link to this heading"></a></h3>
+<p>次の型を持つ関数 <code class="docutils literal notranslate"><span class="pre">lift</span></code> を書きなさい。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> lift #f #g
+   {| ff: functor f |}
+   {| fg: leq f g |}
+   (x: expr f)
+: expr g
+</pre></div>
+</div>
+<p>これを用いて、ある型向けに定義した式を別の型に再利用し、以下の主張（アサーション）が通るようにしなさい。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ex3 : expr (value ++ add ++ mul) = lift addExample *^ v 2
+
+[@@expect_failure]
+<span class="k">let</span> test_e3 = <span class="k">assert_norm</span> (eval_expr ex3 == (1337 * 2))
+</pre></div>
+</div>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(* lift allows promoting terms defined in a smaller type to a bigger one *)</span>
+<span class="k">let</span> <span class="k">rec</span> lift #f #g
+    {| ff: functor f |} 
+    {| fg: leq f g |}
+    (x: expr f)
+: expr g
+= <span class="k">let</span> In xx = x <span class="k">in</span>
+  <span class="k">let</span> xx : f (expr f) = xx <span class="k">in</span>
+  <span class="k">let</span> yy : f (expr g) = ff.fmap xx lift <span class="k">in</span> 
+  In (fg.inj yy)
+
+<span class="c">(* reuse addExample by lifting it *)</span>
+<span class="k">let</span> ex3 : expr (value ++ add ++ mul) = lift addExample *^ v 2
+<span class="k">let</span> test3 = <span class="k">assert_norm</span> (eval_expr ex3 == (1337 * 2))
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part3_typeclasses.html" class="btn btn-neutral float-left" title="型クラス" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../part4/part4.html" class="btn btn-neutral float-right" title="計算効果" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

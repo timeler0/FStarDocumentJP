@@ -1,0 +1,534 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>アトミック操作と不変条件 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="スピンロック" href="pulse_spin_lock.html" />
+    <link rel="prev" title="連結リスト" href="pulse_linked_list.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">アトミック操作と不変条件</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#atomic-operations">アトミック操作</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#invariants">不変条件（Invariant）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#creating-an-invariant">不変条件の作成</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#impredicativity-and-the-later-modality">非述語性と <code class="docutils literal notranslate"><span class="pre">later</span></code> モダリティ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#opening-invariants">不変条件を開く（open）</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-later-modality-and-later-credits">later モダリティと later クレジット</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#double-opening-is-unsound">同一不変条件の二重 open は非健全</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subsuming-atomic-computations">アトミック計算の包含（サブサム）</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">アトミック操作と不変条件</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="atomic-operations-and-invariants">
+<span id="pulse-atomics-and-invariants"></span><h1>アトミック操作と不変条件<a class="headerlink" href="#atomic-operations-and-invariants" title="Link to this heading"></a></h1>
+<p>この章では、ついに並行性に関する構成要素を扱います。</p>
+<p>Pulse の並行性は次の 2 つの概念を中心に構成されています。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>アトミック操作</strong>：他スレッドに割り込まれず、計算の単一ステップで実行されることが保証された操作。</p></li>
+<li><p><strong>不変条件（Invariant）</strong>：常に成り立つよう強制される名前付き述語。アトミック操作は、現在状態で不変条件が成り立つと仮定してそれを利用し、アトミック・ステップの終了時に再び成り立つようにします。</p></li>
+</ul>
+</div></blockquote>
+<p>これらに基づき、これまで学んだ分離論理の道具立て（とくにゴースト状態）と組み合わせることで、Pulse は並行プログラムの証明を可能にします。</p>
+<section id="atomic-operations">
+<h2>アトミック操作<a class="headerlink" href="#atomic-operations" title="Link to this heading"></a></h2>
+<p>これまでに <a class="reference internal" href="pulse_higher_order.html#pulse-higher-order"><span class="std std-ref">Pulse の 2 種類の計算</span></a> を学びました。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>一般用途の部分正当性をもつ計算（計算型 <code class="docutils literal notranslate"><span class="pre">stt</span></code>）</p></li>
+<li><p>完全正当性が証明され、計算的に無関係とみなされるゴースト計算（計算型 <code class="docutils literal notranslate"><span class="pre">stt_ghost</span></code>）。</p></li>
+</ul>
+</div></blockquote>
+<p>Pulse には 3 つ目の計算として <a href="#id1"><span class="problematic" id="id2">*</span></a>アトミック計算*（計算型 <code class="docutils literal notranslate"><span class="pre">stt_atomic</span></code>）があります。以下は <code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Reference</span></code> にある <code class="docutils literal notranslate"><span class="pre">read_atomic</span></code> と <code class="docutils literal notranslate"><span class="pre">write_atomic</span></code> のシグネチャです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">atomic</span>
+<span class="k">fn</span> read_atomic (r:ref U32.t) (#n:erased U32.t) (#p:perm)
+<span class="k">requires</span> pts_to r #p n
+<span class="k">returns</span> x:U32.t
+<span class="k">ensures</span> pts_to r #p n ** pure (reveal n == x)
+</pre></div>
+</div>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">atomic</span>
+<span class="k">fn</span> write_atomic (r:ref U32.t) (x:U32.t) (#n:erased U32.t)
+<span class="k">requires</span> pts_to r n
+<span class="k">ensures</span> pts_to r x
+</pre></div>
+</div>
+<p>これらの関数の <code class="docutils literal notranslate"><span class="pre">atomic</span></code> 注釈は、32 ビット整数の読み書きが 1 回のアトミックな計算ステップで行えることを主張します。</p>
+<p>これは Pulse プログラムの実行対象アーキテクチャに関する仮定です。マシンによっては 32 ビット値を原子的に読み書きできない場合があります。したがって、アトミック操作を使う際は、対象環境で本当に原子的であるかを確認すべきです。</p>
+<p>Pulse では独自の操作をアトミックとして宣言することもできます。たとえば 64/128 ビットのアトミック操作をサポートするマシン向けに、それらの意味論を F* で定義し、Pulse に追加して <code class="docutils literal notranslate"><span class="pre">atomic</span></code> として印を付けられます。</p>
+<p>ときに（特に高階の場面で）次の計算型でアトミック計算が記述されることがあります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> stt_atomic (t:Type) (i:inames) (pre:slprop) (post:t -&gt; slprop)
+  : Type u#4
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">stt_ghost</span></code> と同様、アトミック計算は全域的でユニバース <code class="docutils literal notranslate"><span class="pre">u#4</span></code> に属します。したがって、アトミック関数を状態に格納することはできません（<code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">(unit</span> <span class="pre">-&gt;</span> <span class="pre">stt_atomic</span> <span class="pre">t</span> <span class="pre">i</span> <span class="pre">p</span> <span class="pre">q)</span></code> は整った型ではありません）。</p>
+<p>アトミック計算とゴースト計算は <code class="docutils literal notranslate"><span class="pre">i:inames</span></code> で添字付けされます。<code class="docutils literal notranslate"><span class="pre">inames</span></code> は不変条件の名前集合です。続いて説明します。</p>
+</section>
+<section id="invariants">
+<h2>不変条件（Invariant）<a class="headerlink" href="#invariants" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Core</span></code> には次の型があります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>[@@erasable]
+<span class="k">val</span> iref : Type0
+<span class="k">val</span> inv (i:iref) (p:slprop) : slprop
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span></code> は、現在および将来のすべての状態で <code class="docutils literal notranslate"><span class="pre">p</span></code> が成り立つことを主張する述語だと考えてください。各不変条件は <code class="docutils literal notranslate"><span class="pre">i:iref</span></code> という名前を持ちますが、それは仕様上のみ意味があり、消去可能（erasable）です。</p>
+<p>密接に関連する型として <code class="docutils literal notranslate"><span class="pre">iname</span></code> があります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> iname : eqtype
+<span class="k">let</span> inames = erased (FStar.Set.set iname)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">iname_of</span> <span class="pre">(i:iref):</span> <span class="pre">GTot</span> <span class="pre">iname</span></code> により、すべての <code class="docutils literal notranslate"><span class="pre">iref</span></code> は <code class="docutils literal notranslate"><span class="pre">iname</span></code> に変換できます。</p>
+<p>不変条件は複製可能です。すなわち、<code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span></code> から <code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span> <span class="pre">**</span> <span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span></code> を示せます。これは <code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Core.dup_inv</span></code> の型で表現されています。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span> <span class="k">fn</span> dup_inv (i:iref) (p:slprop)
+<span class="k">requires</span> inv i p
+<span class="k">ensures</span> inv i p ** inv i p
+</pre></div>
+</div>
+<section id="creating-an-invariant">
+<h3>不変条件の作成<a class="headerlink" href="#creating-an-invariant" title="Link to this heading"></a></h3>
+<p>まず、不変条件の作り方を見てみましょう。</p>
+<p>最初に、<code class="docutils literal notranslate"><span class="pre">x</span></code> に対するフル・パーミッションを保持していることを表す述語 <code class="docutils literal notranslate"><span class="pre">owns</span> <span class="pre">x</span></code> を定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> owns (x:ref U32.t) : timeless_slprop = <span class="k">exists</span>* v. pts_to x v
+</pre></div>
+</div>
+<p>いま <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">r</span> <span class="pre">x</span></code> が成り立つなら、次のようにそれを <code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">(owns</span> <span class="pre">r)</span></code> という不変条件に変換できます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> create_invariant (r:ref U32.t) (v:erased U32.t)
+<span class="k">requires</span> pts_to r v
+<span class="k">returns</span> i:iname
+<span class="k">ensures</span> inv i (owns r)
+{
+    <span class="k">fold</span> owns;
+    new_invariant (owns r)
+}
+</pre></div>
+</div>
+<p>重要：<code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">r</span> <span class="pre">x</span></code> を <code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">(owns</span> <span class="pre">r)</span></code> に変換すると、<code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">r</span> <span class="pre">x</span></code> の所有権は**失われます**。<code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">(owns</span> <span class="pre">r)</span></code> を持った時点で、<code class="docutils literal notranslate"><span class="pre">owns</span> <span class="pre">r</span></code> が常に成り立つことを保つのが目的だからです。もし同時に <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">r</span> <span class="pre">x</span></code> を保持できてしまうと、たとえば <code class="docutils literal notranslate"><span class="pre">r</span></code> を解放することで不変条件を破ってしまえます。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>ヒント：<code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span></code> を使う際は、<code class="docutils literal notranslate"><span class="pre">p</span></code> をユーザー定義の述語にしておくのが得策です。例えば補助述語を定義せずに <code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">(exists*</span> <span class="pre">v.</span> <span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">v)</span></code> と書いて済ませたくなるかもしれませんが、その場合 Pulse の検査器が生成する証明義務の一部が SMT にとって難しくなり、妙な失敗が起きがちです。現状では補助述語を定義して用いることをお勧めします。</p>
+</div>
+</section>
+<section id="impredicativity-and-the-later-modality">
+<h3>非述語性と <code class="docutils literal notranslate"><span class="pre">later</span></code> モダリティ<a class="headerlink" href="#impredicativity-and-the-later-modality" title="Link to this heading"></a></h3>
+<p>Pulse では <em>任意の</em> 述語 <code class="docutils literal notranslate"><span class="pre">p:slprop</span></code> を <code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span> <span class="pre">:</span> <span class="pre">slprop</span></code> に変換できます。重要なのは <code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span></code> 自体も <code class="docutils literal notranslate"><span class="pre">slprop</span></code> であるため、<code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">(inv</span> <span class="pre">j</span> <span class="pre">p)</span></code> のように不変条件の中に不変条件を入れられる点です。こうした自己言及的な構成能力により、Pulse の分離論理は <em>非述語的（impredicative）</em> です。</p>
+<p>非述語性は多くの場面で有用です。例えば、内部にさらにロックを含み得るデータ構造へのアクセスを保護するロックを作れます。ただし分離論理で非述語性を健全に実装するのは難しく、ヒープやヒープ述語の定義に循環が生じます。PulseCore は <em>indirection theory</em> と呼ばれる手法でこの循環を解消し、Pulse の構成要素とともに非述語的不変条件の基礎モデルを与えます。詳細は本書の範囲外ですが、実際に論理を使うのにモデル構成の中身を知る必要はありません。</p>
+<p>以下でモデルの直観を少し示しますが、現時点では Pulse に次の抽象述語があることだけ覚えておいてください。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> later (p:slprop) : slprop
+<span class="k">val</span> later_credit (i:nat) : slprop
+</pre></div>
+</div>
+<p>そして、導入と除去のために次の形が用意されています。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span> <span class="k">fn</span> later_intro (p: slprop)
+<span class="k">requires</span> p
+<span class="k">ensures</span> later p
+
+<span class="k">ghost</span> <span class="k">fn</span> later_elim (p: slprop)
+<span class="k">requires</span> later p ** later_credit 1
+<span class="k">ensures</span> p
+
+<span class="k">fn</span> later_credit_buy (amt:nat)
+<span class="k">requires</span> emp
+<span class="k">ensures</span> later_credit n
+</pre></div>
+</div>
+</section>
+<section id="opening-invariants">
+<h3>不変条件を開く（open）<a class="headerlink" href="#opening-invariants" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">(owns</span> <span class="pre">r)</span></code> という不変条件を確保したら、それで何ができるでしょうか。前述のとおり、アトミック計算の間、<code class="docutils literal notranslate"><span class="pre">owns</span> <span class="pre">r</span></code> を利用できますが、アトミック・ステップの終了時に復元する必要があります。</p>
+<p><code class="docutils literal notranslate"><span class="pre">with_invariants</span></code> 構文は、不変条件にアクセス可能なスコープを与えます。そこでは最大 1 回のアトミック・ステップを含み、その前後に必要なだけのゴースト（不可観測）ステップを入れられます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">with_invariants</span></code> の一般形は次のとおりで、式 <code class="docutils literal notranslate"><span class="pre">e</span></code> のスコープで不変条件 <code class="docutils literal notranslate"><span class="pre">i_1</span></code> 〜 <code class="docutils literal notranslate"><span class="pre">i_k</span></code> を“開き”ます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">with_invariants</span> i_1 ... i_k
+<span class="k">returns</span> x:t
+<span class="k">ensures</span> post
+{ e }
+</pre></div>
+</div>
+<p>多くの場合、<code class="docutils literal notranslate"><span class="pre">returns</span></code> と <code class="docutils literal notranslate"><span class="pre">ensures</span></code> 注釈は推論されるため省略されます。</p>
+<p>これは次のような入れ子の糖衣構文です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">with_invariants</span> i_1 {
+ ...
+  <span class="k">with_invariants</span> i_k
+  <span class="k">returns</span> x:t
+  <span class="k">ensures</span> post
+  { e }
+ ...
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">with_invariant</span> <span class="pre">i</span> <span class="pre">{</span> <span class="pre">e</span> <span class="pre">}</span></code> で単一の不変条件 <code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span></code> を開くための規則は次のとおりです。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">i</span></code> は型 <code class="docutils literal notranslate"><span class="pre">iref</span></code> を持ち、かつある <code class="docutils literal notranslate"><span class="pre">p:slprop</span></code> に対して <code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span></code> が現在の文脈で証明可能であること。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">e</span></code> must have the type <code class="docutils literal notranslate"><span class="pre">stt_atomic</span> <span class="pre">t</span> <span class="pre">j</span> <span class="pre">(later</span> <span class="pre">p</span> <span class="pre">**</span> <span class="pre">r)</span> <span class="pre">(fun</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">later</span> <span class="pre">p</span> <span class="pre">**</span>
+<span class="pre">s</span> <span class="pre">x)</span></code>. <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> That is, <code class="docutils literal notranslate"><span class="pre">e</span></code> requires and restores <code class="docutils literal notranslate"><span class="pre">later</span> <span class="pre">p</span></code>, while also
+transforming <code class="docutils literal notranslate"><span class="pre">r</span></code> to <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">x</span></code>, all in at most one atomic step. Further, the
+<code class="docutils literal notranslate"><span class="pre">name_of_inv</span> <span class="pre">i</span></code> must not be in the set <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">with_invariants</span> <span class="pre">i</span> <span class="pre">{</span> <span class="pre">e</span> <span class="pre">}</span></code> は型 <code class="docutils literal notranslate"><span class="pre">stt_atomic</span> <span class="pre">t</span> <span class="pre">(add_inv</span> <span class="pre">i</span> <span class="pre">j)</span> <span class="pre">(inv</span> <span class="pre">i</span> <span class="pre">p</span> <span class="pre">**</span> <span class="pre">r)</span> <span class="pre">(fun</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span> <span class="pre">**</span> <span class="pre">s</span> <span class="pre">x)</span></code> を持ちます。つまり <code class="docutils literal notranslate"><span class="pre">e</span></code> は 1 ステップだけ <code class="docutils literal notranslate"><span class="pre">p</span></code> を使用でき、呼び出し側から見ると文脈は <code class="docutils literal notranslate"><span class="pre">r</span></code> から <code class="docutils literal notranslate"><span class="pre">s</span></code> へ変換され、<code class="docutils literal notranslate"><span class="pre">p</span></code> の使用は隠蔽されます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">with_invariants</span></code> の添字 <code class="docutils literal notranslate"><span class="pre">add_inv</span> <span class="pre">i</span> <span class="pre">j</span></code> に注意してください。<code class="docutils literal notranslate"><span class="pre">stt_atomic``（や</span> <span class="pre">``stt_ghost</span></code>）計算は、開く可能性のあるすべての不変条件の名前でインデックス付けされます。</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">with_invariants</span></code> の働きを、いくつかの例で見ていきましょう。</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>別案として、<code class="docutils literal notranslate"><span class="pre">e</span></code> が型 <code class="docutils literal notranslate"><span class="pre">stt_ghost</span> <span class="pre">t</span> <span class="pre">j</span> <span class="pre">(later</span> <span class="pre">p</span> <span class="pre">**</span> <span class="pre">r)</span> <span class="pre">(fun</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">later</span> <span class="pre">p</span> <span class="pre">**</span> <span class="pre">s</span> <span class="pre">x)</span></code> を持つ場合、<code class="docutils literal notranslate"><span class="pre">with_invariants</span> <span class="pre">i</span> <span class="pre">{</span> <span class="pre">e</span> <span class="pre">}</span></code> 全体は <code class="docutils literal notranslate"><span class="pre">stt_ghost</span> <span class="pre">t</span> <span class="pre">(add_inv</span> <span class="pre">i</span> <span class="pre">j)</span> <span class="pre">(inv</span> <span class="pre">i</span> <span class="pre">p</span> <span class="pre">**</span> <span class="pre">r)</span> <span class="pre">(fun</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">inv</span> <span class="pre">i</span> <span class="pre">p</span> <span class="pre">**</span> <span class="pre">s</span> <span class="pre">x)</span></code> となります。すなわち不変条件はアトミック文脈でもゴースト文脈でも開けます。</p>
+</aside>
+</aside>
+<section id="updating-a-reference">
+<h4>参照の更新<a class="headerlink" href="#updating-a-reference" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">inv</span> <span class="pre">i</span> <span class="pre">(owns</span> <span class="pre">r)</span></code> がある状況で参照を更新してみましょう。最初の試みは次のとおりです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@expect_failure]
+<span class="k">atomic</span>
+<span class="k">fn</span> update_ref_atomic (r:ref U32.t) (i:iname) (v:U32.t)
+<span class="k">requires</span> inv i (owns r)
+<span class="k">ensures</span> inv i (owns r)
+{
+  <span class="k">with_invariants</span> i {    <span class="c">//later (owns r)</span>
+     <span class="k">unfold</span> owns;        <span class="c">//cannot prove owns; only later (owns r)</span>
+  }
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">with_invariants</span> <span class="pre">i</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> で不変条件を開くと、ブロックの内部では <code class="docutils literal notranslate"><span class="pre">later</span> <span class="pre">(owns</span> <span class="pre">r)</span></code> が手に入ります。しかしこのままでは行き詰まります。<code class="docutils literal notranslate"><span class="pre">later</span></code> を外すには先述の <code class="docutils literal notranslate"><span class="pre">later_elim</span></code> を使えますが、その呼び出しには``later_credit 1`` が必要です。</p>
+<p>そこで、次のように再挑戦します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">atomic</span>
+<span class="k">fn</span> update_ref_atomic (r:ref U32.t) (i:iname) (v:U32.t)
+<span class="k">requires</span> inv i (owns r) ** later_credit 1
+<span class="k">ensures</span> inv i (owns r)
+<span class="k">opens</span> [i]
+{
+  <span class="k">with_invariants</span> i {    <span class="c">//later (owns r) ** later_credit 1</span>
+     later_elim <span class="k">_</span>;       <span class="c">//ghost step: owns r</span>
+     <span class="k">unfold</span> owns;        <span class="c">//ghost step;  exists* u. pts_to r u</span>
+     write_atomic r v;   <span class="c">//atomic step; pts_to r v</span>
+     <span class="k">fold</span> owns;          <span class="c">//ghost step;  owns r</span>
+     later_intro (owns r) <span class="c">//ghost step: later (owns r)</span>
+  } <span class="c">// inv i (owns r)</span>
+}
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>関数の前提にも <code class="docutils literal notranslate"><span class="pre">later_credit</span> <span class="pre">1</span></code> を含めます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">with_invariants</span></code> のスコープに入った直後、文脈には <code class="docutils literal notranslate"><span class="pre">later</span> <span class="pre">(owns</span> <span class="pre">r)</span></code> があります。</p></li>
+<li><p>ゴースト手続き <code class="docutils literal notranslate"><span class="pre">later_elim</span> <span class="pre">_</span></code> がクレジットを消費し、<code class="docutils literal notranslate"><span class="pre">later</span> <span class="pre">(owns</span> <span class="pre">r)</span></code> を <code class="docutils literal notranslate"><span class="pre">owns</span> <span class="pre">r</span></code> に戻します。</p></li>
+<li><p>続くゴースト手続き <code class="docutils literal notranslate"><span class="pre">unfold</span> <span class="pre">owns</span></code> は定義を展開します。</p></li>
+<li><p>その後、アトミック操作 <code class="docutils literal notranslate"><span class="pre">write_atomic</span></code> を 1 回行います。</p></li>
+<li><p>さらにゴースト手続き <code class="docutils literal notranslate"><span class="pre">fold</span> <span class="pre">owns</span></code> で畳み込みます。</p></li>
+<li><p>ブロックを終えるには <code class="docutils literal notranslate"><span class="pre">later</span> <span class="pre">(owns</span> <span class="pre">r)</span></code> を復元する必要があります。現在は <code class="docutils literal notranslate"><span class="pre">owns</span> <span class="pre">r</span></code> があるので、ゴースト手続き <code class="docutils literal notranslate"><span class="pre">later_intro</span></code> で復元します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">with_invariants</span> <span class="pre">i</span></code> 内のブロックは <code class="docutils literal notranslate"><span class="pre">stt_atomic</span> <span class="pre">unit</span> <span class="pre">emp_inames</span> <span class="pre">(later</span> <span class="pre">(owns</span> <span class="pre">r)</span> <span class="pre">**</span> <span class="pre">later_credit</span> <span class="pre">1)</span> <span class="pre">(fun</span> <span class="pre">_</span> <span class="pre">-&gt;</span> <span class="pre">later</span> <span class="pre">(owns</span> <span class="pre">r)</span> <span class="pre">**</span> <span class="pre">emp)</span></code> の型になります。</p></li>
+<li><p>不変条件 <code class="docutils literal notranslate"><span class="pre">i</span></code> を開いたので、<code class="docutils literal notranslate"><span class="pre">update_ref_atomic</span></code> の型は <code class="docutils literal notranslate"><span class="pre">opens</span> <span class="pre">(singleton</span> <span class="pre">i)</span></code> 注釈でそれを記録します。同値に、型は <code class="docutils literal notranslate"><span class="pre">stt_atomic</span> <span class="pre">unit</span> <span class="pre">(singleton</span> <span class="pre">i)</span> <span class="pre">(inv</span> <span class="pre">i</span> <span class="pre">(owns</span> <span class="pre">r)</span> <span class="pre">**</span> <span class="pre">later_credit</span> <span class="pre">1)</span> <span class="pre">(fun</span> <span class="pre">_</span> <span class="pre">-&gt;</span> <span class="pre">inv</span> <span class="pre">i</span> <span class="pre">(owns</span> <span class="pre">r))</span></code> です。<code class="docutils literal notranslate"><span class="pre">opens</span></code> を省略した場合は既定で空集合 <code class="docutils literal notranslate"><span class="pre">emp_inames</span></code> が使われます。</p></li>
+</ul>
+<p>最後に、<code class="docutils literal notranslate"><span class="pre">update_ref_atomic</span></code> を呼ぶには事前に later クレジットを購入する必要があります。これはアトミック計算の呼び出し前に容易に行えます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> update_ref (r:ref U32.t) (i:iname) (v:U32.t)
+<span class="k">requires</span> inv i (owns r)
+<span class="k">ensures</span> inv i (owns r)
+{                    
+  later_credit_buy 1;
+  update_ref_atomic r i v;
+}
+</pre></div>
+</div>
+</section>
+</section>
+<section id="the-later-modality-and-later-credits">
+<h3>later モダリティと later クレジット<a class="headerlink" href="#the-later-modality-and-later-credits" title="Link to this heading"></a></h3>
+<p>later モダリティの例を見たので、基礎となるモデルの直観を少し示します。</p>
+<p>PulseCore の意味論は「ティッカー」と呼ぶ抽象的な自然数カウンタを伴うメモリに対して定義されます。これは他の論理で「ステップ指数」と呼ばれることもありますが、PulseCore では実際の計算ステップ数とは無関係です。代わりに、プログラムの特定の地点で、プログラマは特別な <em>ゴースト</em> 命令でティッカーを「刻む（tick）」ことができ、値が 1 減ります。減少するカウンタにより、本来は循環的になりがちなヒープとヒープ述語の間に近似不動点を定義できます。論理は、ティッカー初期値を十分大きく選べば、尽きる前に任意の有限ステップの実行が可能となるよう設計されています。</p>
+<p>PulseCore ではティッカーを直接扱う代わりに、<em>later</em> モダリティと <em>later クレジット</em> という 2 つの論理構成子でその推論をカプセル化します。これは Iris など非述語性をもつ分離論理にも見られる手法です。</p>
+<section id="id3">
+<h4>later モダリティと later クレジット（詳細）<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<p>述語 <code class="docutils literal notranslate"><span class="pre">later</span> <span class="pre">p</span></code> は、1 回ティックを刻んだ後で <code class="docutils literal notranslate"><span class="pre">p:slprop</span></code> が成り立つことを表します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> later (p: slprop) : slprop
+</pre></div>
+</div>
+<p>すべての <code class="docutils literal notranslate"><span class="pre">p:slprop</span></code> は「遺伝的（hereditary）」です。つまり、あるメモリで真なら、そのメモリをティックした後でも真です。ゴースト関数 <code class="docutils literal notranslate"><span class="pre">later_intro</span></code> はこの原理を体現し、<code class="docutils literal notranslate"><span class="pre">p</span></code> から <code class="docutils literal notranslate"><span class="pre">later</span> <span class="pre">p</span></code> を導けます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span> <span class="k">fn</span> later_intro (p: slprop)
+<span class="k">requires</span> p
+<span class="k">ensures</span> later p
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">later</span> <span class="pre">p</span></code> があれば <code class="docutils literal notranslate"><span class="pre">later_elim</span></code> により <code class="docutils literal notranslate"><span class="pre">p</span></code> を得られます。これは実質的にメモリを 1 回ティックしますが、そのためにはティッカーが 0 でないという前提、すなわち <code class="docutils literal notranslate"><span class="pre">later_credit</span> <span class="pre">1</span></code> が必要です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span> <span class="k">fn</span> later_elim (p: slprop)
+<span class="k">requires</span> later p ** later_credit 1
+<span class="k">ensures</span> p
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">later_credit</span> <span class="pre">1</span></code> を得る唯一の方法は、次の操作でクレジットを“購入”することです。これはメモリを少なくとも <code class="docutils literal notranslate"><span class="pre">n</span></code> 回ティックできることを保証する具体的な操作です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> later_credit_buy (amt:nat)
+<span class="k">requires</span> emp
+<span class="k">ensures</span> later_credit n
+</pre></div>
+</div>
+<p>抽象的には、ティッカーがこれ以上刻めない場合、プログラムは無限ループします。later クレジット（一般にはステップ指数論理）を使うプログラムは本質的に部分正当性のみが保証され、無限ループが許容されます。メタレベルでは、初期ティッカー値を十分大きく設定できるため、<code class="docutils literal notranslate"><span class="pre">later_credit_buy</span></code> が実際に無限ループすることはありません。事実、コンパイル時には <code class="docutils literal notranslate"><span class="pre">later_credit_buy</span> <span class="pre">n</span></code> は no-op の <code class="docutils literal notranslate"><span class="pre">()</span></code> に抽出されます。</p>
+<p>なお、later クレジットは加法的に分割・合成できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> later_credit_zero ()
+: <span class="k">Lemma</span> (later_credit 0 == emp)
+
+<span class="k">val</span> later_credit_add (a b: nat)
+: <span class="k">Lemma</span> (later_credit (a + b) == later_credit a ** later_credit b)
+</pre></div>
+</div>
+</section>
+<section id="timeless-predicates">
+<h4>時刻非依存（Timeless）述語<a class="headerlink" href="#timeless-predicates" title="Link to this heading"></a></h4>
+<p>あらゆる <code class="docutils literal notranslate"><span class="pre">p:slprop</span></code> は遺伝的（<code class="docutils literal notranslate"><span class="pre">p</span></code> なら <code class="docutils literal notranslate"><span class="pre">later</span> <span class="pre">p</span></code>）ですが、<code class="docutils literal notranslate"><span class="pre">pts_to</span></code> など多くの基本的述語は <strong>timeless</strong>、すなわち <code class="docutils literal notranslate"><span class="pre">later</span> <span class="pre">p</span></code> から <code class="docutils literal notranslate"><span class="pre">p</span></code> が従います。timeless 述語同士の <code class="docutils literal notranslate"><span class="pre">**</span></code> 結合や、timeless 述語に関する存在量化もtimeless です。</p>
+<p>Pulse.Lib.Core には次が用意されています。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> timeless (p: slprop) : prop
+<span class="k">let</span> timeless_slprop = v:slprop { timeless v }
+<span class="k">val</span> timeless_emp : squash (timeless emp)
+<span class="k">val</span> timeless_pure  (p:prop) : <span class="k">Lemma</span> (timeless (pure p))
+<span class="k">val</span> timeless_star (p q : slprop) : <span class="k">Lemma</span>
+   (<span class="k">requires</span> timeless p /\ timeless q)
+   (<span class="k">ensures</span> timeless (p ** q))
+<span class="k">val</span> timeless_exists (#a:Type u#a) (p: a -&gt; slprop) : <span class="k">Lemma</span>
+ (<span class="k">requires</span> <span class="k">forall</span> x. timeless (p x))
+ (<span class="k">ensures</span> timeless (op_exists_Star p))
+</pre></div>
+</div>
+<p>また、Pulse.Lib.Reference には次があります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> pts_to_timeless (#a:Type) (r:ref a) (p:perm) (x:a)
+: <span class="k">Lemma</span> (timeless (pts_to r #p x))
+        [<span class="k">SMTPat</span> (timeless (pts_to r #p x))]
+</pre></div>
+</div>
+<p>timeless 述語では、クレジットなしで <code class="docutils literal notranslate"><span class="pre">later</span></code> を自明に除去できます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span> <span class="k">fn</span> later_elim_timeless (p: timeless_slprop)
+<span class="k">requires</span> later p
+<span class="k">ensures</span> p
+</pre></div>
+</div>
+</section>
+<section id="updating-a-reference-with-timeless-predicates">
+<h4>timeless 述語を用いた参照の更新<a class="headerlink" href="#updating-a-reference-with-timeless-predicates" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">pts_to</span></code> は timeless なので、以下のように later クレジットなしで <code class="docutils literal notranslate"><span class="pre">later</span> <span class="pre">(owns</span> <span class="pre">r)</span></code> を除去できます。</p>
+<p>まず <code class="docutils literal notranslate"><span class="pre">owns</span></code> が timeless であることを示します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> owns_timeless (x:ref U32.t)
+: squash (timeless (owns x))
+<span class="k">by</span> T.(norm [delta_only [`%owns; `%auto_squash]]; 
+      mapply (`FStar.Squash.return_squash);
+      mapply (`timeless_exists))
+= ()
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>明示的な補題を書くより、定義に注釈を付けて timeless であることを示す方が簡単なことが多いです。例えば次のようにできます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> owns (x:ref U32.t) : timeless_slprop = <span class="k">exists</span>* v. pts_to x v
+</pre></div>
+</div>
+</div>
+<p>次に、later クレジットの代わりに <code class="docutils literal notranslate"><span class="pre">later_elim_timeless</span></code> を使うよう <code class="docutils literal notranslate"><span class="pre">update_ref_atomic</span></code> を書き換えます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">atomic</span>
+<span class="k">fn</span> update_ref_atomic_alt (r:ref U32.t) (i:iname) (v:U32.t)
+<span class="k">requires</span> inv i (owns r)
+<span class="k">ensures</span> inv i (owns r)
+<span class="k">opens</span> [i]
+{
+  <span class="k">with_invariants</span> i {    <span class="c">//later (owns r) ** later_credit 1</span>
+     later_elim_timeless <span class="k">_</span>;       <span class="c">//owns r</span>
+     <span class="k">unfold</span> owns;        <span class="c">//ghost step;  exists* u. pts_to r u</span>
+     write_atomic r v;   <span class="c">//atomic step; pts_to r v</span>
+     <span class="k">fold</span> owns;          <span class="c">//ghost step;  owns r</span>
+     later_intro (owns r) <span class="c">//later (owns r)</span>
+  } <span class="c">// inv i (owns r)</span>
+}
+</pre></div>
+</div>
+</section>
+</section>
+<section id="double-opening-is-unsound">
+<h3>同一不変条件の二重 open は非健全<a class="headerlink" href="#double-opening-is-unsound" title="Link to this heading"></a></h3>
+<p>開いた不変条件の名前を追跡する必要がある理由を示します。もし同じ不変条件を同一スコープで二度開けてしまうと、次のように簡単に <code class="docutils literal notranslate"><span class="pre">False</span></code> を導けてしまいます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@expect_failure]
+<span class="k">fn</span> double_open_bad (r:ref U32.t) (i:inv (owns r))
+<span class="k">requires</span> emp
+<span class="k">ensures</span> pure False
+{
+    <span class="k">with_invariants</span> i {
+      <span class="k">with_invariants</span> i {
+        <span class="k">unfold</span> owns;
+        <span class="k">unfold</span> owns;
+        pts_to_dup_impossible r;
+        <span class="k">fold</span> owns;
+        <span class="k">fold</span> owns
+      }
+    }
+}
+</pre></div>
+</div>
+<p>ここでは不変条件 <code class="docutils literal notranslate"><span class="pre">i</span></code> を 2 回開き、<code class="docutils literal notranslate"><span class="pre">owns</span> <span class="pre">r</span> <span class="pre">**</span> <span class="pre">owns</span> <span class="pre">r</span></code>、すなわち <code class="docutils literal notranslate"><span class="pre">r</span></code> に対する過剰な権限を得ています。これにより矛盾を構成するのは容易です。</p>
+</section>
+<section id="subsuming-atomic-computations">
+<h3>アトミック計算の包含（サブサム）<a class="headerlink" href="#subsuming-atomic-computations" title="Link to this heading"></a></h3>
+<p>アトミック計算は、内部で開いた不変条件の情報を忘れたうえで、通常の <code class="docutils literal notranslate"><span class="pre">stt</span></code> 計算へと暗黙に変換できます。たとえば下の <code class="docutils literal notranslate"><span class="pre">update_ref</span></code> は atomic 印がないため、内部でどの不変条件を開いたかは型に記録されません。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> update_ref (r:ref U32.t) (i:iname) (v:U32.t)
+<span class="k">requires</span> inv i (owns r)
+<span class="k">ensures</span> inv i (owns r)
+{                    
+  later_credit_buy 1;
+  update_ref_atomic r i v;
+}
+</pre></div>
+</div>
+<p>これは問題ありません。非アトミック計算は <code class="docutils literal notranslate"><span class="pre">with_invariants</span></code> ブロック内に現れないため、<code class="docutils literal notranslate"><span class="pre">stt</span></code> 計算が非健全な二重 open を引き起こす心配はないからです。非アトミック計算を <code class="docutils literal notranslate"><span class="pre">with_invariants</span></code> 内で使おうとすると、次のようにエラーになります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@expect_failure] 
+<span class="k">fn</span> update_ref_fail (r:ref U32.t) (i:iname) (v:U32.t)
+<span class="k">requires</span> inv i (owns r)
+<span class="k">ensures</span> inv i (owns r)
+{
+  <span class="k">with_invariants</span> i {
+    <span class="k">unfold</span> owns;
+    r := v; <span class="c">//not atomic</span>
+    <span class="k">fold</span> owns;
+  }
+}
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>- This computation is not atomic nor ghost. `with_invariants`
+  blocks can only contain atomic computations.
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_linked_list.html" class="btn btn-neutral float-left" title="連結リスト" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_spin_lock.html" class="btn btn-neutral float-right" title="スピンロック" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

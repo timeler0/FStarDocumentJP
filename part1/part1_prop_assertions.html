@@ -1,0 +1,336 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMT ソルバとの連携 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="帰納的データ型とパターンマッチ" href="part1_inductives.html" />
+    <link rel="prev" title="等値性（Equality）" href="part1_equality.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part1.html">全域関数によるプログラミングと証明</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part1_getting_off_the_ground.html">まずは始めてみよう</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_polymorphism.html">多相と型推論</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_equality.html">等値性（Equality）</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">SMT ソルバとの連携</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#propositions">命題（Propositions）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#propositional-connectives">命題の連結子</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#quantifiers">量化子</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conjunction-disjunction-negation-implication">連言・選言・否定・含意</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#atomic-propositions">原子的な命題</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#falsehood">偽</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#truth">真</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#propositional-equality">命題的等値</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#type-vs-prop"><code class="docutils literal notranslate"><span class="pre">Type</span></code> と <code class="docutils literal notranslate"><span class="pre">prop</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#assertions">アサーション（断言）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#assumptions">仮定（アサンプション）</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part1_inductives.html">帰納的データ型とパターンマッチ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_termination.html">停止性の証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_lemmas.html">補題と帰納法による証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_quicksort.html">ケーススタディ：クイックソート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_execution.html">プログラムの実行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_wrap.html">まとめ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part1.html">全域関数によるプログラミングと証明</a></li>
+      <li class="breadcrumb-item active">SMT ソルバとの連携</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="interfacing-with-an-smt-solver">
+<span id="part1-prop-assertions"></span><h1>SMT ソルバとの連携<a class="headerlink" href="#interfacing-with-an-smt-solver" title="Link to this heading"></a></h1>
+<p><a class="reference internal" href="part1.html#part1"><span class="std std-ref">この部の冒頭</span></a> で述べたように、型 <code class="docutils literal notranslate"><span class="pre">t</span></code> は命題を表し、項 <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">:</span> <span class="pre">t</span></code> は <code class="docutils literal notranslate"><span class="pre">t</span></code> の証明です。多くの他の依存型付き言語では、<code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">:</span> <span class="pre">t</span></code> という項を示すことが <code class="docutils literal notranslate"><span class="pre">t</span></code> の妥当性を証明する唯一の方法です。F* でもそのような証明は可能ですが、それだけが定理を証明する方法ではありません。</p>
+<p>例として <a class="reference internal" href="part1_getting_off_the_ground.html#part1-ch1-boolean-refinements"><span class="std std-ref">ブール精錬型</span></a> を考えましょう。すでに見たように、F* では <code class="docutils literal notranslate"><span class="pre">17</span> <span class="pre">:</span> <span class="pre">x:int{x</span> <span class="pre">&gt;=</span> <span class="pre">0}</span></code> を簡単に示せます。内部では、F* は <code class="docutils literal notranslate"><span class="pre">(x</span> <span class="pre">&gt;=</span> <span class="pre">0)[17/x]</span></code> が <code class="docutils literal notranslate"><span class="pre">true</span></code> に簡約されることを示しますが、この事実の証明を表す明示的な項は与えません。代わりに F* は、プログラムに関する事実（<code class="docutils literal notranslate"><span class="pre">&gt;=</span></code> のような算術演算子の意味も含む）を SMT ソルバの古典論理にエンコードし、（通常 Z3 に）``17 &gt;= 0`` という式が、エンコードされた事実を含む文脈で妥当かどうかを問います。Z3 が妥当だと証明できれば、F* は <code class="docutils literal notranslate"><span class="pre">17</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code> の証明項を構成することなく、式を真として受理します。</p>
+<p>この設計には、要点だけ挙げても次のような重要な帰結があります。</p>
+<ul class="simple">
+<li><p>信頼：F* は、SMT 論理へのエンコードと Z3 ソルバの正しさを暗黙に信頼します。</p></li>
+<li><p>証明の無関係性（proof irrelevance）：SMT による証明では証明項を構成しないため、プログラムは SMT で証明された事実に対する異なる証明を区別できません。</p></li>
+<li><p>部分型：証明項を構成しないため、<code class="docutils literal notranslate"><span class="pre">17</span></code> のような項は <code class="docutils literal notranslate"><span class="pre">int</span></code>、<code class="docutils literal notranslate"><span class="pre">nat</span></code>、<code class="docutils literal notranslate"><span class="pre">x:int{x</span> <span class="pre">=</span> <span class="pre">17}</span></code> など多様な型を取りえます。<a class="reference internal" href="part1_getting_off_the_ground.html#part1-ch1-boolean-refinements"><span class="std std-ref">前述</span></a> のとおり、F* はこれを活用して精錬の部分型付けを実現しています。</p></li>
+<li><p>決定不能性：Z3 は無限領域にわたる全称・存在量化などを含む自身の論理全体で式の妥当性を検査できるため、F* は Z3 に渡す式をブール式や可判定に限定しません。そのとおり、F* の型検査は決定不能です。</p></li>
+</ul>
+<p>この章では、F* の古典論理の部分、すなわち SMT ソルバと連携するための仕組みを学びます。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>章の前半はやや技術的ですが、F* の古典論理の全容を語るわけではありません。難しく感じる部分があっても、<a class="reference internal" href="#part1-ch2-assertions"><span class="std std-ref">先へ進む</span></a> 前に次の点だけ把握しておけば大丈夫です。</p>
+<p>F* では、次のように量化された式（命題）を書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">forall</span> (x1:t1) ... (xn:tn). p
+<span class="k">exists</span> (x1:t1) ... (xn:tn). p
+</pre></div>
+</div>
+<p>命題は、ブール値や、かつ／または／否定／含意／同値といった連結子から組み立てられます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>p /\ q   <span class="c">//conjunction</span>
+p \/ q   <span class="c">//disjunction</span>
+~p       <span class="c">//negation</span>
+p ==&gt; q  <span class="c">//implication</span>
+p &lt;==&gt; q <span class="c">//bi-implication</span>
+</pre></div>
+</div>
+<p>例えば次のように、「すべての自然数 <code class="docutils literal notranslate"><span class="pre">x</span></code> と <code class="docutils literal notranslate"><span class="pre">y</span></code> について、もし剰余 <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">%</span> <span class="pre">y</span></code> が <code class="docutils literal notranslate"><span class="pre">0</span></code> なら、<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">z</span> <span class="pre">*</span> <span class="pre">y</span></code> を満たす自然数 <code class="docutils literal notranslate"><span class="pre">z</span></code> が存在する」と述べられます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">forall</span> (x:nat) (y:nat). x % y = 0 ==&gt; (<span class="k">exists</span> (z:nat). x = z * y)
+</pre></div>
+</div>
+<p>F* には <code class="docutils literal notranslate"><span class="pre">==</span></code> で表す命題的等値もあり、任意の型の 2 つの項が等しいと主張できます。対照的に、ブール等値 <code class="docutils literal notranslate"><span class="pre">=</span></code> は可判定な等値を持つ型にしか使えません。例えば <code class="docutils literal notranslate"><span class="pre">f1,</span> <span class="pre">f2</span> <span class="pre">:</span> <span class="pre">int</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code> に対しては <code class="docutils literal notranslate"><span class="pre">f1</span> <span class="pre">==</span> <span class="pre">f2</span></code> と書けますが、関数の等値は可判定でないため <code class="docutils literal notranslate"><span class="pre">f1</span> <span class="pre">=</span> <span class="pre">f2</span></code> とは書けません。</p>
+</div>
+<section id="propositions">
+<span id="part1-prop"></span><h2>命題（Propositions）<a class="headerlink" href="#propositions" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Prims</span></code> に定義される型 <code class="docutils literal notranslate"><span class="pre">prop</span></code> は、F* における「証明に無関係な」命題の型です。平たく言えば、SMT ソルバの古典論理で証明可能な事実に与えられる型です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">prop</span></code> に属する命題は可判定である必要はありません。例えばチューリングマシン <code class="docutils literal notranslate"><span class="pre">tm</span></code> に対して <code class="docutils literal notranslate"><span class="pre">halts</span> <span class="pre">tm</span></code> という事実を <code class="docutils literal notranslate"><span class="pre">prop</span></code> として定義できますが、任意の <code class="docutils literal notranslate"><span class="pre">tm</span></code> が全入力で停止するかどうかは決定不能です。これは <code class="docutils literal notranslate"><span class="pre">{true,false}</span></code> からなる <code class="docutils literal notranslate"><span class="pre">bool</span></code> と対照的です。<code class="docutils literal notranslate"><span class="pre">halts</span> <span class="pre">tm</span></code> を <code class="docutils literal notranslate"><span class="pre">bool</span></code> として定義することはできません。そうすると「任意の <code class="docutils literal notranslate"><span class="pre">tm</span></code> について停止性を true/false で判定できる」ことを主張してしまうからです。</p>
+<p>F* は必要に応じて <code class="docutils literal notranslate"><span class="pre">bool</span></code> を <code class="docutils literal notranslate"><span class="pre">prop</span></code> に暗黙変換します（可判定な事実は、より一般の事実として扱えるため）。ただし命題（<code class="docutils literal notranslate"><span class="pre">prop</span></code>）では、次に見るような量化式など、<code class="docutils literal notranslate"><span class="pre">bool</span></code> では定義できないものも定義できます。</p>
+</section>
+<section id="propositional-connectives">
+<span id="part1-prop-connectives"></span><h2>命題の連結子<a class="headerlink" href="#propositional-connectives" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">n:nat</span></code> のとき <code class="docutils literal notranslate"><span class="pre">factorial</span> <span class="pre">n</span></code> が常に正であることを述べたいとします。<a class="reference internal" href="part1_getting_off_the_ground.html#part1-ch1"><span class="std std-ref">前の節</span></a> では、これを <code class="docutils literal notranslate"><span class="pre">factorial</span></code> の型として与える方法を学びました。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> factorial (n:nat) : x:nat{x &gt; 0}
+</pre></div>
+</div>
+<p>これを述べる別の方法は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">forall</span> (n:nat). factorial n &gt; 0
+</pre></div>
+</div>
+<p>では、<code class="docutils literal notranslate"><span class="pre">factorial</span> <span class="pre">n</span></code> がときに <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">*</span> <span class="pre">n</span></code> より大きい値を返す、と述べるには？</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">exists</span> (n:nat). factorial n &gt; n * n
+</pre></div>
+</div>
+<p>いま、全称量化子と存在量化子の最初の使用例を見ました。</p>
+<section id="quantifiers">
+<h3>量化子<a class="headerlink" href="#quantifiers" title="Link to this heading"></a></h3>
+<p>全称量化は <code class="docutils literal notranslate"><span class="pre">forall</span></code> キーワードで書きます。構文は次の形です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">forall</span> (x1:t1) ... (xn:tn) . p
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">x1</span> <span class="pre">...</span> <span class="pre">xn</span></code> は束縛変数で、命題 <code class="docutils literal notranslate"><span class="pre">p</span></code> を量化する対象の領域を表します。すなわち <code class="docutils literal notranslate"><span class="pre">forall</span> <span class="pre">(x:t).</span> <span class="pre">p</span></code> は、すべての <code class="docutils literal notranslate"><span class="pre">v:t</span></code> について命題 <code class="docutils literal notranslate"><span class="pre">p[v/x]</span></code> が成り立つとき妥当です。</p>
+<p>存在量化は <code class="docutils literal notranslate"><span class="pre">exists</span></code> キーワードで、似た構文になります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">exists</span> (x1:t1) ... (xn:tn) . p
+</pre></div>
+</div>
+<p>この場合、<code class="docutils literal notranslate"><span class="pre">exists</span> <span class="pre">(x:t).</span> <span class="pre">p</span></code> は、ある <code class="docutils literal notranslate"><span class="pre">v:t</span></code> に対して命題 <code class="docutils literal notranslate"><span class="pre">p[v/x]</span></code> が成り立つとき妥当です。</p>
+<p>量化子のスコープは、可能な限り右側まで広がります。</p>
+<p>F* では通常どおり、束縛変数の型は省略可能で、F* が推論します。ですが量化式では、変数の型により意味が大きく変わるため、型を書くのが得策です。次の 2 つの命題を考えてみましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">exists</span> (x:int). x &lt; 0
+<span class="k">exists</span> (x:nat). x &lt; 0
+</pre></div>
+</div>
+<p>最初の式は <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">-1</span></code> を取れば妥当ですが、2 つ目は 0 未満の自然数が存在しないため妥当ではありません。</p>
+<p>任意の F* の型に対して量化できます。これにより量化子は高階かつ依存的になります。例えば次のように書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">forall</span> (n:nat) (p: (x:nat{x &gt;= n} -&gt; prop)). p n
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>SMT ソルバは量化された命題の妥当性を判断するためにさまざまなヒューリスティクスを用います。より本格的な F* のプログラムや証明を書くようになると、これらのヒューリスティクスの基礎を知ることが重要になります。後の章で扱いますが、待ちきれない方は <a class="reference external" href="https://github.com/FStarLang/FStar/wiki/Quantifiers-and-patterns">F* wiki</a> を参照してください。</p>
+</div>
+</section>
+<section id="conjunction-disjunction-negation-implication">
+<h3>連言・選言・否定・含意<a class="headerlink" href="#conjunction-disjunction-negation-implication" title="Link to this heading"></a></h3>
+<p>量化子に加え、以下の演算子（優先順位の高い順）で命題同士を組み合わせて命題を構成できます。</p>
+<p><strong>否定</strong></p>
+<p>命題 <code class="docutils literal notranslate"><span class="pre">~p</span></code> は、<code class="docutils literal notranslate"><span class="pre">p</span></code> の否定が妥当であるとき妥当です。ブール演算子 <code class="docutils literal notranslate"><span class="pre">not</span></code> に似ていますが、ブール値ではなく命題に適用されます。</p>
+<p><strong>連言（かつ）</strong></p>
+<p>命題 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">/\</span> <span class="pre">q</span></code> は、<code class="docutils literal notranslate"><span class="pre">p</span></code> と <code class="docutils literal notranslate"><span class="pre">q</span></code> の両方が妥当なとき妥当です。ブール演算子 <code class="docutils literal notranslate"><span class="pre">&amp;&amp;</span></code> に似ていますが、命題に適用されます。</p>
+<p><strong>選言（または）</strong></p>
+<p>命題 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">\/</span> <span class="pre">q</span></code> は、<code class="docutils literal notranslate"><span class="pre">p</span></code> と <code class="docutils literal notranslate"><span class="pre">q</span></code> の少なくとも一方が妥当であるとき妥当です。ブール演算子 <code class="docutils literal notranslate"><span class="pre">||</span></code> に似ていますが、命題に適用されます。</p>
+<p><strong>含意</strong></p>
+<p>命題 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">==&gt;</span> <span class="pre">q</span></code> は、<code class="docutils literal notranslate"><span class="pre">p</span></code> が妥当なら常に <code class="docutils literal notranslate"><span class="pre">q</span></code> も妥当であるとき妥当です。</p>
+<p><strong>同値</strong></p>
+<p>命題 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">&lt;==&gt;</span> <span class="pre">q</span></code> は、<code class="docutils literal notranslate"><span class="pre">p</span></code> と <code class="docutils literal notranslate"><span class="pre">q</span></code> が同値のとき妥当です。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>意外かもしれませんが、優先順位により <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">/\</span> <span class="pre">q</span> <span class="pre">==&gt;</span> <span class="pre">r</span></code> は <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">/\</span> <span class="pre">(q</span> <span class="pre">==&gt;</span> <span class="pre">r)</span></code> ではなく <code class="docutils literal notranslate"><span class="pre">(p</span> <span class="pre">/\</span> <span class="pre">q)</span> <span class="pre">==&gt;</span> <span class="pre">r</span></code> と解釈されます。迷ったら括弧を使いましょう。</p>
+</div>
+</section>
+</section>
+<section id="atomic-propositions">
+<h2>原子的な命題<a class="headerlink" href="#atomic-propositions" title="Link to this heading"></a></h2>
+<p>連結子で既存の命題から新しい命題を作る方法を見ました。では、もとになる基本の命題は何でしょうか。</p>
+<section id="falsehood">
+<h3>偽<a class="headerlink" href="#falsehood" title="Link to this heading"></a></h3>
+<p>命題 <code class="docutils literal notranslate"><span class="pre">False</span></code> は常に不妥当（偽）です。</p>
+</section>
+<section id="truth">
+<h3>真<a class="headerlink" href="#truth" title="Link to this heading"></a></h3>
+<p>命題 <code class="docutils literal notranslate"><span class="pre">True</span></code> は常に妥当（真）です。</p>
+</section>
+<section id="propositional-equality">
+<span id="part1-ch2-propositional-equality"></span><h3>命題的等値<a class="headerlink" href="#propositional-equality" title="Link to this heading"></a></h3>
+<p><a class="reference internal" href="part1_equality.html#part1-equality"><span class="std std-ref">2 種類の等値</span></a> について前章で学びました。命題的等値の型は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> ( == ) (#a:Type) (x:a) (y:a) : prop
+</pre></div>
+</div>
+<p>可判定等値 <code class="docutils literal notranslate"><span class="pre">(=)</span></code> と異なり、命題的等値はすべての型で定義されます。<code class="docutils literal notranslate"><span class="pre">(==)</span></code> の結果の型は命題型 <code class="docutils literal notranslate"><span class="pre">prop</span></code> であり、<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">==</span> <span class="pre">y</span></code> は証明に無関係な命題です。</p>
+<p><strong>ブール値を命題に変換する</strong></p>
+<p>命題的等値はブール値を命題へ変換する便利な手段を与えます。任意の <code class="docutils literal notranslate"><span class="pre">b:bool</span></code> に対して <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">==</span> <span class="pre">true</span></code> は <code class="docutils literal notranslate"><span class="pre">prop</span></code> です。<code class="docutils literal notranslate"><span class="pre">prop</span></code> が期待される文脈で <code class="docutils literal notranslate"><span class="pre">b:bool</span></code> を使うと、F* が自動的に <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">==</span> <span class="pre">true</span></code> を挿入するため、手で書く必要はあまりありません（必要になる場面はときどきあります）。</p>
+</section>
+<section id="type-vs-prop">
+<h3><code class="docutils literal notranslate"><span class="pre">Type</span></code> と <code class="docutils literal notranslate"><span class="pre">prop</span></code><a class="headerlink" href="#type-vs-prop" title="Link to this heading"></a></h3>
+<p>ここからはやや技術的です。最初は理解できなくても心配いりません。今は、ブール値を <code class="docutils literal notranslate"><span class="pre">prop</span></code> に自動変換するのと同様に、必要に応じて任意の型も <code class="docutils literal notranslate"><span class="pre">prop</span></code> に自動変換される、すなわち型から原子的な命題を作れる、と知っていれば十分です。</p>
+<p>F* の各項は型を持ち、型自身にも型があります。例えば <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">:</span> <span class="pre">Type</span></code>、<code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">:</span> <span class="pre">Type</span></code>、さらには <code class="docutils literal notranslate"><span class="pre">prop</span> <span class="pre">:</span> <span class="pre">Type</span></code> です。この詳細は後の節に譲りますが、型を命題に変換して原子的命題を作るもう一つの方法がある、という点だけ述べておきます。</p>
+<p>任意の型 <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">:</span> <span class="pre">Type</span></code> に対し、<code class="docutils literal notranslate"><span class="pre">_:unit</span> <span class="pre">{</span> <span class="pre">t</span> <span class="pre">}</span> <span class="pre">:</span> <span class="pre">prop</span></code> となります。これを型の「スクォッシュ（squash）」と呼びます。この操作は非常に一般的なので、F* は次の 2 つの仕組みで支援します。</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">/\</span> <span class="pre">q</span></code> のような命題連結子は、<code class="docutils literal notranslate"><span class="pre">p</span></code> や <code class="docutils literal notranslate"><span class="pre">q</span></code> が命題ではなく型（<code class="docutils literal notranslate"><span class="pre">p,q</span> <span class="pre">:</span> <span class="pre">Type</span></code>）であっても使えるよう設計されており、暗黙にスクォッシュされます。</p></li>
+<li><p>標準ライブラリ <code class="docutils literal notranslate"><span class="pre">FStar.Squash</span></code> には、スクォッシュされた型を扱うための各種ユーティリティが用意されています。</p></li>
+</ol>
+</section>
+</section>
+<section id="assertions">
+<span id="part1-ch2-assertions"></span><h2>アサーション（断言）<a class="headerlink" href="#assertions" title="Link to this heading"></a></h2>
+<p>命題を書けるようになりましたが、それらが妥当かどうかを F* にどう検査させるのでしょうか。いくつか方法がありますが、最も一般的なのは <em>アサーション</em> です。例：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sqr_is_nat (x:int) : unit = <span class="k">assert</span> (x * x &gt;= 0)
+</pre></div>
+</div>
+<p>これは <code class="docutils literal notranslate"><span class="pre">sqr_is_nat</span> <span class="pre">:</span> <span class="pre">int</span> <span class="pre">-&gt;</span> <span class="pre">unit</span></code> という関数を定義しています—<code class="docutils literal notranslate"><span class="pre">nat</span></code> を取り常に <code class="docutils literal notranslate"><span class="pre">()</span></code> を返すだけなので、関数としては特に面白みはありません。</p>
+<p>しかし本体には <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">*</span> <span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code> というアサーションが含まれています。多くの言語が実行時アサーション（実行時に性質を検査するコード）を持ちますが、F* のアサーションは異なり、プログラムの実行 <em>前</em>、F* コンパイラによって検査されます。</p>
+<p>この場合 <code class="docutils literal notranslate"><span class="pre">assert</span></code> は、プログラムを SMT にエンコードし、任意の整数 <code class="docutils literal notranslate"><span class="pre">x:int</span></code> に対して <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">*</span> <span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code> が妥当か Z3 に問うよう F* に指示します。Z3 が（実際に可能ですが）妥当だと確認できれば、F* はプログラムを受理し、実行時にはアサーションの痕跡は残りません。そうでなければコンパイル時に却下されます。例えば次のように書くと、</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sqr_is_pos (x:int) : unit = <span class="k">assert</span> (x * x &gt; 0)
+</pre></div>
+</div>
+<p>F* は次のようなメッセージで不満を述べます。:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Ch2</span><span class="o">.</span><span class="n">fst</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">39</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">):</span> <span class="p">(</span><span class="n">Error</span> <span class="mi">19</span><span class="p">)</span> <span class="n">assertion</span> <span class="n">failed</span><span class="p">;</span> <span class="n">The</span> <span class="n">SMT</span> <span class="n">solver</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">prove</span> <span class="n">the</span> <span class="n">query</span><span class="p">,</span> <span class="k">try</span> <span class="n">to</span> <span class="n">spell</span> <span class="n">your</span> <span class="n">proof</span> <span class="ow">in</span> <span class="n">more</span> <span class="n">detail</span> <span class="ow">or</span> <span class="n">increase</span> <span class="n">fuel</span><span class="o">/</span><span class="n">ifuel</span>
+</pre></div>
+</div>
+<p>アサーションは以下のように、任意の命題に対して使えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> max x y = <span class="k">if</span> x &gt; y <span class="k">then</span> x <span class="k">else</span> y
+<span class="k">let</span> <span class="k">_</span> = <span class="k">assert</span> (max 0 1 = 1)
+<span class="k">let</span> <span class="k">_</span> = <span class="k">assert</span> (<span class="k">forall</span> x y. max x y &gt;= x /\
+                            max x y &gt;= y /\
+                            (max x y = x \/ max x y = y))
+</pre></div>
+</div>
+</section>
+<section id="assumptions">
+<h2>仮定（アサンプション）<a class="headerlink" href="#assumptions" title="Link to this heading"></a></h2>
+<p>アサーションの双対はアサンプション（仮定）です。事実の証明を F* と Z3 に求める代わりに、ある命題が妥当だと受け入れるよう指示します。仮定は慎重に使うべきです—実は真でない事実を仮定してしまう誤りは起こりやすいからです。</p>
+<p>仮定の構文はアサーションに似ています。以下では <code class="docutils literal notranslate"><span class="pre">assume</span> <span class="pre">(x</span> <span class="pre">&lt;&gt;</span> <span class="pre">0)</span></code> と書き、関数の残りの部分で <code class="docutils literal notranslate"><span class="pre">x</span></code> が 0 でないと F* に仮定させています。これにより続くアサーションが妥当であることを F* が証明できるようになります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sqr_is_pos (x:int) = <span class="k">assume</span> (x &lt;&gt; 0); <span class="k">assert</span> (x * x &gt; 0)
+</pre></div>
+</div>
+<p>もちろん、そのアサーションはすべての <code class="docutils literal notranslate"><span class="pre">x</span></code> で妥当なわけではなく、直前の仮定を満たす <code class="docutils literal notranslate"><span class="pre">x</span></code> に対してのみ妥当です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">assert</span></code> と同様、<code class="docutils literal notranslate"><span class="pre">assume</span> <span class="pre">p</span></code> の型は <code class="docutils literal notranslate"><span class="pre">unit</span></code> です.</p>
+<p>より強力な仮定として <code class="docutils literal notranslate"><span class="pre">admit</span></code> があります。<code class="docutils literal notranslate"><span class="pre">admit()</span></code> には好きな型を与えられます。例えば、</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sqr_is_pos (x:int) : y:nat{y &gt; 0} = admit()
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">assume</span></code> も <code class="docutils literal notranslate"><span class="pre">admit</span></code> も証明作業の途中では役に立ちますが、最終的にそれらを取り除いてこそ証明は完了です。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part1_equality.html" class="btn btn-neutral float-left" title="等値性（Equality）" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part1_inductives.html" class="btn btn-neutral float-right" title="帰納的データ型とパターンマッチ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

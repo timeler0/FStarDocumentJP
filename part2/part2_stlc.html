@@ -1,0 +1,986 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>単純型付きラムダ計算（STLC） &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="高階抽象構文（HOAS）" href="part2_phoas.html" />
+    <link rel="prev" title="構成的連言と古典的連言（論理結合子）" href="part2_logical_connectives.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part2.html">帰納的型によるデータ・証明・計算の表現</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part2_inductive_type_families.html">帰納的型の定義</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_vectors.html">長さインデックス付きリスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_merkle.html">Merkle 木</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_equality.html">等式型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_logical_connectives.html">構成的連言と古典的連言（論理結合子）</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">単純型付きラムダ計算（STLC）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#syntax">構文</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#representing-types">型の表現</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#representing-programs">プログラムの表現</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#runtime-semantics">実行時意味論</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#formalizing-an-operational-semantics">操作的意味論の形式化</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#substitution-failed-attempt">置換：失敗する試み</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#substitution-proven-total">置換：全域性の証明</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#type-system">型システム</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#environments">環境</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#typing-relation">型付け関係</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#progress">進行（Progress）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">演習</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#preservation">保存（Preservation）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">演習</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">演習</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">演習</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">演習</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part2_phoas.html">高階抽象構文（HOAS）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_well_founded.html">良基底関係と停止性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_par.html">計算効果の最初のモデル</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_universes.html">ユニバース（Universes）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+      <li class="breadcrumb-item active">単純型付きラムダ計算（STLC）</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="simply-typed-lambda-calculus">
+<span id="part2-stlc"></span><h1>単純型付きラムダ計算（STLC）<a class="headerlink" href="#simply-typed-lambda-calculus" title="Link to this heading"></a></h1>
+<p>本章では、帰納的に定義された型を用いて、生のデータだけでなく、帰納的に定義された関係、そしてそれらを結びつける証明をどのように表現できるかを見ていきます。</p>
+<p>具体例として、単純型付きラムダ計算（STLC）を題材に小さなケーススタディを展開します。STLC はプログラミング言語の意味論の入門でもよく扱われる、非常に単純な言語です。その構文・型システム・実行時の挙動は数行で記述できます。ここで証明したい主結果は型システムの健全性、すなわち、プログラムが型検査に通るなら、ある種の実行時エラーを起こさず安全に実行できるという性質です。</p>
+<p>STLC を初めて見る方のために、ウェブ上には良い資料がいくつもあります。たとえば <a class="reference external" href="https://softwarefoundations.cis.upenn.edu/plf-current/Stlc.html">Software Foundations の該当章</a> などです。ただし本書の説明は可能な限り自己完結とします。本ケーススタディの一部に貢献いただいた Simon Forest、Catalin Hritcu、Simon Schaffer に感謝します。</p>
+<section id="syntax">
+<h2>構文<a class="headerlink" href="#syntax" title="Link to this heading"></a></h2>
+<p>プログラム <span class="math notranslate nohighlight">\(e\)</span> の構文は、以下の文脈自由文法で定義されます。</p>
+<div class="math notranslate nohighlight">
+\[e~::=~()~|~x~|~\lambda x:t. e_0~|~e_0~e_1\]</div>
+<p>これは次のように読めます。プログラム <span class="math notranslate nohighlight">\(e\)</span> は次のいずれかです。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>ユニット値 <span class="math notranslate nohighlight">\(()\)</span>；</p></li>
+<li><p>変数 <span class="math notranslate nohighlight">\(x\)</span>；</p></li>
+<li><p>型 <span class="math notranslate nohighlight">\(t\)</span> と部分プログラム <span class="math notranslate nohighlight">\(e_0\)</span> を変数 <span class="math notranslate nohighlight">\(x\)</span> に関連付けるラムダ項 <span class="math notranslate nohighlight">\(\lambda x:t. e_0\)</span>；</p></li>
+<li><p>または、部分プログラム <span class="math notranslate nohighlight">\(e_0\)</span> を別の部分プログラム <span class="math notranslate nohighlight">\(e_1\)</span> に適用したもの。</p></li>
+</ul>
+</div></blockquote>
+<p>型注釈 <span class="math notranslate nohighlight">\(t\)</span> の構文も非常に単純です。</p>
+<div class="math notranslate nohighlight">
+\[t~::=~\mathsf{unit}~|~t_0 \rightarrow t_1\]</div>
+<p>型 <span class="math notranslate nohighlight">\(t\)</span> は次のいずれかです。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\mathsf{unit}\)</span> 型定数；</p></li>
+<li><p>あるいは、2 つの小さな型 <span class="math notranslate nohighlight">\(t_0\)</span> と <span class="math notranslate nohighlight">\(t_1\)</span> から形成される矢印型 <span class="math notranslate nohighlight">\(t_0 \rightarrow t_1\)</span>。</p></li>
+</ul>
+</div></blockquote>
+<p>この言語は極めて最小限ですが、他の構成を容易に拡張できます。例えば、整数型・整数定数・加減算のような演算子を追加できます。これについては後の演習で扱います。</p>
+<p>型とプログラムの構文は、F★ で 2 つの単純な帰納的データ型 <a href="#id1"><span class="problematic" id="id2">``</span></a>typ``（型用）と <a href="#id3"><span class="problematic" id="id4">``</span></a>exp``（プログラム／式用）として形式化し、上の各場合に対応するコンストラクタを用意します。</p>
+<p>主な微妙さは変数の表現にあります。例えば型注釈を無視すると、項 <span class="math notranslate nohighlight">\(\lambda x. (\lambda x. x)\)</span> では、内側のラムダは外側とは <em>別の</em> <span class="math notranslate nohighlight">\(x\)</span> を束縛します。すなわちこの項は <span class="math notranslate nohighlight">\(\lambda x. (\lambda y. y)\)</span> と同値であり、プログラム表現はこの慣習を守らねばなりません。ここではデ・ブライン指標と呼ばれる技法を用い、変数名の意味は捨て、各変数を自然数で表します。これは、その変数の出現位置から対応する <span class="math notranslate nohighlight">\(\lambda\)</span> 束縛子へたどる際に跨ぐ <span class="math notranslate nohighlight">\(\lambda\)</span> の個数を表します。</p>
+<p>例えば、<span class="math notranslate nohighlight">\(\lambda x. (\lambda x. x)\)</span> と <span class="math notranslate nohighlight">\(\lambda x. (\lambda y. y)\)</span> はどちらも <span class="math notranslate nohighlight">\(\lambda _. (\lambda _. 0)\)</span> と表されます。内側の <span class="math notranslate nohighlight">\(x\)</span> の出現は内側の <span class="math notranslate nohighlight">\(\lambda\)</span> に対応するからです。一方、<span class="math notranslate nohighlight">\(\lambda x. (\lambda y. (\lambda z. x))\)</span> は <span class="math notranslate nohighlight">\(\lambda _. (\lambda _. (\lambda _. 2))\)</span> と表されます。内側の <span class="math notranslate nohighlight">\(x\)</span> の出現から対応する <span class="math notranslate nohighlight">\(\lambda\)</span> へは <span class="math notranslate nohighlight">\(2\)</span> 個の <span class="math notranslate nohighlight">\(\lambda\)</span> をさかのぼる必要があるためです。デ・ブライン表記では変数名自体は意味を持たないことに注意してください。</p>
+<section id="representing-types">
+<h3>型の表現<a class="headerlink" href="#representing-types" title="Link to this heading"></a></h3>
+<p>以下に定義する帰納的型 <code class="docutils literal notranslate"><span class="pre">typ</span></code> が、型の表現です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> typ =
+  | TUnit : typ
+  | TArr  : typ -&gt; typ -&gt; typ
+</pre></div>
+</div>
+<p>これはまったく素直で、上で述べた型文法の各場合に対応するコンストラクタを備えるだけです。</p>
+</section>
+<section id="representing-programs">
+<h3>プログラムの表現<a class="headerlink" href="#representing-programs" title="Link to this heading"></a></h3>
+<p>プログラム式の表現は以下のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> var = nat
+<span class="k">type</span> exp =
+  | EUnit : exp
+  | EVar  : var -&gt; exp
+  | ELam  : typ -&gt; exp -&gt; exp
+  | EApp  : exp -&gt; exp -&gt; exp
+</pre></div>
+</div>
+<p>これもまた素直で、プログラム文法の各場合に対するコンストラクタから成ります。変数 <code class="docutils literal notranslate"><span class="pre">var</span></code> は <code class="docutils literal notranslate"><span class="pre">nat</span></code> で表し、<code class="docutils literal notranslate"><span class="pre">ELam</span></code> は注釈付きラムダ <span class="math notranslate nohighlight">\(\lambda _:t. e\)</span> を表します。デ・ブライン表記を用いるため、束縛子の名前は省略されます。</p>
+</section>
+</section>
+<section id="runtime-semantics">
+<h2>実行時意味論<a class="headerlink" href="#runtime-semantics" title="Link to this heading"></a></h2>
+<p>STLC がプログラムを実行する主要な計算規則は 1 つ、関数適用規則すなわち <span class="math notranslate nohighlight">\(\beta\)</span> 簡約です（下記）。</p>
+<div class="math notranslate nohighlight">
+\[(\lambda x:t. e_0)~e_1 \longrightarrow e_0 [x \mapsto e_1]\]</div>
+<p>これは、<span class="math notranslate nohighlight">\(\lambda\)</span> リテラルが引数 <span class="math notranslate nohighlight">\(e_1\)</span> に適用されたとき、ラムダ本体 <span class="math notranslate nohighlight">\(e_0\)</span> の中の束縛変数 <span class="math notranslate nohighlight">\(x\)</span> の出現をすべて引数 <span class="math notranslate nohighlight">\(e_1\)</span> に置き換える、という 1 ステップの計算を行うことを意味します。この置換では「名前捕捉」を避ける注意が必要です。すなわち、自由変数が再束縛される文脈での置換を避けねばなりません。例えば <span class="math notranslate nohighlight">\(\lambda x. y\)</span> に対して <span class="math notranslate nohighlight">\(y \mapsto x\)</span> を代入する際、結果が <span class="math notranslate nohighlight">\(\lambda x. x\)</span> <strong>になってはならない</strong> のです。デ・ブライン表記を使えば、この点を厳密に扱え、名前捕捉を避けられます。</p>
+<p>その他の計算規則は帰納的に定義されます。例えば、<span class="math notranslate nohighlight">\(e_0 \longrightarrow e_0'\)</span> であれば <span class="math notranslate nohighlight">\(e_0~e_1\)</span> は <span class="math notranslate nohighlight">\(e_0'~e_1\)</span> へ 1 ステップ進めますし、<span class="math notranslate nohighlight">\(e_1\)</span> についても同様です。</p>
+<p>これらの補助規則の選び方によって、呼び値・呼び名など異なる簡約戦略を得られます。本書では簡約戦略の選択は非決定的のままとし、STLC の計算規則を、1 回の計算ステップを表す添字付き帰納的型 <code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">e</span> <span class="pre">e'</span></code> として表現します。</p>
+<section id="formalizing-an-operational-semantics">
+<h3>操作的意味論の形式化<a class="headerlink" href="#formalizing-an-operational-semantics" title="Link to this heading"></a></h3>
+<p>以下の帰納的型 <code class="docutils literal notranslate"><span class="pre">step</span></code> は、いわゆる「スモールステップ操作的意味論」における 1 回の計算ステップを表します。<code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">e</span> <span class="pre">e'</span></code> は、初期プログラム <code class="docutils literal notranslate"><span class="pre">e</span></code> と、その部分項のいずれかで 1 ステップ実行した結果のプログラム <code class="docutils literal notranslate"><span class="pre">e'</span></code> の関係です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> step : exp -&gt; exp -&gt; Type =
+  | Beta :
+     t:typ -&gt;
+     e1:exp -&gt;
+     e2:exp -&gt;
+     step (EApp (ELam t e1) e2) (subst (sub_beta e2) e1)
+
+  | AppLeft :
+      #e1:exp -&gt;
+      e2:exp -&gt;
+      #e1&#39;:exp -&gt;
+      hst:step e1 e1&#39; -&gt;
+      step (EApp e1 e2) (EApp e1&#39; e2)
+
+  | AppRight : 
+      e1:exp -&gt;
+      #e2:exp -&gt;
+      #e2&#39;:exp -&gt;
+      hst:step e2 e2&#39; -&gt;
+      step (EApp e1 e2) (EApp e1 e2&#39;)
+</pre></div>
+</div>
+<hr class="docutils" />
+<blockquote>
+<div><ul class="simple">
+<li><p>コンストラクタ <code class="docutils literal notranslate"><span class="pre">Beta</span></code> は <span class="math notranslate nohighlight">\(\beta\)</span> 簡約の規則を表します。この展開で最も繊細なのは <code class="docutils literal notranslate"><span class="pre">subst</span></code> と <code class="docutils literal notranslate"><span class="pre">sub_beta</span></code> の定義で、これについては後ほど詳しく取り上げます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AppLeft</span></code> と <code class="docutils literal notranslate"><span class="pre">AppRight</span></code> は、<code class="docutils literal notranslate"><span class="pre">EApp</span> <span class="pre">e1</span> <span class="pre">e2</span></code> の左（あるいは右）の部分項を簡約できるようにします。</p></li>
+</ul>
+</div></blockquote>
+<section id="exercise">
+<h4>演習<a class="headerlink" href="#exercise" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">step</span></code> の推移閉包として、複数ステップの計算を表す帰納的関係 <code class="docutils literal notranslate"><span class="pre">steps</span> <span class="pre">:</span> <span class="pre">exp</span> <span class="pre">-&gt;</span> <span class="pre">exp</span> <span class="pre">-&gt;</span> <span class="pre">Type</span></code> を定義しなさい。</p>
+<p>以降のすべての演習には、<a class="reference external" href="../code/exercises/Part2.STLC.fst">この演習ファイル</a> を使用してください。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> steps : exp -&gt; exp -&gt; Type =
+  | Single : #e0:exp -&gt;
+             #e1:exp -&gt;
+             step e0 e1 -&gt; 
+             steps e0 e1
+
+  | Many  : #e0:exp -&gt;
+             #e1:exp -&gt;
+             #e2:exp -&gt; 
+             step e0 e1 -&gt;
+             steps e1 e2 -&gt; 
+             steps e0 e2
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="substitution-failed-attempt">
+<h3>置換：失敗する試み<a class="headerlink" href="#substitution-failed-attempt" title="Link to this heading"></a></h3>
+<p>置換の定義はこの系の中で最も厄介な部分です。最初の試みは主要な直観を示しますが、F★ はそれが良基底であると認めてくれません。その後、置換が停止することを証明できるように定義を強化します。</p>
+<p>置換は、変数 <code class="docutils literal notranslate"><span class="pre">var</span></code> から式 <code class="docutils literal notranslate"><span class="pre">exp</span></code> への全域関数として定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sub0 = var -&gt; exp
+</pre></div>
+</div>
+<p>この種の置換は「並行置換（parallel substitution）」とも呼ばれます。各変数は他と独立に置換されます。</p>
+<p><span class="math notranslate nohighlight">\(\beta\)</span> 簡約では、関数本体内のデ・ブライン指標 <code class="docutils literal notranslate"><span class="pre">0</span></code> に対応する変数を引数 <code class="docutils literal notranslate"><span class="pre">e</span></code> に置き換え、その後 <span class="math notranslate nohighlight">\(\lambda\)</span> 束縛子を取り除きます。<code class="docutils literal notranslate"><span class="pre">sub_beta0</span></code> はまさにこれを行い、変数 <code class="docutils literal notranslate"><span class="pre">0</span></code> を <code class="docutils literal notranslate"><span class="pre">e</span></code> に置換し、関数の <span class="math notranslate nohighlight">\(\lambda\)</span> 束縛子が消えるため、他の変数を <code class="docutils literal notranslate"><span class="pre">1</span></code> だけ繰り下げます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sub_beta0 (e:exp)
+  : sub0
+  = <span class="k">fun</span> (y:var) -&gt;
+        <span class="k">if</span> y = 0 <span class="k">then</span> e      <span class="c">(* substitute *)</span>
+        <span class="k">else</span> EVar (y-1)    <span class="c">(* shift -1 *)</span>
+</pre></div>
+</div>
+<p>関数 <code class="docutils literal notranslate"><span class="pre">subst</span> <span class="pre">s</span> <span class="pre">e</span></code> は、置換 <code class="docutils literal notranslate"><span class="pre">s</span></code> を式 <code class="docutils literal notranslate"><span class="pre">e</span></code> に適用します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sub_inc0 : sub0 =  <span class="k">fun</span> y -&gt; EVar (y+1)
+
+[@@expect_failure [19;19]]
+<span class="k">let</span> <span class="k">rec</span> subst0 (s:sub0)
+               (e:exp)
+  : exp
+  = <span class="k">match</span> e <span class="k">with</span>
+    | EUnit -&gt; EUnit
+    | EVar x -&gt; s x
+    | EApp e1 e2 -&gt; EApp (subst0 s e1) (subst0 s e2)
+    | ELam t e1 -&gt; ELam t (subst0 (sub_elam0 s) e1)
+
+<span class="k">and</span> sub_elam0 (s:sub0) 
+  : sub0
+  =  <span class="k">fun</span> y -&gt;
+        <span class="k">if</span> y=0
+        <span class="k">then</span> EVar y
+        <span class="k">else</span> subst0 sub_inc0 (s (y - 1))
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">EUnit</span></code> の場合は自明で、置換すべき変数がありません。</p></li>
+<li><p>変数の場合は <code class="docutils literal notranslate"><span class="pre">subst0</span> <span class="pre">s</span> <span class="pre">(EVar</span> <span class="pre">x)</span></code> が単に <code class="docutils literal notranslate"><span class="pre">s</span></code> を <code class="docutils literal notranslate"><span class="pre">x</span></code> に適用します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EApp</span></code> の場合は、各部分項に置換を適用します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ELam</span></code> の場合が最も興味深いところです。置換 <code class="docutils literal notranslate"><span class="pre">s</span></code> を本体 <code class="docutils literal notranslate"><span class="pre">e1</span></code> に適用するには束縛子を 1 つ越える必要があります。相互再帰関数 <code class="docutils literal notranslate"><span class="pre">sub_elam0</span> <span class="pre">s</span></code> は、この新しい束縛子（本体 <code class="docutils literal notranslate"><span class="pre">e1</span></code> の中ではデ・ブライン指標 <code class="docutils literal notranslate"><span class="pre">0</span></code> を持つ。次の束縛子に出会うまで）に合わせて <code class="docutils literal notranslate"><span class="pre">s</span></code> を調整します。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">sub_elam0</span></code> では、新たに束縛された指標 <code class="docutils literal notranslate"><span class="pre">0</span></code> の変数に対しては、その変数を変更しません。<code class="docutils literal notranslate"><span class="pre">s</span></code> はそれに影響しないからです。</p></li>
+<li><p>それ以外の場合、その変数は少なくとも <code class="docutils literal notranslate"><span class="pre">1</span></code> の指標で、外側のスコープで束縛された束縛子を参照しています。したがって、その指標を 1 つ繰り下げてから <code class="docutils literal notranslate"><span class="pre">s</span></code> を適用し、結果の項中の変数をすべて（<code class="docutils literal notranslate"><span class="pre">sub_inc0</span></code> を使って）インクリメントし直し、捕捉を避けます。</p></li>
+</ul>
+</li>
+</ul>
+<p>この置換の定義は内容としては正しいのですが、型検査器に <code class="docutils literal notranslate"><span class="pre">subst0</span></code> と <code class="docutils literal notranslate"><span class="pre">sub_elam0</span></code> の停止性を示していないため、F★ は受理してくれません。実際、終了性チェックの失敗として 2 か所でエラーが報告されます。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>この定義は失敗することを想定しているため、定義に付された <code class="docutils literal notranslate"><span class="pre">[&#64;&#64;expect_failure</span> <span class="pre">[19;19]]</span></code> 属性は、F★ に対してこの定義が 2 回 Error 19 を出すことを確認するよう指示しています。次節で、なぜ失敗するのかを詳しく見ます。</p>
+</div>
+</section>
+<section id="substitution-proven-total">
+<h3>置換：全域性の証明<a class="headerlink" href="#substitution-proven-total" title="Link to this heading"></a></h3>
+<p>非形式的に、<code class="docutils literal notranslate"><span class="pre">subst0</span></code> と <code class="docutils literal notranslate"><span class="pre">sub_elam0</span></code> が実際には停止する理由を確認してみましょう。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">EApp</span></code> の場合の再帰呼び出しは、元の項 <code class="docutils literal notranslate"><span class="pre">e</span></code> の厳密に小さい部分項（<code class="docutils literal notranslate"><span class="pre">e0</span></code> と <code class="docutils literal notranslate"><span class="pre">e1</span></code>）に適用されています。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ELam</span></code> では、より小さい部分項 <code class="docutils literal notranslate"><span class="pre">e1</span></code> に <code class="docutils literal notranslate"><span class="pre">subst0</span></code> を適用しますが、その前に相互再帰で <code class="docutils literal notranslate"><span class="pre">sub_elam0</span> <span class="pre">s</span></code> を呼びます。したがって、その呼び出しが停止することを確認する必要があります。ここが最初のエラー箇所です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sub_elam0</span></code> の中では、全く別の項 <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">(y</span> <span class="pre">-</span> <span class="pre">1)</span></code> に対して <code class="docutils literal notranslate"><span class="pre">subst0</span></code> を呼び返します。このため F★ は停止しない可能性を指摘します。しかし幸い、この呼び出しで使うのは単なる名前の付け替え（リネーミング）である <code class="docutils literal notranslate"><span class="pre">sub_inc0</span></code> 置換だけで、そこでさらなる再帰は発生しません。何とかして、リネーミング置換を伴う再帰呼び出しは問題ない、と F★ に納得させる必要があります。</p></li>
+</ul>
+<p>リネーミングと一般の置換を区別するため、以下に示す添字付き型 <code class="docutils literal notranslate"><span class="pre">sub</span> <span class="pre">r</span></code> を用います。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sub (renaming:bool) = 
+    f:(var -&gt; exp){ renaming &lt;==&gt; (<span class="k">forall</span> x. EVar? (f x)) }
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sub</span> <span class="pre">true</span></code> はリネーミング、すなわち変数を変数に写す置換の型です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sub</span> <span class="pre">false</span></code> は、少なくとも 1 つの変数を非変数へ写す置換です。</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">sub_inc</span></code> がリネーミングであることは容易に証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sub_inc 
+  : sub <span class="k">true</span>
+  = <span class="k">fun</span> y -&gt; EVar (y+1)
+</pre></div>
+</div>
+<p>以下に示す <code class="docutils literal notranslate"><span class="pre">sub_beta</span></code> は <code class="docutils literal notranslate"><span class="pre">sub_beta0</span></code> に対応する関数ですが、それがリネーミングかどうかを追跡する型を備えています。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sub_beta (e:exp)
+  : sub (EVar? e)
+  = <span class="k">let</span> f = 
+      <span class="k">fun</span> (y:var) -&gt;
+        <span class="k">if</span> y = 0 <span class="k">then</span> e      <span class="c">(* substitute *)</span>
+        <span class="k">else</span> (EVar (y-1))    <span class="c">(* shift -1 *)</span>
+    <span class="k">in</span>
+    <span class="k">if</span> not (EVar? e)
+    <span class="k">then</span> <span class="k">introduce</span> <span class="k">exists</span> (x:var). ~(EVar? (f x))
+         <span class="k">with</span> 0 <span class="k">and</span> ();
+    f
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>その型は、<code class="docutils literal notranslate"><span class="pre">e</span></code> 自身が変数である場合に限って、<code class="docutils literal notranslate"><span class="pre">sub_beta</span> <span class="pre">e</span></code> がリネーミングであることを述べています。</p></li>
+<li><p>この型を示すには、特に <code class="docutils literal notranslate"><span class="pre">e</span></code> が変数でない場合、存在量化された式 （すなわち <code class="docutils literal notranslate"><span class="pre">exists</span> <span class="pre">x.</span> <span class="pre">~(EVar</span> <span class="pre">(subst_beta</span> <span class="pre">e)</span> <span class="pre">x)</span></code>）の証明が必要です。<a class="reference internal" href="part2_logical_connectives.html#part2-connectives-exists"><span class="std std-ref">前節</span></a> で述べたとおり、SMT ソルバは目標の存在量化を常に自動インスタンス化できるわけではありません。そこで、存在量化を明示的に導入し、証人として <code class="docutils literal notranslate"><span class="pre">0</span></code> を与えます。すると SMT ソルバは <code class="docutils literal notranslate"><span class="pre">~(EVar</span> <span class="pre">(subst_beta</span> <span class="pre">e)</span> <span class="pre">0)</span></code> を容易に示せます。</p></li>
+</ul>
+<p>最後に、<code class="docutils literal notranslate"><span class="pre">subst</span></code> と <code class="docutils literal notranslate"><span class="pre">sub_elam</span></code> の定義を以下に示します—<code class="docutils literal notranslate"><span class="pre">subst0</span></code> と <code class="docutils literal notranslate"><span class="pre">sub_elam0</span></code> と同一ですが、F★ に対して 4 要素の辞書式順序を用いた停止性の議論を表現できるよう、型を強化しています。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> bool_order (b:bool) = <span class="k">if</span> b <span class="k">then</span> 0 <span class="k">else</span> 1
+<span class="k">let</span> is_var (e:exp) : int = <span class="k">if</span> EVar? e <span class="k">then</span> 0 <span class="k">else</span> 1
+
+<span class="k">let</span> <span class="k">rec</span> subst (#r:bool)
+              (s:sub r)
+              (e:exp)
+  : <span class="k">Tot</span> (e&#39;:exp { r ==&gt; (EVar? e &lt;==&gt; EVar? e&#39;) })
+        (<span class="k">decreases</span> %[bool_order (EVar? e); 
+                     bool_order r;
+                     1;
+                     e])
+  = <span class="k">match</span> e <span class="k">with</span>
+    | EUnit -&gt; EUnit
+    | EVar x -&gt; s x
+    | EApp e1 e2 -&gt; EApp (subst s e1) (subst s e2)
+    | ELam t e1 -&gt; ELam t (subst (sub_elam s) e1)
+
+<span class="k">and</span> sub_elam (#r:bool) (s:sub r) 
+  : <span class="k">Tot</span> (sub r)
+        (<span class="k">decreases</span> %[1;
+                     bool_order r;
+                     0;
+                     EVar 0])
+  = <span class="k">let</span> f : var -&gt; exp = 
+      <span class="k">fun</span> y -&gt;
+        <span class="k">if</span> y=0
+        <span class="k">then</span> EVar y
+        <span class="k">else</span> subst sub_inc (s (y - 1))
+    <span class="k">in</span>
+    <span class="k">assert</span> (not r ==&gt; (<span class="k">forall</span> x. ~(EVar? (s x)) ==&gt; ~(EVar? (f (x + 1)))));
+    f
+</pre></div>
+</div>
+<p>この順序が有効である理由を確認するため、<code class="docutils literal notranslate"><span class="pre">subst</span></code> と <code class="docutils literal notranslate"><span class="pre">subst_elam</span></code> の再帰呼び出しを分析しましょう。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">subst</span></code> の場合分け：</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">EUnit</span></code> と <code class="docutils literal notranslate"><span class="pre">EVar</span></code> の場合は、これまでどおり自明です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EApp</span></code> では、<code class="docutils literal notranslate"><span class="pre">e</span></code> は確実に変数ではないため <code class="docutils literal notranslate"><span class="pre">bool_order</span> <span class="pre">(EVar?</span> <span class="pre">e)</span></code> は <code class="docutils literal notranslate"><span class="pre">1</span></code> です。もし <code class="docutils literal notranslate"><span class="pre">e1``（あるいは</span> <span class="pre">``e2</span></code>）が変数なら、他の成分に関わらず辞書式組 <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">_,</span> <span class="pre">_,</span> <span class="pre">_)</span> <span class="pre">&lt;&lt;</span> <span class="pre">(1,</span> <span class="pre">_,</span> <span class="pre">_,</span> <span class="pre">_)</span></code> により再帰は終了します。そうでなければ、組の最後の成分が減少します（<code class="docutils literal notranslate"><span class="pre">e1</span></code> と <code class="docutils literal notranslate"><span class="pre">e2</span></code> は <code class="docutils literal notranslate"><span class="pre">e</span></code> の真部分項なので）一方、他の成分は変化しません。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ELam</span></code> における <code class="docutils literal notranslate"><span class="pre">sub_elam</span> <span class="pre">s</span></code> の呼び出しは、組の第 3 成分が <code class="docutils literal notranslate"><span class="pre">1</span></code> から <code class="docutils literal notranslate"><span class="pre">0</span></code> に減少し、先頭 2 成分は不変であるため終了します。</p></li>
+<li><p>最後の <code class="docutils literal notranslate"><span class="pre">subst</span></code> への再帰呼び出しも、<code class="docutils literal notranslate"><span class="pre">EApp</span></code> の場合と同様の理由で終了します。というのも、<code class="docutils literal notranslate"><span class="pre">sub_elam</span></code> の型が「<code class="docutils literal notranslate"><span class="pre">s</span></code> がリネーミングであるときに限って <code class="docutils literal notranslate"><span class="pre">sub_elam</span> <span class="pre">s</span></code> もリネーミングである」ことを保証し、<code class="docutils literal notranslate"><span class="pre">r</span></code> ビットが変化しないからです。</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sub_elam</span></code> の場合分け：再帰呼び出し <code class="docutils literal notranslate"><span class="pre">subst</span> <span class="pre">sub_inc</span> <span class="pre">(s</span> <span class="pre">(y</span> <span class="pre">-</span> <span class="pre">1))</span></code> において、<code class="docutils literal notranslate"><span class="pre">sub_inc</span></code> がリネーミングであることは既に示しています。したがって、次の 2 つを考えます。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">(y</span> <span class="pre">-</span> <span class="pre">1)</span></code> が変数なら、<code class="docutils literal notranslate"><span class="pre">subst</span></code> の減少タプルの第 1 成分である <code class="docutils literal notranslate"><span class="pre">bool_order</span> <span class="pre">(EVar?</span> <span class="pre">e)</span></code> は <code class="docutils literal notranslate"><span class="pre">0</span></code> となり、<code class="docutils literal notranslate"><span class="pre">subst_elam</span></code> の減少タプルの第 1 成分 <code class="docutils literal notranslate"><span class="pre">1</span></code> に明らかに先行します。</p></li>
+<li><p>一方、<code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">(y</span> <span class="pre">-</span> <span class="pre">1)</span></code> が変数でないなら、<code class="docutils literal notranslate"><span class="pre">s</span></code> は確実にリネーミングではありませんが、<code class="docutils literal notranslate"><span class="pre">sub_inc</span></code> はリネーミングです。よって、第 1 成分は不変のまま、第 2 成分が減少します。</p></li>
+</ul>
+</li>
+</ul>
+<p>最後に、<code class="docutils literal notranslate"><span class="pre">sub_elam</span> <span class="pre">s</span></code> がリネーミングであることと <code class="docutils literal notranslate"><span class="pre">s</span></code> がリネーミングであることが同値であると示す必要があります。そのために 2 つのことが要ります。</p>
+<ul class="simple">
+<li><p>第一に、<code class="docutils literal notranslate"><span class="pre">subst</span> <span class="pre">s</span></code> の型を強化し、<code class="docutils literal notranslate"><span class="pre">r</span></code> がリネーミングである場合に限って変数を変数に写すことを示します。</p></li>
+<li><p>第二に、<code class="docutils literal notranslate"><span class="pre">sub_elam</span></code> 内で存在量化をインスタンス化し、<code class="docutils literal notranslate"><span class="pre">s</span></code> がリネーミングでないなら、ある <code class="docutils literal notranslate"><span class="pre">x</span></code> を非変数へ写すはずであり、したがって <code class="docutils literal notranslate"><span class="pre">sub_elam</span> <span class="pre">s</span> <span class="pre">(x</span> <span class="pre">+</span> <span class="pre">1)</span></code> も非変数になることを示す必要があります。そのための 1 つの方法は、この事実を <code class="docutils literal notranslate"><span class="pre">assert</span></code> することで、SMT ソルバが必要なインスタンス化を見つけるのに十分なヒントとなります。別の方法は、以下の演習のように存在量化を明示的に導入することです。</p></li>
+</ul>
+<p>まとめると、添字付き型と辞書式順序にもとづく良基底再帰を組み合わせることで、定義の全域性を証明できました。もっとも、このような順序付けを考案するのは簡単ではなく工夫が要ります。しかし一度できてしまえば、置換とリネーミングの双方を扱える比較的コンパクトな定義が可能になります。</p>
+<section id="id1">
+<h4>演習<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<p>両方の定義の減少条件から第 1 成分を取り除き、F★ が受理するように定義を修正しなさい。</p>
+<p>あなたの解答は次のシグネチャを持つべきです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> subst1 (#r:bool)
+               (s:sub r)
+               (e:exp)
+  : <span class="k">Tot</span> (e&#39;:exp { r ==&gt; (EVar? e &lt;==&gt; EVar? e&#39;) })
+        (<span class="k">decreases</span> %[bool_order r;
+                     1;
+                     e])
+...
+
+<span class="k">and</span> sub_elam1 (#r:bool) (s:sub r)
+  : <span class="k">Tot</span> (sub r)
+        (<span class="k">decreases</span> %[bool_order r;
+                     0;
+                     EVar 0])
+</pre></div>
+</div>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>ヒント</strong></p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">subst_elam</span></code> の中で <code class="docutils literal notranslate"><span class="pre">subst</span></code> のある場合をインライン化してみてください。解答は次の問題に含まれています。</p>
+</div>
+<hr class="docutils" />
+<p><code class="docutils literal notranslate"><span class="pre">subst_elam</span></code> 内の <code class="docutils literal notranslate"><span class="pre">assert</span></code> を、存在量化を明示的に導入する証明に置き換えなさい。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> subst1 (#r:bool)
+              (s:sub r)
+              (e:exp)
+  : <span class="k">Tot</span> (e&#39;:exp { r ==&gt; (EVar? e &lt;==&gt; EVar? e&#39;) })
+        (<span class="k">decreases</span> %[bool_order r;
+                     1;
+                     e])
+  = <span class="k">match</span> e <span class="k">with</span>
+    | EVar x -&gt; s x
+    | ELam t e1 -&gt; ELam t (subst1 (sub_elam1 s) e1)
+    | EApp e1 e2 -&gt; EApp (subst1 s e1) (subst1 s e2)
+    | EUnit -&gt; EUnit
+
+<span class="k">and</span> sub_elam1 (#r:bool) (s:sub r) 
+  : <span class="k">Tot</span> (sub r)
+        (<span class="k">decreases</span> %[bool_order r;
+                     0;
+                     EVar 0])
+  = <span class="k">let</span> f : var -&gt; exp = 
+      <span class="k">fun</span> y -&gt;
+        <span class="k">if</span> y=0
+        <span class="k">then</span> EVar y
+        <span class="k">else</span> <span class="k">match</span> s (y - 1) <span class="k">with</span>
+             | EVar x -&gt; sub_inc x
+             | e -&gt; subst1 sub_inc e
+    <span class="k">in</span>
+    <span class="k">introduce</span> not r ==&gt; (<span class="k">exists</span> x. ~ (EVar? (f x))) 
+    <span class="k">with</span> not_r. 
+      <span class="k">eliminate</span> <span class="k">exists</span> y. ~ (EVar? (s y))
+      <span class="k">returns</span> <span class="k">_</span>
+      <span class="k">with</span> not_evar_sy. 
+        <span class="k">introduce</span> <span class="k">exists</span> x. ~(EVar? (f x))
+        <span class="k">with</span> (y + 1)
+        <span class="k">and</span> ()
+    ;
+    f
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="type-system">
+<h2>型システム<a class="headerlink" href="#type-system" title="Link to this heading"></a></h2>
+<p>プログラムの実行中に <span class="math notranslate nohighlight">\(()~e\)</span> のような項（すなわち、<span class="math notranslate nohighlight">\(()\)</span> のような非関数を関数のように用いる項）に至ったなら、実行時エラーが発生しプログラムはクラッシュします。単純型付きラムダ計算の型システムは、この種の実行時エラーを防ぐために設計されています。</p>
+<p>型システムは、帰納的に定義された関係 <code class="docutils literal notranslate"><span class="pre">typing</span> <span class="pre">g</span> <span class="pre">e</span> <span class="pre">t</span></code> として与えられ、以下の間の関係を表します。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>型付け環境 <a href="#id1"><span class="problematic" id="id2">``</span></a>g:env``（あるスコープの変数インデックスからその注釈付き型への部分写像）；</p></li>
+<li><p>プログラム式 <code class="docutils literal notranslate"><span class="pre">e:exp</span></code>；</p></li>
+<li><p>およびその型 <code class="docutils literal notranslate"><span class="pre">t:typ</span></code>。</p></li>
+</ul>
+</div></blockquote>
+<section id="environments">
+<h3>環境<a class="headerlink" href="#environments" title="Link to this heading"></a></h3>
+<p>以下のコードは、型付け環境 <code class="docutils literal notranslate"><span class="pre">env</span></code> の表現を示します。これは変数インデックス <code class="docutils literal notranslate"><span class="pre">var</span></code> から <code class="docutils literal notranslate"><span class="pre">Some</span> <span class="pre">t</span></code> もしくは <code class="docutils literal notranslate"><span class="pre">None</span></code> への全域関数です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> env = var -&gt; option typ
+
+<span class="k">let</span> empty : env = <span class="k">fun</span> <span class="k">_</span> -&gt; None
+
+<span class="k">let</span> extend (t:typ) (g:env) 
+  : env 
+  = <span class="k">fun</span> y -&gt; <span class="k">if</span> y = 0 <span class="k">then</span> Some t
+          <span class="k">else</span> g (y-1)
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">empty</span></code> 環境は、すべての変数を <code class="docutils literal notranslate"><span class="pre">None</span></code> に写します。</p></li>
+<li><p>環境 <code class="docutils literal notranslate"><span class="pre">g</span></code> を拡張して、型 <code class="docutils literal notranslate"><span class="pre">t</span></code> をインデックス <code class="docutils literal notranslate"><span class="pre">0</span></code> の新しい変数に関連付けるには、<code class="docutils literal notranslate"><span class="pre">g</span></code> 中の他のすべての変数のインデックスを <code class="docutils literal notranslate"><span class="pre">1</span></code> だけ繰り上げます。</p></li>
+</ul>
+</section>
+<section id="typing-relation">
+<span id="part2-stlc-typing"></span><h3>型付け関係<a class="headerlink" href="#typing-relation" title="Link to this heading"></a></h3>
+<p>STLC の型システムは、以下に示す帰納的関係 <code class="docutils literal notranslate"><span class="pre">typing</span> <span class="pre">g</span> <span class="pre">e</span> <span class="pre">t</span></code> により定義されます。<code class="docutils literal notranslate"><span class="pre">typing</span> <span class="pre">g</span> <span class="pre">e</span> <span class="pre">t</span></code> の値は、環境 <code class="docutils literal notranslate"><span class="pre">g</span></code> において <code class="docutils literal notranslate"><span class="pre">e</span></code> が型 <code class="docutils literal notranslate"><span class="pre">t</span></code> を持つという導出（すなわち証明）です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span> 
+<span class="k">type</span> typing : env -&gt; exp -&gt; typ -&gt; Type =
+  | TyUnit :
+      #g:env -&gt;
+      typing g EUnit TUnit
+
+  | TyVar :
+      #g:env -&gt;
+      x:var{Some? (g x)} -&gt;
+      typing g (EVar x) (Some?.v (g x))
+
+  | TyLam :
+      #g :env -&gt;
+      t:typ -&gt;
+      #e1:exp -&gt;
+      #t&#39;:typ -&gt;
+      hbody:typing (extend t g) e1 t&#39; -&gt;
+      typing g (ELam t e1) (TArr t t&#39;)
+            
+  | TyApp :
+      #g:env -&gt;
+      #e1:exp -&gt;
+      #e2:exp -&gt;
+      #t11:typ -&gt;
+      #t12:typ -&gt;
+      h1:typing g e1 (TArr t11 t12) -&gt;
+      h2:typing g e2 t11 -&gt;
+      typing g (EApp e1 e2) t12
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>各コンストラクタが可判定同値性を持たない関数型の値 <code class="docutils literal notranslate"><span class="pre">g:env</span></code> を含むため、この型では可判定同値性をサポートできません。そこで、この帰納型には <code class="docutils literal notranslate"><span class="pre">noeq</span></code> 修飾子を付けます（<a class="reference internal" href="part2_equality.html#part2-equality-qualifiers"><span class="std std-ref">前述</span></a>）。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TyUnit</span></code> は、ユニット値 <code class="docutils literal notranslate"><span class="pre">EUnit</span></code> がどの環境でも型 <code class="docutils literal notranslate"><span class="pre">TUnit</span></code> を持つことを述べます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TyVar</span></code> は、変数 <code class="docutils literal notranslate"><span class="pre">x</span></code> がよく型付けされるのは、その型が <code class="docutils literal notranslate"><span class="pre">Some</span> <span class="pre">t</span></code> に束縛された環境 <code class="docutils literal notranslate"><span class="pre">g</span></code> においてのみであり、そのときプログラム <code class="docutils literal notranslate"><span class="pre">EVar</span> <span class="pre">x</span></code> は型 <code class="docutils literal notranslate"><span class="pre">t</span></code> を持つ、と述べます。この規則により、スコープ外の変数が使用されないことが保証されます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TyLam</span></code> は、関数リテラル <code class="docutils literal notranslate"><span class="pre">ELam</span> <span class="pre">t</span> <span class="pre">e1</span></code> が環境 <code class="docutils literal notranslate"><span class="pre">g</span></code> で型 <code class="docutils literal notranslate"><span class="pre">TArr</span> <span class="pre">t</span> <span class="pre">t'</span></code> を持つのは、関数本体 <code class="docutils literal notranslate"><span class="pre">e1</span></code> が、型 <code class="docutils literal notranslate"><span class="pre">t</span></code> の新しい変数の束縛を追加して（他の変数をシフトし保持した）環境で型 <code class="docutils literal notranslate"><span class="pre">t'</span></code> を持つ場合である、と述べます。</p></li>
+<li><p>最後に <code class="docutils literal notranslate"><span class="pre">TyApp</span></code> は、<code class="docutils literal notranslate"><span class="pre">e1</span></code> が矢印型であり、引数 <code class="docutils literal notranslate"><span class="pre">e2</span></code> がその仮引数の型を持つときにのみ <code class="docutils literal notranslate"><span class="pre">e1</span></code> を <code class="docutils literal notranslate"><span class="pre">e2</span></code> に適用でき、全体の項は <code class="docutils literal notranslate"><span class="pre">e1</span></code> の戻り型を持つことを認めます。</p></li>
+</ul>
+</section>
+</section>
+<section id="progress">
+<h2>進行（Progress）<a class="headerlink" href="#progress" title="Link to this heading"></a></h2>
+<p>自由変数を持たない、よく型付けされたユニット以外やラムダの項が 1 ステップの計算を行えることは比較的容易に証明できます。この性質は <em>進行（progress）</em> として知られます。</p>
+<section id="id2">
+<h3>演習<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>進行の定理を述べ、証明しなさい。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> is_value (e:exp) : bool = ELam? e || EUnit? e
+
+<span class="k">let</span> <span class="k">rec</span> progress (#e:exp {~ (is_value e) })
+                 (#t:typ)
+                 (h:typing empty e t)
+  : (e&#39;:exp &amp; step e e&#39;)
+  = <span class="k">let</span> TyApp #g #e1 #e2 #t11 #t12 h1 h2 = h <span class="k">in</span>
+    <span class="k">match</span> e1 <span class="k">with</span>
+    | ELam t e1&#39; -&gt; (| subst (sub_beta e2) e1&#39;, Beta t e1&#39; e2 |)
+    | <span class="k">_</span>          -&gt; <span class="k">let</span> (| e1&#39;, h1&#39; |) = progress h1 <span class="k">in</span>
+                   (| EApp e1&#39; e2, AppLeft e2 h1&#39;|)
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="preservation">
+<h2>保存（Preservation）<a class="headerlink" href="#preservation" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">typing</span> <span class="pre">g</span> <span class="pre">e</span> <span class="pre">t</span></code> を満たすよく型付けされた項 <code class="docutils literal notranslate"><span class="pre">e</span></code> と <code class="docutils literal notranslate"><span class="pre">steps</span> <span class="pre">e</span> <span class="pre">e'</span></code> が与えられたとき、<code class="docutils literal notranslate"><span class="pre">e'</span></code> も <code class="docutils literal notranslate"><span class="pre">e</span></code> と同じ型、すなわち <code class="docutils literal notranslate"><span class="pre">typing</span> <span class="pre">g</span> <span class="pre">e'</span> <span class="pre">t</span></code> を満たすことを示したい。この性質は <em>保存（preservation）*（あるいは *主題縮小</em>）として知られます。<em>進行</em> と組み合わせることで、よく型付けされた項は値に到達するまでステップを進められることが示せます。</p>
+<p>以下の証明は 1 ステップに対する保存を示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> preservation_step #e #e&#39; #g #t (ht:typing g e t) (hs:step e e&#39;) 
+  : typing g e&#39; t
+  = <span class="k">let</span> TyApp h1 h2 = ht <span class="k">in</span>
+    <span class="k">match</span> hs <span class="k">with</span>
+    | Beta tx e1&#39; e2&#39; -&gt; substitution_beta h2 (TyLam?.hbody h1)
+    | AppLeft e2&#39; hs1   -&gt; TyApp (preservation_step h1 hs1) h2
+    | AppRight e1&#39; hs2   -&gt; TyApp h1 (preservation_step h2 hs2)
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>計算が 1 ステップ進むことが分かっているので、型付け導出 <code class="docutils literal notranslate"><span class="pre">ht</span></code> は <code class="docutils literal notranslate"><span class="pre">TyApp</span></code> の事例であるはずです。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AppLeft</span></code> と <code class="docutils literal notranslate"><span class="pre">AppRight</span></code> の場合は、どちら側が実際にステップしたかに応じて帰納法の仮定を容易に用いることができます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Beta</span></code> の場合が最も興味深く、型付けを保存する置換に関する補題が必要です。</p></li>
+</ul>
+<p>置換補題は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> subst_typing #r (s:sub r) (g1:env) (g2:env) =
+    x:var{Some? (g1 x)} -&gt; typing g2 (s x) (Some?.v (g1 x))
+
+<span class="k">let</span> <span class="k">rec</span> substitution (#g1:env) 
+                     (#e:exp)
+                     (#t:typ)
+                     (#r:bool)
+                     (s:sub r)
+                     (#g2:env)
+                     (h1:typing g1 e t)
+                     (hs:subst_typing s g1 g2)
+   : <span class="k">Tot</span> (typing g2 (subst s e) t)
+         (<span class="k">decreases</span> %[bool_order (EVar? e); bool_order r; e])
+   = <span class="k">match</span> h1 <span class="k">with</span>
+     | TyUnit -&gt; TyUnit
+     | TyVar x -&gt; hs x
+     | TyApp hfun harg -&gt; TyApp (substitution s hfun hs) (substitution s harg hs)
+     | TyLam tlam hbody -&gt;
+       <span class="k">let</span> hs&#39;&#39; : subst_typing (sub_inc) g2 (extend tlam g2) =
+         <span class="k">fun</span> x -&gt; TyVar (x+1) 
+       <span class="k">in</span>
+       <span class="k">let</span> hs&#39; : subst_typing (sub_elam s) (extend tlam g1) (extend tlam g2) =
+         <span class="k">fun</span> y -&gt; <span class="k">if</span> y = 0 <span class="k">then</span> TyVar y
+               <span class="k">else</span> substitution sub_inc (hs (y - 1)) hs&#39;&#39;
+       <span class="k">in</span>
+       TyLam tlam (substitution (sub_elam s) hbody hs&#39;)
+</pre></div>
+</div>
+<p>まず置換の型付け可能性 <code class="docutils literal notranslate"><span class="pre">subst_typing</span> <span class="pre">s</span> <span class="pre">g1</span> <span class="pre">g2</span></code> の概念から始めます。これは、変数 <code class="docutils literal notranslate"><span class="pre">x</span></code> が型 <code class="docutils literal notranslate"><span class="pre">g1</span> <span class="pre">x</span></code> を持つなら、<code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">x</span></code> は <code class="docutils literal notranslate"><span class="pre">g2</span></code> において同じ型を持たねばならない、というものです。</p>
+<p>置換補題はこの概念を式に持ち上げ、よく型付けされた置換 <code class="docutils literal notranslate"><span class="pre">subst_typing</span> <span class="pre">s</span> <span class="pre">g1</span> <span class="pre">g2</span></code> を <code class="docutils literal notranslate"><span class="pre">g1</span></code> でよく型付けされた項に適用すると、同じ型を保ったまま <code class="docutils literal notranslate"><span class="pre">g2</span></code> でよく型付けされた項が得られる、と述べます。</p>
+<section id="id3">
+<h3>演習<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p>保存の証明で用いた <code class="docutils literal notranslate"><span class="pre">substitution_beta</span></code> 補題を、置換補題を使って述べ、証明しなさい。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> substitution_beta #e #v #t_x #t #g 
+                      (h1:typing g v t_x)
+                      (h2:typing (extend t_x g) e t)
+  : typing g (subst (sub_beta v) e) t
+  = <span class="k">let</span> hs : subst_typing (sub_beta v) (extend t_x g) g =
+        <span class="k">fun</span> y -&gt; <span class="k">if</span> y = 0 <span class="k">then</span> h1 <span class="k">else</span> TyVar (y-1) <span class="k">in</span>
+    substitution (sub_beta v) h2 hs
+</pre></div>
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="id4">
+<h3>演習<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>複数ステップに対する保存補題を証明しなさい。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> preservation #e #e&#39; #g #t (ht:typing g e t) (hs:steps e e&#39;) 
+  : <span class="k">Tot</span> (typing g e&#39; t)
+        (<span class="k">decreases</span> hs)
+  = <span class="k">match</span> hs <span class="k">with</span>
+    | Single s -&gt; 
+      preservation_step ht s
+    | Many s0 s1 -&gt; 
+      <span class="k">let</span> ht&#39; = preservation_step ht s0 <span class="k">in</span>
+      preservation ht&#39; s1
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id5">
+<h2>演習<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<p>次の主張を持つ型健全性補題を証明しなさい。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> soundness #e #e&#39; #t 
+              (ht:typing empty e t) 
+  : either (squash (is_value e))
+           (e&#39;:exp &amp; steps e e&#39; &amp; typing empty e&#39; t)
+</pre></div>
+</div>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>  = <span class="k">if</span> is_value e <span class="k">then</span> Inl ()
+    <span class="k">else</span> <span class="k">let</span> (| e&#39;, s |) = progress ht <span class="k">in</span>
+         <span class="k">let</span> ht&#39; = preservation_step ht s <span class="k">in</span>
+         Inr (| e&#39;, Single s, ht&#39; |)
+</pre></div>
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="id6">
+<h2>演習<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<p>束縛子の内側での簡約ステップを追加し、システムが健全であることを証明しなさい。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(*</span>
+<span class="c">   Copyright 2014-2015</span>
+<span class="c">     Simon Forest - Inria and ENS Paris</span>
+<span class="c">     Catalin Hritcu - Inria</span>
+<span class="c">     Nikhil Swamy - Microsoft Research</span>
+
+<span class="c">   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c">   you may not use this file except in compliance with the License.</span>
+<span class="c">   You may obtain a copy of the License at</span>
+
+<span class="c">       http://www.apache.org/licenses/LICENSE-2.0</span>
+
+<span class="c">   Unless required by applicable law or agreed to in writing, software</span>
+<span class="c">   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c">   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c">   See the License for the specific language governing permissions and</span>
+<span class="c">   limitations under the License.</span>
+<span class="c">*)</span>
+
+<span class="k">module</span> Part2.STLC.Strong
+<span class="k">open</span> FStar.Classical.Sugar
+<span class="c">(* Constructive-style progress and preservation proof for STLC with</span>
+<span class="c">   strong reduction, using deBruijn indices and parallel substitution. *)</span>
+
+<span class="k">type</span> typ =
+  | TUnit : typ
+  | TArr  : typ -&gt; typ -&gt; typ
+
+<span class="k">let</span> var = nat
+<span class="k">type</span> exp =
+  | EUnit : exp
+  | EVar  : var -&gt; exp
+  | ELam  : typ -&gt; exp -&gt; exp
+  | EApp  : exp -&gt; exp -&gt; exp
+
+<span class="c">(* Parallel substitution operation `subst` *)</span>
+<span class="k">let</span> sub (renaming:bool) = 
+    f:(var -&gt; exp){ renaming &lt;==&gt; (<span class="k">forall</span> x. EVar? (f x)) }
+
+<span class="k">let</span> bool_order (b:bool) = <span class="k">if</span> b <span class="k">then</span> 0 <span class="k">else</span> 1
+
+<span class="k">let</span> sub_inc 
+  : sub <span class="k">true</span>
+  = <span class="k">fun</span> y -&gt; EVar (y+1)
+
+<span class="k">let</span> is_var (e:exp) : int = <span class="k">if</span> EVar? e <span class="k">then</span> 0 <span class="k">else</span> 1
+
+<span class="k">let</span> <span class="k">rec</span> subst (#r:bool)
+              (s:sub r)
+              (e:exp)
+  : <span class="k">Tot</span> (e&#39;:exp { r ==&gt; (EVar? e &lt;==&gt; EVar? e&#39;) })
+        (<span class="k">decreases</span> %[bool_order (EVar? e); 
+                     bool_order r;
+                     1;
+                     e])
+  = <span class="k">match</span> e <span class="k">with</span>
+    | EVar x -&gt; s x
+    | ELam t e1 -&gt; ELam t (subst (sub_elam s) e1)
+    | EApp e1 e2 -&gt; EApp (subst s e1) (subst s e2)
+    | EUnit -&gt; EUnit
+
+<span class="k">and</span> sub_elam (#r:bool) (s:sub r) 
+  : <span class="k">Tot</span> (sub r)
+        (<span class="k">decreases</span> %[1;
+                     bool_order r;
+                     0;
+                     EVar 0])
+  = <span class="k">let</span> f : var -&gt; exp = 
+      <span class="k">fun</span> y -&gt;
+        <span class="k">if</span> y=0
+        <span class="k">then</span> EVar y
+        <span class="k">else</span> subst sub_inc (s (y - 1))
+    <span class="k">in</span>
+    <span class="k">introduce</span> not r ==&gt; (<span class="k">exists</span> x. ~ (EVar? (f x)))
+    <span class="k">with</span> not_r. 
+      <span class="k">eliminate</span> <span class="k">exists</span> y. ~ (EVar? (s y))
+      <span class="k">returns</span> (<span class="k">exists</span> x. ~ (EVar? (f x)))
+      <span class="k">with</span> (not_evar_sy:squash (~(EVar? (s y)))). 
+        <span class="k">introduce</span> <span class="k">exists</span> x. ~(EVar? (f x))
+        <span class="k">with</span> (y + 1)
+        <span class="k">and</span> ()
+    ;
+    f
+
+<span class="k">let</span> sub_beta (e:exp)
+  : sub (EVar? e)
+  = <span class="k">let</span> f = 
+      <span class="k">fun</span> (y:var) -&gt;
+        <span class="k">if</span> y = 0 <span class="k">then</span> e      <span class="c">(* substitute *)</span>
+        <span class="k">else</span> (EVar (y-1))    <span class="c">(* shift -1 *)</span>
+    <span class="k">in</span>
+    <span class="k">if</span> not (EVar? e)
+    <span class="k">then</span> <span class="k">introduce</span> <span class="k">exists</span> (x:var). ~(EVar? (f x))
+         <span class="k">with</span> 0 <span class="k">and</span> ();
+    f
+
+<span class="c">(* Small-step operational semantics; strong / full-beta reduction is</span>
+<span class="c">   non-deterministic, so necessarily as inductive relation *)</span>
+
+<span class="k">type</span> step : exp -&gt; exp -&gt; Type =
+  | SBeta : t:typ -&gt;
+            e1:exp -&gt;
+            e2:exp -&gt;
+            step (EApp (ELam t e1) e2) (subst (sub_beta e2) e1)
+
+  | SApp1 : #e1:exp -&gt;
+             e2:exp -&gt;
+            #e1&#39;:exp -&gt;
+            hst:step e1 e1&#39; -&gt;
+            step (EApp e1 e2) (EApp e1&#39; e2)
+
+  | SApp2 :  e1:exp -&gt;
+            #e2:exp -&gt;
+            #e2&#39;:exp -&gt;
+            hst:step e2 e2&#39; -&gt;
+            step (EApp e1 e2) (EApp e1 e2&#39;)
+
+  | STrans : #e0:exp -&gt;
+             #e1:exp -&gt;
+             #e2:exp -&gt; 
+             step e0 e1 -&gt;
+             step e1 e2 -&gt; 
+             step e0 e2
+
+  | SStrong : t:typ -&gt;
+              e:exp -&gt;
+              e&#39;:exp -&gt;
+              step e e&#39; -&gt; 
+              step (ELam t e) (ELam t e&#39;)
+
+<span class="c">(* Type system; as inductive relation (not strictly necessary for STLC) *)</span>
+
+<span class="k">type</span> env = var -&gt; option typ
+
+<span class="k">let</span> empty : env = <span class="k">fun</span> <span class="k">_</span> -&gt; None
+
+<span class="c">(* we only need extend at 0 *)</span>
+<span class="k">let</span> extend (t:typ) (g:env) 
+  : env 
+  = <span class="k">fun</span> y -&gt; <span class="k">if</span> y = 0 <span class="k">then</span> Some t
+          <span class="k">else</span> g (y-1)
+
+<span class="k">noeq</span> 
+<span class="k">type</span> typing : env -&gt; exp -&gt; typ -&gt; Type =
+  | TyUnit : #g:env -&gt;
+             typing g EUnit TUnit
+
+  | TyVar : #g:env -&gt;
+             x:var{Some? (g x)} -&gt;
+             typing g (EVar x) (Some?.v (g x))
+
+  | TyLam : #g :env -&gt;
+            t:typ -&gt;
+            #e1:exp -&gt;
+            #t&#39;:typ -&gt;
+            hbody:typing (extend t g) e1 t&#39; -&gt;
+            typing g (ELam t e1) (TArr t t&#39;)
+            
+  | TyApp : #g:env -&gt;
+            #e1:exp -&gt;
+            #e2:exp -&gt;
+            #t11:typ -&gt;
+            #t12:typ -&gt;
+            h1:typing g e1 (TArr t11 t12) -&gt;
+            h2:typing g e2 t11 -&gt;
+            typing g (EApp e1 e2) t12
+            
+
+<span class="c">(* Progress *)</span>
+
+<span class="k">let</span> is_value (e:exp) : bool = ELam? e || EUnit? e
+
+<span class="k">let</span> <span class="k">rec</span> progress (#e:exp {~ (is_value e) })
+                 (#t:typ)
+                 (h:typing empty e t)
+  : (e&#39;:exp &amp; step e e&#39;)
+  = <span class="k">let</span> TyApp #g #e1 #e2 #t11 #t12 h1 h2 = h <span class="k">in</span>
+    <span class="k">match</span> e1 <span class="k">with</span>
+    | ELam t e1&#39; -&gt; (| subst (sub_beta e2) e1&#39;, SBeta t e1&#39; e2 |)
+    | <span class="k">_</span>          -&gt; <span class="k">let</span> (| e1&#39;, h1&#39; |) = progress h1 <span class="k">in</span>
+                   (| EApp e1&#39; e2, SApp1 e2 h1&#39;|)
+
+<span class="c">(* Typing of substitutions (very easy, actually) *)</span>
+<span class="k">let</span> subst_typing #r (s:sub r) (g1:env) (g2:env) =
+    x:var{Some? (g1 x)} -&gt; typing g2 (s x) (Some?.v (g1 x))
+
+<span class="c">(* Substitution preserves typing</span>
+<span class="c">   Strongest possible statement; suggested by Steven Schäfer *)</span>
+<span class="k">let</span> <span class="k">rec</span> substitution (#g1:env) 
+                     (#e:exp)
+                     (#t:typ)
+                     (#r:bool)
+                     (s:sub r)
+                     (#g2:env)
+                     (h1:typing g1 e t)
+                     (hs:subst_typing s g1 g2)
+   : <span class="k">Tot</span> (typing g2 (subst s e) t)
+         (<span class="k">decreases</span> %[bool_order (EVar? e); bool_order r; e])
+   = <span class="k">match</span> h1 <span class="k">with</span>
+   | TyVar x -&gt; hs x
+   | TyApp hfun harg -&gt; TyApp (substitution s hfun hs) (substitution s harg hs)
+   | TyLam tlam hbody -&gt;
+     <span class="k">let</span> hs&#39;&#39; : subst_typing (sub_inc) g2 (extend tlam g2) =
+       <span class="k">fun</span> x -&gt; TyVar (x+1) <span class="k">in</span>
+     <span class="k">let</span> hs&#39; : subst_typing (sub_elam s) (extend tlam g1) (extend tlam g2) =
+       <span class="k">fun</span> y -&gt; <span class="k">if</span> y = 0 <span class="k">then</span> TyVar y
+             <span class="k">else</span> substitution sub_inc (hs (y - 1)) hs&#39;&#39;
+     <span class="k">in</span> TyLam tlam (substitution (sub_elam s) hbody hs&#39;)
+   | TyUnit -&gt; TyUnit
+
+<span class="c">(* Substitution for beta reduction</span>
+<span class="c">   Now just a special case of substitution lemma *)</span>
+<span class="k">let</span> substitution_beta #e #v #t_x #t #g 
+                      (h1:typing g v t_x)
+                      (h2:typing (extend t_x g) e t)
+  : typing g (subst (sub_beta v) e) t
+  = <span class="k">let</span> hs : subst_typing (sub_beta v) (extend t_x g) g =
+        <span class="k">fun</span> y -&gt; <span class="k">if</span> y = 0 <span class="k">then</span> h1 <span class="k">else</span> TyVar (y-1) <span class="k">in</span>
+    substitution (sub_beta v) h2 hs
+
+<span class="c">(* Type preservation *)</span>
+<span class="k">let</span> <span class="k">rec</span> preservation #e #e&#39; #g #t (ht:typing g e t) (hs:step e e&#39;) 
+  : <span class="k">Tot</span> (typing g e&#39; t)
+        (<span class="k">decreases</span> hs)
+  = <span class="k">match</span> hs <span class="k">with</span>
+    | STrans s0 s1 -&gt;
+      <span class="k">let</span> ht&#39; = preservation ht s0 <span class="k">in</span>
+      preservation ht&#39; s1
+    | <span class="k">_</span> -&gt;
+      <span class="k">match</span> ht <span class="k">with</span>
+      | TyApp h1 h2 -&gt; (
+        <span class="k">match</span> hs <span class="k">with</span>
+        | SBeta tx e1&#39; e2&#39; -&gt; substitution_beta h2 (TyLam?.hbody h1)
+        | SApp1 e2&#39; hs1   -&gt; TyApp (preservation h1 hs1) h2
+        | SApp2 e1&#39; hs2   -&gt; TyApp h1 (preservation h2 hs2)
+      )
+      | TyLam t hb -&gt;
+        <span class="k">let</span> SStrong t e e&#39; hs&#39; = hs <span class="k">in</span>
+        <span class="k">let</span> hb&#39; = preservation hb hs&#39; <span class="k">in</span>
+        TyLam t hb&#39;
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part2_logical_connectives.html" class="btn btn-neutral float-left" title="構成的連言と古典的連言（論理結合子）" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part2_phoas.html" class="btn btn-neutral float-right" title="高階抽象構文（HOAS）" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,445 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>停止性の証明 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="補題と帰納法による証明" href="part1_lemmas.html" />
+    <link rel="prev" title="帰納的データ型とパターンマッチ" href="part1_inductives.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part1.html">全域関数によるプログラミングと証明</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part1_getting_off_the_ground.html">まずは始めてみよう</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_polymorphism.html">多相と型推論</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_equality.html">等値性（Equality）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_prop_assertions.html">SMT ソルバとの連携</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_inductives.html">帰納的データ型とパターンマッチ</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">停止性の証明</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-well-founded-partial-order-on-terms">項上の整礎な半順序</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-precedes-relation">先行関係（precedes relation）</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#why-length-terminates"><code class="docutils literal notranslate"><span class="pre">length</span></code> が停止する理由</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lexicographic-orderings">辞書式順序（レキシコグラフィック順序）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#default-measures">デフォルトの測度</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mutual-recursion">相互再帰</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-termination-check-precisely">停止性検査の厳密な説明</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exercise-fibonacci-in-linear-time">演習：線形時間のフィボナッチ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exercise-tail-recursive-reversal">演習：末尾再帰による反転</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part1_lemmas.html">補題と帰納法による証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_quicksort.html">ケーススタディ：クイックソート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_execution.html">プログラムの実行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_wrap.html">まとめ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part1.html">全域関数によるプログラミングと証明</a></li>
+      <li class="breadcrumb-item active">停止性の証明</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="proofs-of-termination">
+<span id="part1-termination"></span><h1>停止性の証明<a class="headerlink" href="#proofs-of-termination" title="Link to this heading"></a></h1>
+<p>F* のコア論理の健全性にとって、すべての関数が停止することは極めて重要です。そうでないと、次のような停止しない関数を書けてしまいます。:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">let</span> <span class="n">rec</span> <span class="n">loop</span> <span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="n">unit</span><span class="p">)</span> <span class="p">:</span> <span class="kc">False</span> <span class="o">=</span> <span class="n">loop</span> <span class="n">x</span>
+</pre></div>
+</div>
+<p>そして <code class="docutils literal notranslate"><span class="pre">loop</span> <span class="pre">()</span> <span class="pre">:</span> <span class="pre">False</span></code> を示せてしまいます。つまり <code class="docutils literal notranslate"><span class="pre">False</span></code> の証明項が得られ、論理が崩壊します。</p>
+<p>前章では、<a class="reference internal" href="part1_inductives.html#part1-inductives-length"><span class="std std-ref">リストの長さを計算する</span></a> 再帰関数や <a class="reference internal" href="part1_inductives.html#part1-inductives-append"><span class="std std-ref">2 つのリストを結合する</span></a> 再帰関数を定義しました。また <a class="reference internal" href="part1_getting_off_the_ground.html#part1-ch1-arrows"><span class="std std-ref">以前</span></a>、F* のコアにおけるすべての関数は <em>全関数（total）</em>、すなわち有限時間で必ず返ると述べました。では、<code class="docutils literal notranslate"><span class="pre">length</span></code> や <code class="docutils literal notranslate"><span class="pre">append</span></code> のような再帰関数が実際にすべての入力で停止することは、何によって保証されるのでしょうか。</p>
+<p>F* がコアにおけるすべての関数の停止性を保証する仕組みの全容には、データ型定義の正性制約やユニバース制約など複数の要素が関わります。しかし現時点で理解しておくべき要点は、F* には全関数の再帰定義に適用される停止性検査があり、これは他の依存型言語のような構文的基準ではなく、意味的な検査である、ということです。</p>
+<p>ここでは F* の停止性検査（再帰関数に対する）の基本構造を手短に説明します。より興味深いプログラムを書くために、この仕組みを少し理解しておく必要があります。</p>
+<section id="a-well-founded-partial-order-on-terms">
+<h2>項上の整礎な半順序<a class="headerlink" href="#a-well-founded-partial-order-on-terms" title="Link to this heading"></a></h2>
+<p>F* で関数の停止性を証明するには、関数の引数に依存する純粋な式である <em>測度（measure）</em> を与えます。F* は、各再帰呼び出しでこの測度が厳密に減少することを検査します。呼び出しの引数に対する測度は、前の呼び出しの測度と、F* の項に定義された整礎な半順序に従って比較されます。この順序で <cite>v1</cite> が <cite>v2</cite> に先行する場合を <cite>v1 &lt;&lt; v2</cite> と書きます。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>集合 <cite>S</cite> 上の関係 <cite>R</cite> が整礎な半順序であるとは、<cite>R</cite> が <cite>S</cite> 上の半順序であり、かつ <cite>R</cite> による無限下降列が存在しないことを言います。例えば <cite>S</cite> を自然数集合 <cite>nat</cite> とすると、整数の順序 <cite>&lt;</cite> は整礎な半順序（実際には全順序）です。</p>
+</div>
+<p>各再帰呼び出しで測度が厳密に減少し、無限下降列が存在しないため、再帰呼び出しはやがて尽きます。すなわち関数は停止します。</p>
+<section id="the-precedes-relation">
+<span id="part1-precedes-relation"></span><h3>先行関係（precedes relation）<a class="headerlink" href="#the-precedes-relation" title="Link to this heading"></a></h3>
+<p>2 つの項 <code class="docutils literal notranslate"><span class="pre">v1:t1</span></code> と <code class="docutils literal notranslate"><span class="pre">v2:t2</span></code> について、次のいずれかが成り立てば <code class="docutils literal notranslate"><span class="pre">v1</span> <span class="pre">&lt;&lt;</span> <span class="pre">v2</span></code> を証明できます。</p>
+<ol class="arabic">
+<li><p><strong>整数の順序</strong>：</p>
+<p><code class="docutils literal notranslate"><span class="pre">t1</span> <span class="pre">=</span> <span class="pre">nat</span></code> かつ <code class="docutils literal notranslate"><span class="pre">t2</span> <span class="pre">=</span> <span class="pre">nat</span></code> かつ <code class="docutils literal notranslate"><span class="pre">v1</span> <span class="pre">&lt;</span> <span class="pre">v2</span></code></p>
+<p>負の整数同士は <cite>&lt;&lt;</cite> で比較されません。<cite>&lt;&lt;</cite> はあくまで _半_ 順序だからです。</p>
+</li>
+<li><p><strong>帰納的型における部分項順序</strong></p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">v2</span> <span class="pre">=</span> <span class="pre">D</span> <span class="pre">u1</span> <span class="pre">...</span> <span class="pre">un``（``D</span></code> は帰納的型のコンストラクタで、引数 <code class="docutils literal notranslate"><span class="pre">u1</span></code> から <code class="docutils literal notranslate"><span class="pre">un</span></code> までに完全適用されている）とすると、次のいずれかなら <code class="docutils literal notranslate"><span class="pre">v1</span> <span class="pre">&lt;&lt;</span> <span class="pre">v2</span></code> が成り立ちます。</p>
+<ul class="simple">
+<li><p>ある <code class="docutils literal notranslate"><span class="pre">i</span></code> について <code class="docutils literal notranslate"><span class="pre">v1</span> <span class="pre">=</span> <span class="pre">ui</span></code>、すなわち <code class="docutils literal notranslate"><span class="pre">v1</span></code> が <code class="docutils literal notranslate"><span class="pre">v2</span></code> の部分項である。</p></li>
+<li><p>ある <code class="docutils literal notranslate"><span class="pre">i</span></code> と <code class="docutils literal notranslate"><span class="pre">x</span></code> について <code class="docutils literal notranslate"><span class="pre">v1</span> <span class="pre">=</span> <span class="pre">ui</span> <span class="pre">x</span></code>、すなわち <code class="docutils literal notranslate"><span class="pre">v1</span></code> が <code class="docutils literal notranslate"><span class="pre">v2</span></code> の部分項に何らかの引数 <code class="docutils literal notranslate"><span class="pre">x</span></code> を適用した結果である。</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ol>
+</section>
+</section>
+<section id="why-length-terminates">
+<span id="part1-why-length-terminates"></span><h2><code class="docutils literal notranslate"><span class="pre">length</span></code> が停止する理由<a class="headerlink" href="#why-length-terminates" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">length</span></code> の定義をもう一度見て、F* がどのように停止性を検査するかを確認しましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> length #a (l:list a)
+  : nat
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; 0
+    | <span class="k">_</span> :: tl -&gt; 1 + length tl
+</pre></div>
+</div>
+<p>まず、上の <code class="docutils literal notranslate"><span class="pre">length</span></code> の定義では、いくつかの詳細を隠すために構文上の省略記法を使っています。これを完全に書き下すと、次のようになります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> length #a (l:list a)
+  : <span class="k">Tot</span> nat (<span class="k">decreases</span> l)
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; 0
+    | <span class="k">_</span> :: tl -&gt; 1 + length tl
+</pre></div>
+</div>
+<p>主な違いは 2 行目です。<code class="docutils literal notranslate"><span class="pre">length</span></code> の結果型だけを書く代わりに、詳細に <code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">nat</span> <span class="pre">(decreases</span> <span class="pre">l)</span></code> と書いています。これは次の 2 点を述べています。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">nat</span></code> の部分は、<code class="docutils literal notranslate"><span class="pre">length</span></code> が <code class="docutils literal notranslate"><span class="pre">nat</span></code> を返す全関数であることを（先ほどの <code class="docutils literal notranslate"><span class="pre">nat</span></code> と同様に）示します。</p></li>
+<li><p>追加の <code class="docutils literal notranslate"><span class="pre">(decreases</span> <span class="pre">l)</span></code> は <em>測度</em> を指定します。すなわち、整礎な関係 <code class="docutils literal notranslate"><span class="pre">&lt;&lt;</span></code> に従って各再帰呼び出しで減少する量です。</p></li>
+</ul>
+<p>定義を検査するために、F* は再帰的に束縛された名前（ここでは <code class="docutils literal notranslate"><span class="pre">length</span></code>）に、測度でガードされた型を与えます。すなわち関数本体において、<code class="docutils literal notranslate"><span class="pre">length</span></code> は次の型を持ちます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#a:Type -&gt; m:list a{ m &lt;&lt; l } -&gt; nat
+</pre></div>
+</div>
+<p>これは、再帰呼び出しで <code class="docutils literal notranslate"><span class="pre">length</span></code> を使うとき、引数 <code class="docutils literal notranslate"><span class="pre">m</span></code> は必ず <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">&lt;&lt;</span> <span class="pre">l</span></code> を満たさなければならない、すなわち現在の引数 <code class="docutils literal notranslate"><span class="pre">l</span></code> に先行する引数にしか適用できない、という意味です。<code class="docutils literal notranslate"><span class="pre">&lt;&lt;</span></code> による無限下降列が存在しないため、これで再帰呼び出しが必ず尽きる（停止する）ことが保証されます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">length</span></code> の場合、再帰呼び出し <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">tl</span></code> において、<code class="docutils literal notranslate"><span class="pre">tl</span> <span class="pre">:</span> <span class="pre">(m</span> <span class="pre">:</span> <span class="pre">list</span> <span class="pre">a</span> <span class="pre">{</span> <span class="pre">m</span> <span class="pre">&lt;&lt;</span> <span class="pre">l</span> <span class="pre">})</span></code>、言い換えれば <code class="docutils literal notranslate"><span class="pre">tl</span> <span class="pre">&lt;&lt;</span> <span class="pre">l</span></code> を示す必要があります。帰納的型の部分項順序より、<code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">=</span> <span class="pre">Cons</span> <span class="pre">_</span> <span class="pre">tl</span></code> ですから、<code class="docutils literal notranslate"><span class="pre">tl</span> <span class="pre">&lt;&lt;</span> <span class="pre">l</span></code> は確かに証明でき、検査は通ります。</p>
+</section>
+<section id="lexicographic-orderings">
+<span id="part1-lexicographic-orderings"></span><h2>辞書式順序（レキシコグラフィック順序）<a class="headerlink" href="#lexicographic-orderings" title="Link to this heading"></a></h2>
+<p>F* では、整礎順序 <code class="docutils literal notranslate"><span class="pre">&lt;&lt;</span></code> を辞書式に組み合わせて扱うための便宜も提供しています。すなわち、項の列 <code class="docutils literal notranslate"><span class="pre">v1,</span> <span class="pre">...,</span> <span class="pre">vn</span></code> と <code class="docutils literal notranslate"><span class="pre">u1,</span> <span class="pre">...,</span> <span class="pre">un</span></code> について、次の辞書式順序を認めます。:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>v1 &lt;&lt; u1 ‌‌\/ (v1 == u1 /\ (v2 &lt;&lt; u2 ‌‌\/ (v2 == u2 /\ ( ... vn &lt;&lt; un))))
+</pre></div>
+</div>
+<p>これは整礎でもあります。実際、<code class="docutils literal notranslate"><span class="pre">&lt;&lt;</span></code> 自体が整礎であれば、この順序が整礎であることを F* で証明できます。</p>
+<p>辞書式順序はよく使うため、F* はそれを手軽に使える特別な記法を提供しています。特に、次の記法:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="p">[</span><span class="n">v1</span><span class="p">;</span> <span class="n">v2</span><span class="p">;</span> <span class="o">...</span><span class="p">;</span> <span class="n">vn</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="o">%</span><span class="p">[</span><span class="n">u1</span><span class="p">;</span> <span class="n">u2</span><span class="p">;</span> <span class="o">...</span><span class="p">;</span> <span class="n">un</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>は次の省略形です。:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>v1 &lt;&lt; u1 ‌‌\/ (v1 == u1 /\ (v2 &lt;&lt; u2 ‌‌\/ (v2 == u2 /\ ( ... vn &lt;&lt; un))))
+</pre></div>
+</div>
+<p>古典的な <code class="docutils literal notranslate"><span class="pre">ackermann</span></code> 関数がすべての入力で停止することを示す場面で、この辞書式順序がどう働くか見てみましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> ackermann (m n:nat)
+  : <span class="k">Tot</span> nat (<span class="k">decreases</span> %[m;n])
+  = <span class="k">if</span> m=0 <span class="k">then</span> n + 1
+    <span class="k">else</span> <span class="k">if</span> n = 0 <span class="k">then</span> ackermann (m - 1) 1
+    <span class="k">else</span> ackermann (m - 1) (ackermann m (n - 1))
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">decreases</span> <span class="pre">%[m;n]</span></code> という記法は、引数の組 <code class="docutils literal notranslate"><span class="pre">m,</span> <span class="pre">n</span></code> に対する辞書式順序を測度として用い、この関数の停止性を証明するよう F* に指示します。</p>
+<p>When defining <code class="docutils literal notranslate"><span class="pre">ackermann</span> <span class="pre">m</span> <span class="pre">n</span></code>, for each recursive call of the form
+<code class="docutils literal notranslate"><span class="pre">ackermann</span> <span class="pre">m'</span> <span class="pre">n'</span></code>, F* checks that <code class="docutils literal notranslate"><span class="pre">%[m';n']</span> <span class="pre">&lt;&lt;</span> <span class="pre">%[m;n]</span></code>, i.e., F*
+checks that either</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">m'</span> <span class="pre">&lt;&lt;</span> <span class="pre">m</span></code>、または</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">m'</span> <span class="pre">=</span> <span class="pre">m</span></code> かつ <code class="docutils literal notranslate"><span class="pre">n'</span> <span class="pre">&lt;&lt;</span> <span class="pre">n</span></code></p></li>
+</ul>
+<p>考慮すべき再帰呼び出しは 3 つあります。</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ackermann</span> <span class="pre">(m</span> <span class="pre">-</span> <span class="pre">1)</span> <span class="pre">1</span></code>：この場合、<code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> なので自然数の順序により <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">-</span> <span class="pre">1</span> <span class="pre">&lt;&lt;</span> <span class="pre">m</span></code> が成り立ちます。辞書式順序のため、第 2 引数は停止性に関与しません。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ackermann</span> <span class="pre">m</span> <span class="pre">(n</span> <span class="pre">-</span> <span class="pre">1)</span></code>：この場合、第 1 引数は同じ（<code class="docutils literal notranslate"><span class="pre">m</span></code> のまま）ですが、<code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> なので自然数の順序により <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">-</span> <span class="pre">1</span> <span class="pre">&lt;&lt;</span> <span class="pre">n</span></code> です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ackermann</span> <span class="pre">(m</span> <span class="pre">-</span> <span class="pre">1)</span> <span class="pre">(ackermann</span> <span class="pre">m</span> <span class="pre">(n</span> <span class="pre">-</span> <span class="pre">1))</span></code>：最初のケースと同様に第 1 引数は <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">-</span> <span class="pre">1</span> <span class="pre">&lt;&lt;</span> <span class="pre">m</span></code>、第 2 引数は停止性に関与しません。</p></li>
+</ol>
+</section>
+<section id="default-measures">
+<span id="part1-termination-default-measures"></span><h2>デフォルトの測度<a class="headerlink" href="#default-measures" title="Link to this heading"></a></h2>
+<p>前に見たように、<code class="docutils literal notranslate"><span class="pre">decreases</span></code> 節を書かなくても、F* は次のコードを受け付けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> length #a (l:list a)
+  : nat
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; 0
+    | <span class="k">_</span> :: tl -&gt; 1 + length tl
+</pre></div>
+</div>
+<p>同様に <code class="docutils literal notranslate"><span class="pre">ackermann</span></code> でも <code class="docutils literal notranslate"><span class="pre">decreases</span></code> 節を省略して構いません。F* は受け付けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> ackermann (m n:nat)
+  : nat
+  = <span class="k">if</span> m=0 <span class="k">then</span> n + 1
+    <span class="k">else</span> <span class="k">if</span> n = 0 <span class="k">then</span> ackermann (m - 1) 1
+    <span class="k">else</span> ackermann (m - 1) (ackermann m (n - 1))
+</pre></div>
+</div>
+<p>これは、ユーザが <code class="docutils literal notranslate"><span class="pre">decreases</span></code> 節を与えなかった場合、F* が単純なヒューリスティクスで測度を選ぶためです。</p>
+<p>全ての非関数型の引数を左から順に並べた辞書式順序が、全再帰関数に対する <em>デフォルト</em> の <code class="docutils literal notranslate"><span class="pre">decreases</span></code> 節になります。</p>
+<p>つまり <code class="docutils literal notranslate"><span class="pre">ackermann</span></code> のデフォルトはちょうど <code class="docutils literal notranslate"><span class="pre">decreases</span> <span class="pre">%[m;</span> <span class="pre">n]</span></code>、<code class="docutils literal notranslate"><span class="pre">length</span></code> のデフォルトは <code class="docutils literal notranslate"><span class="pre">decreases</span> <span class="pre">%[a;</span> <span class="pre">l]``（``decreases</span> <span class="pre">l</span></code> と同値）です。したがって、明示的に書く必要はありません。</p>
+<p>一方で、<code class="docutils literal notranslate"><span class="pre">ackermann</span></code> の引数の順序を入れ替えると、デフォルトの測度では正しくなくなるため、下に示すように明示的に書く必要があります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> ackermann_flip (n m:nat)
+  : <span class="k">Tot</span> nat (<span class="k">decreases</span> %[m;n])
+  = <span class="k">if</span> m=0 <span class="k">then</span> n + 1
+    <span class="k">else</span> <span class="k">if</span> n = 0 <span class="k">then</span> ackermann_flip 1 (m - 1)
+    <span class="k">else</span> ackermann_flip (ackermann (n - 1) m) (m - 1)
+</pre></div>
+</div>
+</section>
+<section id="mutual-recursion">
+<span id="part1-mutual-recursion"></span><h2>相互再帰<a class="headerlink" href="#mutual-recursion" title="Link to this heading"></a></h2>
+<p>F* は相互再帰もサポートしており、各（相互）再帰呼び出しで引数の測度が減少することを証明する、同様の検査が適用されます。</p>
+<p>例えば、各内部ノードに整数を格納する二分木 <code class="docutils literal notranslate"><span class="pre">tree</span></code> を次のように定義できます。キーワード <code class="docutils literal notranslate"><span class="pre">and</span></code> によって、互いに依存する複数の型を同時に定義できます。</p>
+<p>木中のすべての整数をインクリメントするには、相互再帰関数を定義します。ここでも <code class="docutils literal notranslate"><span class="pre">and</span></code> を使って、互いに依存する <code class="docutils literal notranslate"><span class="pre">incr_tree</span></code> と <code class="docutils literal notranslate"><span class="pre">incr_node</span></code> を定義します。F* は、通常どおりデフォルトの測度だけで、これらの関数が停止することを証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> tree =
+  | Terminal : tree
+  | Internal : node -&gt; tree
+
+<span class="k">and</span> node = {
+  left : tree;
+  data : int;
+  right : tree
+}
+
+<span class="k">let</span> <span class="k">rec</span> incr_tree (x:tree)
+  : tree
+  = <span class="k">match</span> x <span class="k">with</span>
+    | Terminal -&gt; Terminal
+    | Internal node -&gt; Internal (incr_node node)
+
+<span class="k">and</span> incr_node (n:node)
+  : node
+  = {
+      left = incr_tree n.left;
+      data = n.data + 1;
+      right = incr_tree n.right
+    }
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>ときには、辞書式順序のちょっとした工夫が相互再帰関数の正しさ証明に役立ちます。ここではコツとして紹介します。初読では飛ばしても構いません。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> foo (l:list int)
+  : <span class="k">Tot</span> int (<span class="k">decreases</span> %[l;0])
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; 0
+    | x :: xs -&gt; bar xs
+<span class="k">and</span> bar (l:list int)
+  : <span class="k">Tot</span> int (<span class="k">decreases</span> %[l;1])
+  = foo l
+</pre></div>
+</div>
+<p>What's happening here is that when <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">l</span></code> calls <code class="docutils literal notranslate"><span class="pre">bar</span></code>, the
+argument <code class="docutils literal notranslate"><span class="pre">xs</span></code> is legitimately a sub-term of <code class="docutils literal notranslate"><span class="pre">l</span></code>. However, <code class="docutils literal notranslate"><span class="pre">bar</span>
+<span class="pre">l</span></code> simply calls back <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">l</span></code>, without decreasing the
+argument. The reason this terminates, however, is that <code class="docutils literal notranslate"><span class="pre">bar</span></code> can
+freely call back <code class="docutils literal notranslate"><span class="pre">foo</span></code>, since <code class="docutils literal notranslate"><span class="pre">foo</span></code> will only ever call <code class="docutils literal notranslate"><span class="pre">bar</span></code>
+again with a smaller argument. You can convince F* of this by
+writing the decreases clauses shown, i.e., when <code class="docutils literal notranslate"><span class="pre">bar</span></code> calls
+<code class="docutils literal notranslate"><span class="pre">foo</span></code>, <code class="docutils literal notranslate"><span class="pre">l</span></code> doesn't change, but the second component of the
+lexicographic ordering does decrease, i.e., <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;&lt;</span> <span class="pre">1</span></code>.</p>
+</div>
+</section>
+<section id="the-termination-check-precisely">
+<h2>停止性検査の厳密な説明<a class="headerlink" href="#the-termination-check-precisely" title="Link to this heading"></a></h2>
+<p>いくつかの例を見たところで、一般に停止性検査がどのように動作するかを説明します。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>ここでは正確を期すために、やや数学的な表記を用います。馴染みがなくても、最初から完全に理解する必要はありません。例を進めつつ、正確な説明が必要になったときにこの節へ戻ってきてください。</p>
+</div>
+<p>再帰関数を定義するとき</p>
+<div class="math notranslate nohighlight">
+\[\mathsf{f~(\overline{x:t})~:~Tot~r~(decreases~m)~=~e}\]</div>
+<p>すなわち、<span class="math notranslate nohighlight">\(\mathsf{f}\)</span> は複数引数 <span class="math notranslate nohighlight">\(\mathsf{x1:t1}, ..., \mathsf{x_n:t_n}\)</span> を取り、測度 <span class="math notranslate nohighlight">\(\mathsf{m}\)</span> を伴って <span class="math notranslate nohighlight">\(\mathsf{r}\)</span> を返す関数で、他の複数引数の関数群と相互再帰します。各関数の型は次のとおりです。</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathsf{f_1~(\overline{x_1:t_1})~:~Tot~r_1~(decreases~m_1)} \\
+\ldots \\
+\mathsf{f_n~(\overline{x_n:t_n})~:~Tot~r_n~(decreases~m_n)} \\\end{split}\]</div>
+<p>このとき、<span class="math notranslate nohighlight">\(\mathsf{f}\)</span> の本体（<span class="math notranslate nohighlight">\(\mathsf{e}\)</span>）を、相互再帰するすべての関数がスコープ内にある状態で検査しますが、それらは次の意味で定義域が制限された型として扱われます。</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathsf{f~:~(\overline{y:t}\{~m[\overline{y}/\overline{x}]~&lt;&lt;~m~\}~\rightarrow~r[\overline{y}/\overline{x}])} \\
+\mathsf{f_1~:~(\overline{x_1:t_1}\{~m_1~&lt;&lt;~m~\}~\rightarrow~r_1)} \\
+\ldots \\
+\mathsf{f_n~:~(\overline{x_n:t_n}\{~m_n~&lt;&lt;~m~\}~\rightarrow~r_n)} \\\end{split}\]</div>
+<p>つまり、相互再帰グループ内の各関数は、注釈された測度に従い、現在の <span class="math notranslate nohighlight">\(\mathsf{f}\)</span> の形式引数に先行する引数に対してのみ適用できます。</p>
+</section>
+<section id="exercise-fibonacci-in-linear-time">
+<span id="part1-termination-fibonacci"></span><h2>演習：線形時間のフィボナッチ<a class="headerlink" href="#exercise-fibonacci-in-linear-time" title="Link to this heading"></a></h2>
+<p>演習ファイルは <a class="reference external" href="../code/exercises/Part1.Termination.fst">こちら</a>。</p>
+<p><span class="math notranslate nohighlight">\(n\)</span> 番目のフィボナッチ数を計算する関数です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> fibonacci (n:nat)
+  : nat
+  = <span class="k">if</span> n &lt;= 1
+    <span class="k">then</span> 1
+    <span class="k">else</span> fibonacci (n - 1) + fibonacci (n - 2)
+</pre></div>
+</div>
+<p>より効率的な、末尾再帰で線形時間の変種です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> fib a b n =
+   <span class="k">match</span> n <span class="k">with</span>
+   | 0 -&gt; a
+   | <span class="k">_</span> -&gt; fib b (a+b) (n-1)
+
+<span class="k">let</span> fibonacci n = fib 1 1 n
+</pre></div>
+</div>
+<p>F* に受け入れられるよう、関数に注釈を追加してください。特に <code class="docutils literal notranslate"><span class="pre">fib</span></code> が停止することを証明してください。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> fib (a b n:nat)
+  : <span class="k">Tot</span> nat (<span class="k">decreases</span> n)
+  = <span class="k">match</span> n <span class="k">with</span>
+    | 0 -&gt; a
+    | <span class="k">_</span> -&gt; fib b (a+b) (n-1)
+
+<span class="k">let</span> fibonacci (n:nat) : nat = fib 1 1 n
+</pre></div>
+</div>
+</div>
+</section>
+<section id="exercise-tail-recursive-reversal">
+<span id="part1-termination-reverse"></span><h2>演習：末尾再帰による反転<a class="headerlink" href="#exercise-tail-recursive-reversal" title="Link to this heading"></a></h2>
+<p>演習ファイルは <a class="reference external" href="../code/exercises/Part1.Termination.fst">こちら</a>。</p>
+<p>リストを反転する関数です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> rev #a (l:list a)
+  : list a
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; []
+    | hd::tl -&gt; append (rev tl) hd
+</pre></div>
+</div>
+<p>しかしこれは効率的ではありません。末尾再帰ではないうえ、各ステップで先頭要素を末尾に付けるために反転済みの末尾を毎回走査するので、計算量は二乗になります。</p>
+<p>こちらの版は末尾再帰で線形時間のため、より効率的です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> rev_aux l1 l2 =
+  <span class="k">match</span> l2 <span class="k">with</span>
+  | []     -&gt; l1
+  | hd :: tl -&gt; rev_aux (hd :: l1) tl
+
+<span class="k">let</span> rev l = rev_aux [] l
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">rev_aux</span></code> と <code class="docutils literal notranslate"><span class="pre">rev</span></code> に型注釈を追加し、特に <code class="docutils literal notranslate"><span class="pre">rev_aux</span></code> の停止性を証明してください。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> rev_aux #a (l1 l2:list a)
+  : <span class="k">Tot</span> (list a) (<span class="k">decreases</span> l2)
+  = <span class="k">match</span> l2 <span class="k">with</span>
+    | []     -&gt; l1
+    | hd :: tl -&gt; rev_aux (hd :: l1) tl
+
+<span class="k">let</span> rev #a (l:list a) : list a = rev_aux [] l
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part1_inductives.html" class="btn btn-neutral float-left" title="帰納的データ型とパターンマッチ" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part1_lemmas.html" class="btn btn-neutral float-right" title="補題と帰納法による証明" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

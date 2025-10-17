@@ -1,0 +1,802 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ケーススタディ：クイックソート &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="プログラムの実行" href="part1_execution.html" />
+    <link rel="prev" title="補題と帰納法による証明" href="part1_lemmas.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part1.html">全域関数によるプログラミングと証明</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part1_getting_off_the_ground.html">まずは始めてみよう</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_polymorphism.html">多相と型推論</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_equality.html">等値性（Equality）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_prop_assertions.html">SMT ソルバとの連携</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_inductives.html">帰納的データ型とパターンマッチ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_termination.html">停止性の証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_lemmas.html">補題と帰納法による証明</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ケーススタディ：クイックソート</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#implementing-sort"><code class="docutils literal notranslate"><span class="pre">sort</span></code> の実装</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementing-partition"><code class="docutils literal notranslate"><span class="pre">partition</span></code> の実装</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#proving-sort-correct"><code class="docutils literal notranslate"><span class="pre">sort</span></code> の正しさの証明</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#limitations-of-smt-based-proofs-at-higher-order">高階における SMT ベース証明の限界</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#an-intrinsic-proof-of-sort"><code class="docutils literal notranslate"><span class="pre">sort</span></code> の内在的証明</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#runtime-cost">実行時コストは？</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#exercises">演習</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#generic-sorting">ジェネリックなソート</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proving-that-sort-is-a-permutation"><code class="docutils literal notranslate"><span class="pre">sort</span></code> が置換（順列）であることの証明</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part1_execution.html">プログラムの実行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_wrap.html">まとめ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part1.html">全域関数によるプログラミングと証明</a></li>
+      <li class="breadcrumb-item active">ケーススタディ：クイックソート</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="case-study-quicksort">
+<span id="part1-quicksort"></span><h1>ケーススタディ：クイックソート<a class="headerlink" href="#case-study-quicksort" title="Link to this heading"></a></h1>
+<p>これまで学んだ再帰関数の定義とそれに関する補題の証明を組み合わせ、古典的なソートアルゴリズムである <a class="reference external" href="https://en.wikipedia.org/wiki/Quicksort">Quicksort</a> の正しさを証明していきます。</p>
+<p>まずは整数リストを対象に、ソートアルゴリズムに満たしてほしい性質をいくつか記述します。昇順に整列済みかを判定する関数 <code class="docutils literal notranslate"><span class="pre">sorted</span></code>、そして要素がリストに含まれるかを判定する <code class="docutils literal notranslate"><span class="pre">mem</span></code> を導入します。なお <code class="docutils literal notranslate"><span class="pre">mem</span></code> は <a class="reference internal" href="part1_equality.html#part1-equality"><span class="std std-ref">可判定な等値性を持つ型の族（eqtype）</span></a> を用います。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> sorted (l:list int)
+  : bool
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; <span class="k">true</span>
+    | [x] -&gt; <span class="k">true</span>
+    | x :: y :: xs -&gt; x &lt;= y &amp;&amp; sorted (y :: xs)
+
+<span class="k">let</span> <span class="k">rec</span> mem (#a:eqtype) (i:a) (l:list a)
+  : bool
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; <span class="k">false</span>
+    | hd :: tl -&gt; hd = i || mem i tl
+</pre></div>
+</div>
+<p>ソートアルゴリズム <code class="docutils literal notranslate"><span class="pre">sort</span></code> が与えられたとして、次の性質を証明したいとします。すなわち、任意の入力リスト <code class="docutils literal notranslate"><span class="pre">l</span></code> に対して、得られる <code class="docutils literal notranslate"><span class="pre">sort</span> <span class="pre">l</span></code> は整列済みであり、かつ <code class="docutils literal notranslate"><span class="pre">l</span></code> と同じ要素をすべて含む、というものです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">forall</span> l. sorted (sort l) /\ (<span class="k">forall</span> i. mem i l &lt;==&gt; mem i (sort l))
+</pre></div>
+</div>
+<p>この仕様は意図的にやや弱くしています。例えば <code class="docutils literal notranslate"><span class="pre">l</span></code> に同一要素が複数ある場合でも、<code class="docutils literal notranslate"><span class="pre">sort</span></code> がそれらのうち 1 つだけを残すことをこの仕様は妨げません。</p>
+<p>この仕様をどのように強化するかは、後の演習で扱います。</p>
+<p>アルゴリズムに馴染みがなければ <a class="reference external" href="https://en.wikipedia.org/wiki/Quicksort">こちら</a> を参照してください。ここではクイックソートの実装と証明をいくつかのバリエーションで詳述します。併せて、この流れの <a class="reference external" href="../code/Part1.Quicksort.fst">完全なコード開発</a> をインタラクティブに追うと理解が深まるでしょう。</p>
+<section id="implementing-sort">
+<h2><code class="docutils literal notranslate"><span class="pre">sort</span></code> の実装<a class="headerlink" href="#implementing-sort" title="Link to this heading"></a></h2>
+<p>ここでのクイックソート実装は非常に素朴です。常に先頭要素をピボットとして選び、残りの要素をピボット以上とそれ以外に分割し、それぞれを再帰的にソートし、最後にピボットを中央に挿入して返します。コードは次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> sort (l:list int)
+  : <span class="k">Tot</span> (list int) (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; []
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition ((&lt;=) pivot) tl <span class="k">in</span>
+      append (sort lo) (pivot :: sort hi)
+</pre></div>
+</div>
+<p>いくつか詳しく説明すべき点があります。</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">((&lt;=)</span> <span class="pre">pivot)</span></code> という表記は説明が必要かもしれません。これは <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code> 演算子の <em>部分適用</em> で、引数を 1 つ（<code class="docutils literal notranslate"><span class="pre">pivot</span></code>）だけ供給したものです。<code class="docutils literal notranslate"><span class="pre">fun</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">pivot</span> <span class="pre">&lt;=</span> <span class="pre">x</span></code> と同値です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sort</span></code> が停止することも証明しなければなりません。ここで与えた測度は <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">l</span></code> で、各再帰呼び出しで入力リストの長さが厳密に減少することを主張しています。</p></li>
+<li><p>なぜそう言えるのでしょうか。非形式的には、<code class="docutils literal notranslate"><span class="pre">sort</span> <span class="pre">lo</span></code> と <code class="docutils literal notranslate"><span class="pre">sort</span> <span class="pre">hi</span></code> の再帰呼び出しはリストの <code class="docutils literal notranslate"><span class="pre">tl``（先頭を除いた部分）に対する分割であり、``pivot</span></code> 要素を除去しているため <code class="docutils literal notranslate"><span class="pre">tl</span></code> は <code class="docutils literal notranslate"><span class="pre">l</span></code> より確実に短いからです。これを F* に納得させるため、後で示すように <code class="docutils literal notranslate"><span class="pre">partition</span></code> に興味深い型を与えます。</p></li>
+</ol>
+</section>
+<section id="implementing-partition">
+<h2><code class="docutils literal notranslate"><span class="pre">partition</span></code> の実装<a class="headerlink" href="#implementing-partition" title="Link to this heading"></a></h2>
+<p>以下が <code class="docutils literal notranslate"><span class="pre">partition</span></code> の実装です。これは <a class="reference internal" href="part1_lemmas.html#part1-higher-order-functions"><span class="std std-ref">高階関数</span></a> で、<code class="docutils literal notranslate"><span class="pre">partition</span> <span class="pre">f</span> <span class="pre">l</span></code> はリスト <code class="docutils literal notranslate"><span class="pre">l</span></code> の要素を、述語 <code class="docutils literal notranslate"><span class="pre">f</span></code> を満たすものからなる <code class="docutils literal notranslate"><span class="pre">l₁</span></code> と、満たさないものからなる <code class="docutils literal notranslate"><span class="pre">l₂</span></code> に分割した組を返します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> partition (#a:Type) (f:a -&gt; bool) (l:list a)
+  : x:(list a &amp; list a) { length (fst x) + length (snd x) = length l }
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; [], []
+    | hd::tl -&gt;
+      <span class="k">let</span> l1, l2 = partition f tl <span class="k">in</span>
+      <span class="k">if</span> f hd
+      <span class="k">then</span> hd::l1, l2
+      <span class="k">else</span> l1, hd::l2
+</pre></div>
+</div>
+<p>ここで与えている <code class="docutils literal notranslate"><span class="pre">partition</span></code> の仕様は部分的なものです。例えば <code class="docutils literal notranslate"><span class="pre">l₁</span></code> のすべての要素が <code class="docutils literal notranslate"><span class="pre">f</span></code> を満たす、といったことは述べていません。言っているのは、<code class="docutils literal notranslate"><span class="pre">l₁</span></code> と <code class="docutils literal notranslate"><span class="pre">l₂</span></code> の長さの和が <code class="docutils literal notranslate"><span class="pre">l</span></code> の長さに等しいことだけです。これは今のところ <code class="docutils literal notranslate"><span class="pre">partition</span></code> について必要な性質がそれだけだからです。長さに関するこの性質が、再帰呼び出し <code class="docutils literal notranslate"><span class="pre">sort</span> <span class="pre">lo</span></code> と <code class="docutils literal notranslate"><span class="pre">sort</span> <span class="pre">hi</span></code> において引数 <code class="docutils literal notranslate"><span class="pre">lo</span></code> と <code class="docutils literal notranslate"><span class="pre">hi</span></code> が入力リストより厳密に短いことを示すために必要になります。</p>
+<p>このような部分仕様のスタイルから、プログラム証明の作法や <a class="reference internal" href="part1_lemmas.html#part1-intrinsic-extrinsic"><span class="std std-ref">内在的（intrinsic）と外在的（extrinsic）な証明</span></a> の設計選択の感覚が掴めるでしょう。最初から思いつく限りの性質をすべて盛り込むのではなく、必要なことだけを記述するのが普通です。</p>
+</section>
+<section id="proving-sort-correct">
+<h2><code class="docutils literal notranslate"><span class="pre">sort</span></code> の正しさの証明<a class="headerlink" href="#proving-sort-correct" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">sort</span></code> の定義ができたので、これが正しいことを証明する必要があります。以下に証明を示します。3 つの補助補題が必要で、順に詳しく説明します。</p>
+<p>最初の補題は <code class="docutils literal notranslate"><span class="pre">partition</span></code> と <code class="docutils literal notranslate"><span class="pre">mem</span></code> の関係を示します。すなわち、<code class="docutils literal notranslate"><span class="pre">partition</span></code> の内在的仕様で省いた点――<code class="docutils literal notranslate"><span class="pre">l₁</span></code> の要素はすべて <code class="docutils literal notranslate"><span class="pre">f</span></code> を満たし、<code class="docutils literal notranslate"><span class="pre">l₂</span></code> の要素は満たさず、<code class="docutils literal notranslate"><span class="pre">l</span></code> の各要素は <code class="docutils literal notranslate"><span class="pre">l₁</span></code> または <code class="docutils literal notranslate"><span class="pre">l₂</span></code> のどちらかに現れる――を証明します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> partition_mem (#a:eqtype)
+                      (f:(a -&gt; bool))
+                      (l:list a)
+  : <span class="k">Lemma</span> (<span class="k">let</span> l1, l2 = partition f l <span class="k">in</span>
+           (<span class="k">forall</span> x. mem x l1 ==&gt; f x) /\
+           (<span class="k">forall</span> x. mem x l2 ==&gt; not (f x)) /\
+           (<span class="k">forall</span> x. mem x l = (mem x l1 || mem x l2)))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; ()
+    | hd :: tl -&gt; partition_mem f tl
+</pre></div>
+</div>
+<p>次の補題はクイックソート特有のものです。<code class="docutils literal notranslate"><span class="pre">l₁</span></code> と <code class="docutils literal notranslate"><span class="pre">l₂</span></code> がすでに整列済みで、<code class="docutils literal notranslate"><span class="pre">pivot</span></code> によって分割されているなら、<code class="docutils literal notranslate"><span class="pre">l₁</span></code> と <code class="docutils literal notranslate"><span class="pre">l₂</span></code> の間に <code class="docutils literal notranslate"><span class="pre">pivot</span></code> を挿入すると整列済みのリストになります。<code class="docutils literal notranslate"><span class="pre">sorted_concat</span></code> の仕様では、（例：<code class="docutils literal notranslate"><span class="pre">l1:list</span> <span class="pre">int{sorted</span> <span class="pre">l1}</span></code>）のような精密化型と <code class="docutils literal notranslate"><span class="pre">requires</span></code> / <code class="docutils literal notranslate"><span class="pre">ensures</span></code> を混ぜて使っていますが、これは書き方の好みの問題です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> sorted_concat (l1:list int{sorted l1})
+                      (l2:list int{sorted l2})
+                      (pivot:int)
+  : <span class="k">Lemma</span> (<span class="k">requires</span> (<span class="k">forall</span> y. mem y l1 ==&gt; not (pivot &lt;= y)) /\
+                    (<span class="k">forall</span> y. mem y l2 ==&gt; pivot &lt;= y))
+          (<span class="k">ensures</span> sorted (append l1 (pivot :: l2)))
+  = <span class="k">match</span> l1 <span class="k">with</span>
+    | [] -&gt; ()
+    | hd :: tl -&gt; sorted_concat tl l2 pivot
+</pre></div>
+</div>
+<p>3 つ目の補題は <code class="docutils literal notranslate"><span class="pre">append</span></code> と <code class="docutils literal notranslate"><span class="pre">mem</span></code> に関する単純な性質です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> append_mem (#t:eqtype)
+                   (l1 l2:list t)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span> (<span class="k">forall</span> a. mem a (append l1 l2) = (mem a l1 || mem a l2)))
+  = <span class="k">match</span> l1 <span class="k">with</span>
+    | [] -&gt; ()
+    | hd::tl -&gt; append_mem tl l2
+</pre></div>
+</div>
+<p>最後に、これらを組み合わせて <code class="docutils literal notranslate"><span class="pre">sort</span></code> の正しさに関する最上位の主張を示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> sort_correct (l:list int)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span> (
+           <span class="k">let</span> m = sort l <span class="k">in</span>
+           sorted m /\
+           (<span class="k">forall</span> i. mem i l = mem i m)))
+          (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; ()
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition ((&lt;=) pivot) tl <span class="k">in</span>
+      sort_correct hi;
+      sort_correct lo;
+      partition_mem ((&lt;=) pivot) tl;
+      sorted_concat (sort lo) (sort hi) pivot;
+      append_mem (sort lo) (pivot :: sort hi)
+</pre></div>
+</div>
+<p>この補題の構造は <code class="docutils literal notranslate"><span class="pre">sort</span></code> 自身の構造をそのまま反映しています。</p>
+<ul class="simple">
+<li><p>基底の場合の証明は自動で済みます。</p></li>
+<li><p>帰納の場合は、リストの末尾を分割し、<code class="docutils literal notranslate"><span class="pre">sort</span></code> 本体と同様に <code class="docutils literal notranslate"><span class="pre">hi</span></code> と <code class="docutils literal notranslate"><span class="pre">lo</span></code> それぞれに対して補題を再帰的に適用します。ここでも <code class="docutils literal notranslate"><span class="pre">partition</span></code> の内在的な型が役に立ち、リストの <code class="docutils literal notranslate"><span class="pre">length</span></code> を測度として、この帰納が整礎であることを示します。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ensures</span></code> の事後条件を示すため、3 つの補助補題を適用します。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">partition_mem</span> <span class="pre">((&lt;=)</span> <span class="pre">pivot)</span> <span class="pre">tl</span></code> により、<code class="docutils literal notranslate"><span class="pre">sorted_concat</span></code> の <code class="docutils literal notranslate"><span class="pre">requires</span></code> 節を満たすために必要な前提が得られます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sorted_concat</span></code> を呼ぶためには <code class="docutils literal notranslate"><span class="pre">sort</span> <span class="pre">lo</span></code> と <code class="docutils literal notranslate"><span class="pre">sort</span> <span class="pre">hi</span></code> に対する <code class="docutils literal notranslate"><span class="pre">sorted</span></code> の精密化も示す必要がありますが、補題の再帰的適用によってそれらの性質は得られます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sorted_concat</span></code> の呼び出し後、結果リストが整列済みであることは示されました。残るは入力リストのすべての要素が結果に含まれることの証明です。これは <code class="docutils literal notranslate"><span class="pre">append_mem</span></code> が行い、<code class="docutils literal notranslate"><span class="pre">partition_mem</span></code> の事後条件と帰納法の仮定を用いて、<code class="docutils literal notranslate"><span class="pre">append</span> <span class="pre">(sort</span> <span class="pre">lo)</span> <span class="pre">(pivot</span> <span class="pre">::</span> <span class="pre">sort</span> <span class="pre">hi)</span></code> の要素と入力 <code class="docutils literal notranslate"><span class="pre">l</span></code> を対応付けます。</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>こちらは <code class="docutils literal notranslate"><span class="pre">sort_correct</span></code> 補題の別版で、多数の中間 <code class="docutils literal notranslate"><span class="pre">assert</span></code> による注釈を付けたものです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sort_ok (l:list int) =
+    <span class="k">let</span> m = sort l <span class="k">in</span>
+    sorted m /\
+    (<span class="k">forall</span> i. mem i l = mem i m)
+
+<span class="k">let</span> <span class="k">rec</span> sort_correct_annotated (l:list int)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span> sort_ok l)
+          (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; ()
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition ((&lt;=) pivot) tl <span class="k">in</span>
+      <span class="k">assert</span> (length hi + length lo == length tl);
+      sort_correct_annotated hi;
+      <span class="k">assert</span> (sort_ok hi);
+      sort_correct_annotated lo;
+      <span class="k">assert</span> (sort_ok lo);
+      partition_mem ((&lt;=) pivot) tl;
+      <span class="k">assert</span> (<span class="k">forall</span> i. mem i tl = mem i hi || mem i lo);
+      <span class="k">assert</span> (<span class="k">forall</span> i. mem i hi ==&gt; pivot &lt;= i);
+      <span class="k">assert</span> (<span class="k">forall</span> i. mem i lo ==&gt; i &lt; pivot);
+      <span class="k">assert</span> (sort l == (append (sort lo) (pivot :: sort hi)));
+      sorted_concat (sort lo) (sort hi) pivot;
+      <span class="k">assert</span> (sorted (sort l));
+      append_mem (sort lo) (pivot :: sort hi);
+      <span class="k">assert</span> (<span class="k">forall</span> i. mem i l = mem i (sort l))
+</pre></div>
+</div>
+<p>これはほぼ全ステップにアサーションを挿入した極端な例ですが、SMT 支援の証明で F* と対話する際によく使うスタイルを表しています。プログラムや証明の各地点で、<code class="docutils literal notranslate"><span class="pre">assert</span></code> によりその時点で証明器が「知っている」ことを確認できます。アサーションの位置を動かしてみてください。例えば <code class="docutils literal notranslate"><span class="pre">sort_correct_annotated</span> <span class="pre">lo</span></code> を呼ぶ前に <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">(sort_ok</span> <span class="pre">lo)</span></code> を置くと、F* は証明不能だと文句を言うはずです。</p>
+</section>
+<section id="limitations-of-smt-based-proofs-at-higher-order">
+<h2>高階における SMT ベース証明の限界<a class="headerlink" href="#limitations-of-smt-based-proofs-at-higher-order" title="Link to this heading"></a></h2>
+<p>なぜコードで <code class="docutils literal notranslate"><span class="pre">fun</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">pivot</span> <span class="pre">&lt;=</span> <span class="pre">x</span></code> ではなく <code class="docutils literal notranslate"><span class="pre">(&lt;=)</span> <span class="pre">pivot</span></code> を使ったのか疑問に思うかもしれません。関数型言語に不慣れな人には後者のほうが読みやすいと言えるでしょう。理由は技術的なものです。</p>
+<p>実際、<code class="docutils literal notranslate"><span class="pre">sort</span></code> を次のように書くこともできます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> sort_alt (l:list int)
+  : <span class="k">Tot</span> (list int) (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; []
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition (<span class="k">fun</span> x -&gt; pivot &lt;= x) tl <span class="k">in</span>
+      append (sort_alt lo) (pivot :: sort_alt hi)
+</pre></div>
+</div>
+<p>そして主補題を次のように書くことも試せます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sort_alt_ok (l:list int) =
+    <span class="k">let</span> m = sort_alt l <span class="k">in</span>
+    sorted m /\
+    (<span class="k">forall</span> i. mem i l = mem i m)
+
+<span class="k">let</span> <span class="k">rec</span> sort_alt_correct_annotated (l:list int)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span> sort_alt_ok l)
+          (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; ()
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition (<span class="k">fun</span> x -&gt; pivot &lt;= x) tl <span class="k">in</span>
+      <span class="k">assert</span> (length hi + length lo == length tl);
+      sort_alt_correct_annotated hi;
+      <span class="k">assert</span> (sort_alt_ok hi);
+      sort_alt_correct_annotated lo;
+      <span class="k">assert</span> (sort_alt_ok lo);
+      partition_mem (<span class="k">fun</span> x -&gt; pivot &lt;= x) tl;
+      <span class="k">assert</span> (<span class="k">forall</span> i. mem i tl = mem i hi || mem i lo);
+      <span class="k">assert</span> (<span class="k">forall</span> i. mem i hi ==&gt; pivot &lt;= i);
+      <span class="k">assert</span> (<span class="k">forall</span> i. mem i lo ==&gt; i &lt; pivot);
+      <span class="c">//THIS NEXT LINE IS NOT PROVABLE BY SMT ALONE</span>
+      <span class="k">assume</span> (sort_alt l == append (sort_alt lo) (pivot :: sort_alt hi));
+      sorted_concat (sort_alt lo) (sort_alt hi) pivot;
+      <span class="k">assert</span> (sorted (sort_alt l));
+      append_mem (sort_alt lo) (pivot :: sort_alt hi);
+      <span class="k">assert</span> (<span class="k">forall</span> i. mem i l = mem i (sort_alt l))
+</pre></div>
+</div>
+<p>しかしさらなる補助なしでは、F*＋SMT は <code class="docutils literal notranslate"><span class="pre">assume</span></code> のある行を証明できません。これは、F* が高階論理を SMT ソルバの一階論理へエンコードする方法の根本的な制約に起因します。とくにラムダ項で精度が落ちます。この例では、<code class="docutils literal notranslate"><span class="pre">sort_alt_correct_annotated</span></code> の証明に現れる <code class="docutils literal notranslate"><span class="pre">fun</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">pivot</span> <span class="pre">&lt;=</span> <span class="pre">x</span></code> が、<code class="docutils literal notranslate"><span class="pre">sort_alt</span></code> 中に現れる同じラムダ項と同一であることを SMT ソルバが証明できず、したがって <code class="docutils literal notranslate"><span class="pre">sort_alt</span> <span class="pre">l</span></code> が実際に <code class="docutils literal notranslate"><span class="pre">append</span> <span class="pre">(sort_alt</span> <span class="pre">lo)</span> <span class="pre">(pivot</span> <span class="pre">::</span> <span class="pre">sort_alt</span> <span class="pre">hi)</span></code> と等しいと結論づけられません。</p>
+<p>これは残念な点であり、高階項に関する証明では思わぬ落とし穴になります。以下のような回避策があります。</p>
+<ul class="simple">
+<li><p>高階で使う関数には、ラムダリテラルより名前付き関数を使うようにしましょう。名前付き関数は SMT へのエンコードで精度が落ちません。ここで <code class="docutils literal notranslate"><span class="pre">(&lt;=)</span> <span class="pre">pivot</span></code> がラムダより良く働いた理由はこれです。<code class="docutils literal notranslate"><span class="pre">(&lt;=)</span></code> という名前が <code class="docutils literal notranslate"><span class="pre">sort</span></code> の定義と <code class="docutils literal notranslate"><span class="pre">sort_alt_correct</span></code> の証明の両方に構文的に現れ、SMT ソルバが同一であると容易に判断できるからです。</p></li>
+<li><p>どうしてもラムダ項を使う場合、後述するように内在的な証明スタイルが助けになることがあります。</p></li>
+<li><p>ラムダ項と外在的証明を併用する場合でも証明を完遂できますが、F* をタクティクスや正規化による証明で助ける必要があります。これらは後の章で扱う発展的な話題です。</p></li>
+<li><p>さらに将来的には、近年の <a class="reference external" href="https://matryoshka-project.github.io/">高階版 SMT ソルバ</a> の動向も有望で、これらの制限の一部は解消されるかもしれません。</p></li>
+</ul>
+</section>
+<section id="an-intrinsic-proof-of-sort">
+<h2><code class="docutils literal notranslate"><span class="pre">sort</span></code> の内在的証明<a class="headerlink" href="#an-intrinsic-proof-of-sort" title="Link to this heading"></a></h2>
+<p>先に見たように、<code class="docutils literal notranslate"><span class="pre">sort_correct</span></code> の証明は本質的に <code class="docutils literal notranslate"><span class="pre">sort</span></code> の定義と同じ構造でした。そこで、重複を避けるために、<code class="docutils literal notranslate"><span class="pre">sort</span></code> の定義そのものに正しさの証明を組み込む（<code class="docutils literal notranslate"><span class="pre">sort</span></code> と <code class="docutils literal notranslate"><span class="pre">sort_correct</span></code> を融合する）ことができます。</p>
+<p>これがよりコンパクトな <code class="docutils literal notranslate"><span class="pre">sort</span></code> の証明です。今回は内在的に、すなわち <code class="docutils literal notranslate"><span class="pre">sort</span></code> の型を強化して望む性質を直接表現します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> sort_intrinsic (l:list int)
+  : <span class="k">Tot</span> (m:list int {
+                sorted m /\
+                (<span class="k">forall</span> i. mem i l = mem i m)
+         })
+   (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; []
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition (<span class="k">fun</span> x -&gt; pivot &lt;= x) tl <span class="k">in</span>
+      partition_mem (<span class="k">fun</span> x -&gt; pivot &lt;= x) tl;
+      sorted_concat (sort_intrinsic lo) (sort_intrinsic hi) pivot;
+      append_mem (sort_intrinsic lo) (pivot :: sort_intrinsic hi);
+      append (sort_intrinsic lo) (pivot :: sort_intrinsic hi)
+</pre></div>
+</div>
+<p>必要な性質の証明には相変わらず同じ 3 つの補助補題を使いますが、今回は分割した部分リストをソートする再帰呼び出し自体が、求める正しさの帰納仮定の適用として機能します。</p>
+<p>また、このスタイルではラムダリテラルの使用も問題になりにくい点に注意してください。同一スコープ内であれば、F* の SMT へのエンコードは十分賢く、<code class="docutils literal notranslate"><span class="pre">fun</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">pivot</span> <span class="pre">&lt;=</span> <span class="pre">x</span></code> の複数出現を同一の関数として扱ってくれます。</p>
+<section id="runtime-cost">
+<h3>実行時コストは？<a class="headerlink" href="#runtime-cost" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">sort_intrinsic</span></code> の定義に 3 つの追加の再帰関数呼び出しを混ぜ込んだため、実行時にオーバーヘッドが発生するのではと心配かもしれません。ありがたいことに、答えは「いいえ」です。</p>
+<p><a class="reference internal" href="../structure.html#effects"><span class="std std-ref">効果</span></a> の章で学ぶように、F* には <em>erasure</em> の概念があります――実行の観測可能な挙動に寄与しないと証明できる項は、実行前にコンパイラが消去します。ここでの 3 つの補題呼び出しは unit を返す全関数、すなわち有限時間で必ず <code class="docutils literal notranslate"><span class="pre">()</span></code> を返し、他の観測可能な副作用を持ちません。したがって、それらの呼び出しを保持する意味はなく、結果 <code class="docutils literal notranslate"><span class="pre">()</span></code> へと最適化（消去）されます。</p>
+<p>実際、プログラムを OCaml に抽出（<code class="docutils literal notranslate"><span class="pre">fstar</span> <span class="pre">--codegen</span> <span class="pre">OCaml</span></code>）すると、結果は次のようになります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> (sort_intrinsic : Prims.int Prims.list -&gt; Prims.int Prims.list) =
+  <span class="k">fun</span> l -&gt;
+    <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; []
+    | pivot::tl -&gt;
+       <span class="k">let</span> uu___ = partition (<span class="k">fun</span> x -&gt; pivot &lt;= x) tl <span class="k">in</span>
+       (<span class="k">match</span> uu___ <span class="k">with</span>
+        | (hi, lo) -&gt;
+          append (sort_intrinsic lo) (pivot :: (sort_intrinsic hi)))
+</pre></div>
+</div>
+<p>補題の呼び出しは消えています。</p>
+</section>
+</section>
+<section id="exercises">
+<h2>演習<a class="headerlink" href="#exercises" title="Link to this heading"></a></h2>
+<section id="generic-sorting">
+<h3>ジェネリックなソート<a class="headerlink" href="#generic-sorting" title="Link to this heading"></a></h3>
+<p>この演習用の足場コードは <a class="reference external" href="../code/exercises/Part1.Quicksort.Generic.fst">こちら</a> にあります。</p>
+<p>この演習の目的は、整数リスト専用の <code class="docutils literal notranslate"><span class="pre">sort</span></code> ではなく、要素上の任意の全順序をパラメータに取るジェネリック版 <code class="docutils literal notranslate"><span class="pre">sort</span></code> を定義することです。もちろん実装の正しさも証明します。内在的・外在的の両アプローチで行い、以下の開発からすべての <code class="docutils literal notranslate"><span class="pre">admit</span></code> を取り除くことが目標です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> Part1.Quicksort.Generic
+
+<span class="c">//Some auxiliary definitions to make this a standalone example</span>
+<span class="k">let</span> <span class="k">rec</span> length #a (l:list a)
+  : nat
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; 0
+    | <span class="k">_</span> :: tl -&gt; 1 + length tl
+
+<span class="k">let</span> <span class="k">rec</span> append #a (l1 l2:list a)
+  : list a
+  = <span class="k">match</span> l1 <span class="k">with</span>
+    | [] -&gt; l2
+    | hd :: tl -&gt; hd :: append tl l2
+
+<span class="k">let</span> total_order (#a:Type) (f: (a -&gt; a -&gt; bool)) =
+    (<span class="k">forall</span> a. f a a)                                         <span class="c">(* reflexivity   *)</span>
+    /\ (<span class="k">forall</span> a1 a2. (f a1 a2 /\ a1=!=a2)  &lt;==&gt; not (f a2 a1))  <span class="c">(* anti-symmetry *)</span>
+    /\ (<span class="k">forall</span> a1 a2 a3. f a1 a2 /\ f a2 a3 ==&gt; f a1 a3)        <span class="c">(* transitivity  *)</span>
+    /\ (<span class="k">forall</span> a1 a2. f a1 a2 \/ f a2 a1)                       <span class="c">(* totality  *)</span>
+
+<span class="k">let</span> total_order_t (a:Type) = f:(a -&gt; a -&gt; bool) { total_order f }
+
+<span class="k">let</span> <span class="k">rec</span> sorted #a  (f:total_order_t a) (l:list a)
+  : bool
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; <span class="k">true</span>
+    | [x] -&gt; <span class="k">true</span>
+    | x :: y :: xs -&gt; f x y &amp;&amp; sorted f (y :: xs)
+
+<span class="k">let</span> <span class="k">rec</span> mem (#a:eqtype) (i:a) (l:list a)
+  : bool
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; <span class="k">false</span>
+    | hd :: tl -&gt; hd = i || mem i tl
+
+<span class="k">let</span> <span class="k">rec</span> sort #a (f:total_order_t a) (l:list a)
+  : <span class="k">Tot</span> (list a) (<span class="k">decreases</span> (length l))
+  = admit()
+
+<span class="k">let</span> <span class="k">rec</span> sort_correct (#a:eqtype) (f:total_order_t a) (l:list a)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span> (
+           <span class="k">let</span> m = sort f l <span class="k">in</span>
+           sorted f m /\
+           (<span class="k">forall</span> i. mem i l = mem i m)))
+          (<span class="k">decreases</span> (length l))
+  = admit()
+
+<span class="k">let</span> <span class="k">rec</span> sort_intrinsic (#a:eqtype) (f:total_order_t a) (l:list a)
+  : <span class="k">Tot</span> (m:list a {
+                sorted f m /\
+                (<span class="k">forall</span> i. mem i l = mem i m)
+         })
+   (<span class="k">decreases</span> (length l))
+  = admit()
+</pre></div>
+</div>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> Part1.Quicksort.Generic
+
+<span class="c">//Some auxiliary definitions to make this a standalone example</span>
+<span class="k">let</span> <span class="k">rec</span> length #a (l:list a)
+  : nat
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; 0
+    | <span class="k">_</span> :: tl -&gt; 1 + length tl
+
+<span class="k">let</span> <span class="k">rec</span> append #a (l1 l2:list a)
+  : list a
+  = <span class="k">match</span> l1 <span class="k">with</span>
+    | [] -&gt; l2
+    | hd :: tl -&gt; hd :: append tl l2
+
+<span class="k">let</span> total_order (#a:Type) (f: (a -&gt; a -&gt; bool)) =
+    (<span class="k">forall</span> a. f a a)                                         <span class="c">(* reflexivity   *)</span>
+    /\ (<span class="k">forall</span> a1 a2. (f a1 a2 /\ a1=!=a2)  &lt;==&gt; not (f a2 a1))  <span class="c">(* anti-symmetry *)</span>
+    /\ (<span class="k">forall</span> a1 a2 a3. f a1 a2 /\ f a2 a3 ==&gt; f a1 a3)        <span class="c">(* transitivity  *)</span>
+    /\ (<span class="k">forall</span> a1 a2. f a1 a2 \/ f a2 a1)                       <span class="c">(* totality *)</span>
+
+<span class="k">let</span> total_order_t (a:Type) = f:(a -&gt; a -&gt; bool) { total_order f }
+
+<span class="k">let</span> <span class="k">rec</span> sorted #a  (f:total_order_t a) (l:list a)
+  : bool
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; <span class="k">true</span>
+    | [x] -&gt; <span class="k">true</span>
+    | x :: y :: xs -&gt; f x y &amp;&amp; sorted f (y :: xs)
+
+<span class="k">let</span> <span class="k">rec</span> mem (#a:eqtype) (i:a) (l:list a)
+  : bool
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; <span class="k">false</span>
+    | hd :: tl -&gt; hd = i || mem i tl
+
+<span class="k">let</span> <span class="k">rec</span> partition (#a:Type) (f:a -&gt; bool) (l:list a)
+  : x:(list a &amp; list a) { length (fst x) + length (snd x) = length l }
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; [], []
+    | hd::tl -&gt;
+      <span class="k">let</span> l1, l2 = partition f tl <span class="k">in</span>
+      <span class="k">if</span> f hd
+      <span class="k">then</span> hd::l1, l2
+      <span class="k">else</span> l1, hd::l2
+
+<span class="k">let</span> <span class="k">rec</span> sort #a (f:total_order_t a) (l:list a)
+  : <span class="k">Tot</span> (list a) (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; []
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition (f pivot) tl <span class="k">in</span>
+      append (sort f lo) (pivot :: sort f hi)
+
+
+<span class="k">let</span> <span class="k">rec</span> partition_mem (#a:eqtype)
+                      (f:(a -&gt; bool))
+                      (l:list a)
+  : <span class="k">Lemma</span> (<span class="k">let</span> l1, l2 = partition f l <span class="k">in</span>
+           (<span class="k">forall</span> x. mem x l1 ==&gt; f x) /\
+           (<span class="k">forall</span> x. mem x l2 ==&gt; not (f x)) /\
+           (<span class="k">forall</span> x. mem x l = (mem x l1 || mem x l2)))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; ()
+    | hd :: tl -&gt; partition_mem f tl
+
+<span class="k">let</span> <span class="k">rec</span> sorted_concat (#a:eqtype)
+                      (f:total_order_t a)
+                      (l1:list a{sorted f l1})
+                      (l2:list a{sorted f l2})
+                      (pivot:a)
+  : <span class="k">Lemma</span> (<span class="k">requires</span> (<span class="k">forall</span> y. mem y l1 ==&gt; not (f pivot y)) /\
+                    (<span class="k">forall</span> y. mem y l2 ==&gt; f pivot y))
+          (<span class="k">ensures</span> sorted f (append l1 (pivot :: l2)))
+  = <span class="k">match</span> l1 <span class="k">with</span>
+    | [] -&gt; ()
+    | hd :: tl -&gt; sorted_concat f tl l2 pivot
+
+<span class="k">let</span> <span class="k">rec</span> append_mem (#t:eqtype)
+                   (l1 l2:list t)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span> (<span class="k">forall</span> a. mem a (append l1 l2) = (mem a l1 || mem a l2)))
+  = <span class="k">match</span> l1 <span class="k">with</span>
+    | [] -&gt; ()
+    | hd::tl -&gt; append_mem tl l2
+
+<span class="k">let</span> <span class="k">rec</span> sort_correct (#a:eqtype) (f:total_order_t a) (l:list a)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span> (
+           <span class="k">let</span> m = sort f l <span class="k">in</span>
+           sorted f m /\
+           (<span class="k">forall</span> i. mem i l = mem i m)))
+          (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; ()
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition (f pivot) tl <span class="k">in</span>
+      sort_correct f hi;
+      sort_correct f lo;
+      partition_mem (f pivot) tl;
+      sorted_concat f (sort f lo) (sort f hi) pivot;
+      append_mem (sort f lo) (pivot :: sort f hi)
+
+<span class="k">let</span> <span class="k">rec</span> sort_intrinsic (#a:eqtype) (f:total_order_t a) (l:list a)
+  : <span class="k">Tot</span> (m:list a {
+                sorted f m /\
+                (<span class="k">forall</span> i. mem i l = mem i m)
+         })
+   (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; []
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition (f pivot) tl <span class="k">in</span>
+      partition_mem (f pivot) tl;
+      sorted_concat f (sort_intrinsic f lo) (sort_intrinsic f hi) pivot;
+      append_mem (sort_intrinsic f lo) (pivot :: sort_intrinsic f hi);
+      append (sort_intrinsic f lo) (pivot :: sort_intrinsic f hi)
+</pre></div>
+</div>
+</div>
+</section>
+<section id="proving-that-sort-is-a-permutation">
+<h3><code class="docutils literal notranslate"><span class="pre">sort</span></code> が置換（順列）であることの証明<a class="headerlink" href="#proving-that-sort-is-a-permutation" title="Link to this heading"></a></h3>
+<p>本節の冒頭で、<code class="docutils literal notranslate"><span class="pre">sort</span></code> が重複要素を落とさないことまで保証する、より良い仕様を最終的に与えると述べました。この節の演習の目標はまさにそれで、汎用クイックソートが入力リストの置換を返すことを証明します。</p>
+<p>まず、2 つのリストが互いに置換であるとはどういうことかを定義します。ここでは要素の出現回数を用いて定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> count (#a:eqtype) (x:a) (l:list a)
+  : nat
+  = <span class="k">match</span> l <span class="k">with</span>
+    | hd::tl -&gt; (<span class="k">if</span> hd = x <span class="k">then</span> 1 <span class="k">else</span> 0) + count x tl
+    | [] -&gt; 0
+
+<span class="k">let</span> mem (#a:eqtype) (i:a) (l:list a)
+  : bool
+  = count i l &gt; 0
+
+<span class="k">let</span> is_permutation (#a:eqtype) (l m:list a) =
+  <span class="k">forall</span> x. count x l = count x m
+
+<span class="k">let</span> <span class="k">rec</span> append_count (#t:eqtype)
+                     (l1 l2:list t)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span> (<span class="k">forall</span> a. count a (append l1 l2) = (count a l1 + count a l2)))
+  = <span class="k">match</span> l1 <span class="k">with</span>
+    | [] -&gt; ()
+    | hd::tl -&gt; append_count tl l2
+</pre></div>
+</div>
+<p>定義自体は自明でしょう。リスト連結と出現回数を関係付ける重要な補題 <code class="docutils literal notranslate"><span class="pre">append_count</span></code> を併せて用意します。</p>
+<p>次に証明すべき重要な補題は <code class="docutils literal notranslate"><span class="pre">partition_mem_permutation</span></code> です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> partition_mem_permutation (#a:eqtype)
+                              (f:(a -&gt; bool))
+                              (l:list a)
+  : <span class="k">Lemma</span> (<span class="k">let</span> l1, l2 = partition f l <span class="k">in</span>
+           (<span class="k">forall</span> x. mem x l1 ==&gt; f x) /\
+           (<span class="k">forall</span> x. mem x l2 ==&gt; not (f x)) /\
+           (is_permutation l (append l1 l2)))
+</pre></div>
+</div>
+<p>また、次のような補題も必要になるでしょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> permutation_app_lemma (#a:eqtype) (hd:a) (tl l1 l2:list a)
+  : <span class="k">Lemma</span> (<span class="k">requires</span> (is_permutation tl (append l1 l2)))
+          (<span class="k">ensures</span> (is_permutation (hd::tl) (append l1 (hd::l2))))
+</pre></div>
+</div>
+<p>これらと、先ほどの補題の変形を用いて、次を証明してください。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> sort_correct (#a:eqtype) (f:total_order_t a) (l:list a)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span>
+            sorted f (sort f l) /\
+            is_permutation l (sort f l))
+</pre></div>
+</div>
+<p><a class="reference external" href="../code/exercises/Part1.Quicksort.Permutation.fst">演習スクリプト</a> を読み込み、挑戦してみてください。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> Part1.Quicksort.Permutation
+#push-options &quot;--fuel 1 --ifuel 1&quot;
+
+<span class="c">//Some auxiliary definitions to make this a standalone example</span>
+<span class="k">let</span> <span class="k">rec</span> length #a (l:list a)
+  : nat
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; 0
+    | <span class="k">_</span> :: tl -&gt; 1 + length tl
+
+<span class="k">let</span> <span class="k">rec</span> append #a (l1 l2:list a)
+  : list a
+  = <span class="k">match</span> l1 <span class="k">with</span>
+    | [] -&gt; l2
+    | hd :: tl -&gt; hd :: append tl l2
+
+<span class="k">let</span> total_order (#a:Type) (f: (a -&gt; a -&gt; bool)) =
+    (<span class="k">forall</span> a. f a a)                                         <span class="c">(* reflexivity   *)</span>
+    /\ (<span class="k">forall</span> a1 a2. (f a1 a2 /\ a1=!=a2)  &lt;==&gt; not (f a2 a1))  <span class="c">(* anti-symmetry *)</span>
+    /\ (<span class="k">forall</span> a1 a2 a3. f a1 a2 /\ f a2 a3 ==&gt; f a1 a3)        <span class="c">(* transitivity  *)</span>
+    /\ (<span class="k">forall</span> a1 a2. f a1 a2 \/ f a2 a1)                       <span class="c">(* totality *)</span>
+<span class="k">let</span> total_order_t (a:Type) = f:(a -&gt; a -&gt; bool) { total_order f }
+
+<span class="k">let</span> <span class="k">rec</span> sorted #a  (f:total_order_t a) (l:list a)
+  : bool
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; <span class="k">true</span>
+    | [x] -&gt; <span class="k">true</span>
+    | x :: y :: xs -&gt; f x y &amp;&amp; sorted f (y :: xs)
+
+<span class="c">//SNIPPET_START: count permutation</span>
+<span class="k">let</span> <span class="k">rec</span> count (#a:eqtype) (x:a) (l:list a)
+  : nat
+  = <span class="k">match</span> l <span class="k">with</span>
+    | hd::tl -&gt; (<span class="k">if</span> hd = x <span class="k">then</span> 1 <span class="k">else</span> 0) + count x tl
+    | [] -&gt; 0
+
+<span class="k">let</span> mem (#a:eqtype) (i:a) (l:list a)
+  : bool
+  = count i l &gt; 0
+
+<span class="k">let</span> is_permutation (#a:eqtype) (l m:list a) =
+  <span class="k">forall</span> x. count x l = count x m
+
+<span class="k">let</span> <span class="k">rec</span> append_count (#t:eqtype)
+                     (l1 l2:list t)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span> (<span class="k">forall</span> a. count a (append l1 l2) = (count a l1 + count a l2)))
+  = <span class="k">match</span> l1 <span class="k">with</span>
+    | [] -&gt; ()
+    | hd::tl -&gt; append_count tl l2
+<span class="c">//SNIPPET_END: count permutation</span>
+
+<span class="k">let</span> <span class="k">rec</span> partition (#a:Type) (f:a -&gt; bool) (l:list a)
+  : x:(list a &amp; list a) { length (fst x) + length (snd x) = length l }
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; [], []
+    | hd::tl -&gt;
+      <span class="k">let</span> l1, l2 = partition f tl <span class="k">in</span>
+      <span class="k">if</span> f hd
+      <span class="k">then</span> hd::l1, l2
+      <span class="k">else</span> l1, hd::l2
+
+<span class="k">let</span> <span class="k">rec</span> sort #a (f:total_order_t a) (l:list a)
+  : <span class="k">Tot</span> (list a) (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; []
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition (f pivot) tl <span class="k">in</span>
+      append (sort f lo) (pivot :: sort f hi)
+
+<span class="k">let</span> <span class="k">rec</span> partition_mem_permutation (#a:eqtype)
+                                  (f:(a -&gt; bool))
+                                  (l:list a)
+  : <span class="k">Lemma</span> (<span class="k">let</span> l1, l2 = partition f l <span class="k">in</span>
+           (<span class="k">forall</span> x. mem x l1 ==&gt; f x) /\
+           (<span class="k">forall</span> x. mem x l2 ==&gt; not (f x)) /\
+           (is_permutation l (append l1 l2)))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; ()
+    | hd :: tl -&gt; 
+      partition_mem_permutation f tl;
+      <span class="k">let</span> hi, lo = partition f tl <span class="k">in</span>
+      append_count hi lo;
+      append_count hi (hd::lo);
+      append_count (hd :: hi) lo
+
+<span class="k">let</span> <span class="k">rec</span> sorted_concat (#a:eqtype)
+                      (f:total_order_t a)
+                      (l1:list a{sorted f l1})
+                      (l2:list a{sorted f l2})
+                      (pivot:a)
+  : <span class="k">Lemma</span> (<span class="k">requires</span> (<span class="k">forall</span> y. mem y l1 ==&gt; not (f pivot y)) /\
+                    (<span class="k">forall</span> y. mem y l2 ==&gt; f pivot y))
+          (<span class="k">ensures</span> sorted f (append l1 (pivot :: l2)))
+  = <span class="k">match</span> l1 <span class="k">with</span>
+    | [] -&gt; ()
+    | hd :: tl -&gt; sorted_concat f tl l2 pivot
+
+<span class="k">let</span> permutation_app_lemma (#a:eqtype) (hd:a) (tl:list a)
+                          (l1:list a) (l2:list a)
+   : <span class="k">Lemma</span> (<span class="k">requires</span> (is_permutation tl (append l1 l2)))
+           (<span class="k">ensures</span> (is_permutation (hd::tl) (append l1 (hd::l2))))
+  = append_count l1 l2;
+    append_count l1 (hd :: l2)
+  
+<span class="k">let</span> <span class="k">rec</span> sort_correct (#a:eqtype) (f:total_order_t a) (l:list a)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span> (
+           sorted f (sort f l) /\
+           is_permutation l (sort f l)))
+          (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; ()
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition (f pivot) tl <span class="k">in</span>
+      partition_mem_permutation (f pivot) tl;
+      append_count lo hi;
+      append_count hi lo;
+      <span class="k">assert</span> (is_permutation tl (append lo hi));
+      sort_correct f hi;
+      sort_correct f lo;
+      sorted_concat f (sort f lo) (sort f hi) pivot;
+      append_count (sort f lo) (sort f hi);
+      <span class="k">assert</span> (is_permutation tl (sort f lo `append` sort f hi));
+      permutation_app_lemma pivot tl (sort f lo) (sort f hi)
+      
+
+<span class="k">let</span> <span class="k">rec</span> sort_intrinsic (#a:eqtype) (f:total_order_t a) (l:list a)
+  : <span class="k">Tot</span> (m:list a {
+                sorted f m /\
+                is_permutation l m
+         })
+   (<span class="k">decreases</span> (length l))
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; []
+    | pivot :: tl -&gt;
+      <span class="k">let</span> hi, lo  = partition (f pivot) tl <span class="k">in</span>
+      partition_mem_permutation (f pivot) tl;
+      append_count lo hi;  append_count hi lo;
+      sorted_concat f (sort_intrinsic f lo) (sort_intrinsic f hi) pivot;
+      append_count (sort_intrinsic f lo) (sort_intrinsic f hi);
+      permutation_app_lemma pivot tl (sort_intrinsic f lo) (sort_intrinsic f hi);
+      append (sort_intrinsic f lo) (pivot :: sort_intrinsic f hi)
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part1_lemmas.html" class="btn btn-neutral float-left" title="補題と帰納法による証明" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part1_execution.html" class="btn btn-neutral float-right" title="プログラムの実行" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

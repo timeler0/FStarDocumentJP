@@ -1,0 +1,378 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>インターフェース &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="型クラス" href="part3_typeclasses.html" />
+    <link rel="prev" title="インターフェースと型クラスによるモジュール性" href="part3.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part3.html">インターフェースと型クラスによるモジュール性</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">インターフェース</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bounded-integers">有界整数</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#interface-uint32-fsti">インターフェース：UInt32.fsti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#implementation-uint32-fst">実装：UInt32.fst</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#interleaving-a-quirk">インターリーブ：現在の癖</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#comparison-with-machine-integers-in-the-f-library">F* ライブラリの機械語整数との比較</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part3_typeclasses.html">型クラス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part3_alacarte.html">型クラスで遊ぶ：Datatypes à la Carte</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part3.html">インターフェースと型クラスによるモジュール性</a></li>
+      <li class="breadcrumb-item active">インターフェース</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="interfaces">
+<span id="part3-interfaces"></span><h1>インターフェース<a class="headerlink" href="#interfaces" title="Link to this heading"></a></h1>
+<p>F* の標準ライブラリ（<code class="docutils literal notranslate"><span class="pre">ulib</span></code> フォルダ）を見ると、拡張子が <code class="docutils literal notranslate"><span class="pre">.fsti</span></code> のファイルが多数あります。これらはそれぞれ、対応する <code class="docutils literal notranslate"><span class="pre">.fst</span></code> ファイルのモジュール実装と対になるインターフェースファイルです。</p>
+<p>インターフェース（<code class="docutils literal notranslate"><span class="pre">.fsti</span></code>）はモジュール実装（<code class="docutils literal notranslate"><span class="pre">.fst</span></code>）と非常によく似ており、帰納的な <code class="docutils literal notranslate"><span class="pre">type</span></code> 定義、<code class="docutils literal notranslate"><span class="pre">let</span></code> および <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">rec</span></code> の定義、<code class="docutils literal notranslate"><span class="pre">val</span></code> 宣言など、モジュールが持てる要素をすべて含められます。ただしモジュール実装と異なり、インターフェースでは対応する実装なしに <code class="docutils literal notranslate"><span class="pre">val</span> <span class="pre">f</span> <span class="pre">:</span> <span class="pre">t</span></code> とシンボルを宣言できます。これにより <code class="docutils literal notranslate"><span class="pre">f</span></code> はインターフェースおよびすべてのクライアントモジュールに対して抽象化され、すなわち定義なしに型 <code class="docutils literal notranslate"><span class="pre">t</span></code> を持つと仮定されます。<code class="docutils literal notranslate"><span class="pre">f</span></code> の定義は <code class="docutils literal notranslate"><span class="pre">.fst</span></code> 側に置かれ、型 <code class="docutils literal notranslate"><span class="pre">t</span></code> を満たすか検査されます。これにより、クライアントが仮定する <code class="docutils literal notranslate"><span class="pre">f:t</span></code> が適切な定義で裏付けられることが保証されます。</p>
+<p>インターフェースがどのように機能するかを見るために、<strong>有界整数</strong> モジュールである <code class="docutils literal notranslate"><span class="pre">FStar.UInt32</span></code>、<code class="docutils literal notranslate"><span class="pre">FStar.UInt64</span></code> などの設計を取り上げ、説明のために簡略版を自作してみます。</p>
+<section id="bounded-integers">
+<span id="machine-integers"></span><h2>有界整数<a class="headerlink" href="#bounded-integers" title="Link to this heading"></a></h2>
+<p>F* のプリミティブ型 <code class="docutils literal notranslate"><span class="pre">int</span></code> は無限精度の数学的整数です。プログラムを OCaml などにコンパイルする場合、<code class="docutils literal notranslate"><span class="pre">int</span></code> は OCaml の <a class="reference external" href="https://opam.ocaml.org/packages/zarith/">ZArith パッケージ</a> による多倍長整数に変換されます。しかし <code class="docutils literal notranslate"><span class="pre">int</span></code> は非効率な場合があり、（例えば F* を C にコンパイルするような）状況では、常に機械語ワードで表現できる有界整数を使いたくなることがあります。標準ライブラリの <code class="docutils literal notranslate"><span class="pre">FStar.UInt32.t</span></code> および <code class="docutils literal notranslate"><span class="pre">FStar.UInt64.t</span></code> は、それぞれ 32 ビットと 64 ビットの符号なし整数で常に表現できる値の型です。</p>
+<p>32 ビット符号なし整数上の算術（加算など）は <code class="docutils literal notranslate"><span class="pre">2^32</span></code> を法とする演算として解釈されます。しかし多くの用途では、意図しない算術オーバーフローが起こらないことを保証する作法でプログラムしたいものです。つまり効率のために有界整数を使いつつ、その演算がオーバーフローしないことを証明することで、剰余算術を用いずに有界整数式を推論できるようにします。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>ここでは詳述しませんが、F* のライブラリには C の対応する符号付き整数にコンパイルできる符号付き整数型も用意されています。符号付き整数演算でのオーバーフロー回避は推論容易性だけの問題ではありません。C では符号付きオーバーフローは未定義動作だからです。</p>
+</div>
+<section id="interface-uint32-fsti">
+<h3>インターフェース：UInt32.fsti<a class="headerlink" href="#interface-uint32-fsti" title="Link to this heading"></a></h3>
+<p>インターフェース <code class="docutils literal notranslate"><span class="pre">UInt32</span></code> は、他のモジュールと同様にモジュール名の宣言から始まります。（この場合は <code class="docutils literal notranslate"><span class="pre">UInt32.fsti</span></code> というファイル名から推測可能ですが）F* では明示が必要です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> UInt32
+
+<span class="k">val</span> t : eqtype
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">UInt32</span></code> は有界整数の型として、抽象型 <code class="docutils literal notranslate"><span class="pre">val</span> <span class="pre">t</span> <span class="pre">:</span> <span class="pre">eqtype</span></code> を提供します。これは可判定な等値性を備えることを示しますが、インターフェースでは <code class="docutils literal notranslate"><span class="pre">t</span></code> の具体定義は公開しません。</p>
+<p><code class="docutils literal notranslate"><span class="pre">t</span></code> 上の各演算は、<code class="docutils literal notranslate"><span class="pre">t</span></code> を有界な数学的整数（特に <code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">32</span></code> 未満の自然数である <code class="docutils literal notranslate"><span class="pre">u32_nat</span></code>）に対応付ける論理モデルを用いて仕様化します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> n = 32
+<span class="k">let</span> min : nat = 0
+<span class="k">let</span> max : nat = pow2 n - 1
+<span class="k">let</span> u32_nat = n:nat{ n &lt;= max }
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>OCaml などの言語と異なり、F* のインターフェースには <code class="docutils literal notranslate"><span class="pre">let</span></code> や <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">rec</span></code> の定義を <em>含めることができます</em>。<code class="docutils literal notranslate"><span class="pre">UInt32</span></code> にも見られるように、これらの定義はインターフェースに列挙した他の操作に、精密な仕様を与えるのに有用です。</p>
+</div>
+<p>抽象型 <code class="docutils literal notranslate"><span class="pre">t</span></code> と <code class="docutils literal notranslate"><span class="pre">u32_nat</span></code> を結びつけるため、インターフェースは <code class="docutils literal notranslate"><span class="pre">t</span></code> と <code class="docutils literal notranslate"><span class="pre">u32_nat</span></code> を相互に変換する 2 つの強制変換 <code class="docutils literal notranslate"><span class="pre">v</span></code> と <code class="docutils literal notranslate"><span class="pre">u</span></code> を提供します。補題 <code class="docutils literal notranslate"><span class="pre">vu_inv</span></code> と <code class="docutils literal notranslate"><span class="pre">uv_inv</span></code> は、<code class="docutils literal notranslate"><span class="pre">v</span></code> と <code class="docutils literal notranslate"><span class="pre">u</span></code> が互いに逆写像であること、すなわち <code class="docutils literal notranslate"><span class="pre">t</span></code> と <code class="docutils literal notranslate"><span class="pre">u32_nat</span></code> が 1 対 1 対応にあることを要求します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> v (x:t) : u32_nat
+<span class="k">val</span> u (x:u32_nat) : t
+
+<span class="k">val</span> uv_inv (x : t) : <span class="k">Lemma</span> (u (v x) == x)
+<span class="k">val</span> vu_inv (x : u32_nat) : <span class="k">Lemma</span> (v (u x) == x)
+</pre></div>
+</div>
+<section id="modular-addition-and-subtraction">
+<h4>剰余算術による加算と減算<a class="headerlink" href="#modular-addition-and-subtraction" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">t</span></code> の値に対する加算と減算は <code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">32</span></code> を法とする演算として定義されます。これは以下の <code class="docutils literal notranslate"><span class="pre">add_mod</span></code> と <code class="docutils literal notranslate"><span class="pre">sub_mod</span></code> のシグネチャで規定されます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(** Addition modulo [2^n]</span>
+
+<span class="c">    Unsigned machine integers can always be added, but the postcondition is now</span>
+<span class="c">    in terms of addition modulo [2^n] on mathematical integers *)</span>
+<span class="k">val</span> add_mod (a:t) (b:t) 
+  : y:t { v y = (v a + v b) % pow2 n } 
+</pre></div>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(** Subtraction modulo [2^n]</span>
+
+<span class="c">    Unsigned machine integers can always be subtracted, but the postcondition is now</span>
+<span class="c">    in terms of subtraction modulo [2^n] on mathematical integers *)</span>
+<span class="k">val</span> sub_mod (a:t) (b:t) 
+  : y:t { v y = (v a - v b) % pow2 n } 
+</pre></div>
+</div>
+</section>
+<section id="bounds-checked-addition-and-subtraction">
+<h4>範囲検査付きの加算と減算<a class="headerlink" href="#bounds-checked-addition-and-subtraction" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">add_mod</span></code> と <code class="docutils literal notranslate"><span class="pre">sub_mod</span></code> の型は厳密ですが、常に扱いやすいとは限りません。例えば <code class="docutils literal notranslate"><span class="pre">add_mod</span> <span class="pre">(u</span> <span class="pre">2)</span> <span class="pre">(u</span> <span class="pre">3)</span> <span class="pre">==</span> <span class="pre">u</span> <span class="pre">5</span></code> を示すには剰余算術の推論が必要です――<code class="docutils literal notranslate"><span class="pre">2</span></code>、<code class="docutils literal notranslate"><span class="pre">3</span></code>、<code class="docutils literal notranslate"><span class="pre">5</span></code> のような定数なら簡単ですが、記号的な値に対する剰余算術の証明は一般に非線形算術の推論を伴い、SMT ソルバでも自動化が難しいことがあります。また、安全性重視のソフトウェアでは整数オーバーフロー自体を避けたい場面が多々あります。</p>
+<p>そこで <code class="docutils literal notranslate"><span class="pre">UInt32</span></code> インターフェースは追加で <code class="docutils literal notranslate"><span class="pre">add</span></code> と <code class="docutils literal notranslate"><span class="pre">sub</span></code> を提供します。これらはオーバーフロー（あるいはアンダーフロー）が起きない場合にのみ <code class="docutils literal notranslate"><span class="pre">t</span></code> 同士の加算（減算）を許す仕様になっています。</p>
+<p>まず、演算がオーバーフロー／アンダーフローしないことを述べる補助述語 <code class="docutils literal notranslate"><span class="pre">fits</span></code> を定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> fits (op: int -&gt; int -&gt; int)
+         (x y : t)
+  = min &lt;= op (v x) (v y) /\
+    op (v x) (v y) &lt;= max
+</pre></div>
+</div>
+<p>次に <code class="docutils literal notranslate"><span class="pre">fits</span></code> を用いて <code class="docutils literal notranslate"><span class="pre">add</span></code> と <code class="docutils literal notranslate"><span class="pre">sub</span></code> の定義域を制限し、剰余算術を使うことなく、結果が引数の和（差）であることを型で保証します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(** Bounds-respecting addition</span>
+
+<span class="c">    The precondition enforces that the sum does not overflow,</span>
+<span class="c">    expressing the bound as an addition on mathematical integers *)</span>
+<span class="k">val</span> add (a:t) (b:t { fits (+) a b }) 
+  : y:t{ v y == v a + v b }
+</pre></div>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(** Bounds-respecting subtraction</span>
+
+<span class="c">    The precondition enforces that the difference does not underflow,</span>
+<span class="c">    expressing the bound as an subtraction on mathematical integers *)</span>
+<span class="k">val</span> sub (a:t) (b:t { fits (<span class="k">fun</span> x y -&gt; x - y) a b }) 
+  : y:t{ v y == v a - v b }
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>加算演算子は <code class="docutils literal notranslate"><span class="pre">(+)</span></code> の記法で第一級関数として使えますが、減算は同様にはいきません。<code class="docutils literal notranslate"><span class="pre">(-)</span></code> は減算ではなく単項の符号反転に解釈されるため、<code class="docutils literal notranslate"><span class="pre">fun</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">-&gt;</span> <span class="pre">x</span> <span class="pre">-</span> <span class="pre">y</span></code> と書きます。</p>
+</div>
+</section>
+<section id="comparison">
+<h4>比較<a class="headerlink" href="#comparison" title="Link to this heading"></a></h4>
+<p>最後に、以下のとおり比較演算子 <code class="docutils literal notranslate"><span class="pre">lt</span></code> もインターフェースで提供します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(** Less than *)</span>
+<span class="k">val</span> lt (a:t) (b:t) 
+  : r:bool { r &lt;==&gt; v a &lt; v b }
+</pre></div>
+</div>
+</section>
+</section>
+<section id="implementation-uint32-fst">
+<h3>実装：UInt32.fst<a class="headerlink" href="#implementation-uint32-fst" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">UInt32</span></code> の実装は、抽象型 <code class="docutils literal notranslate"><span class="pre">t</span></code> の表現から始めて、インターフェース <code class="docutils literal notranslate"><span class="pre">UInt32</span></code> にあるすべての <code class="docutils literal notranslate"><span class="pre">val</span></code> 宣言に対する定義を提供しなければなりません。</p>
+<p><code class="docutils literal notranslate"><span class="pre">t</span></code> の表現には複数の選択肢がありますが、インターフェースの要点はクライアントを実装選択から切り離すことにあります。</p>
+<p>おそらく最も簡単なのは、<code class="docutils literal notranslate"><span class="pre">t</span></code> を <code class="docutils literal notranslate"><span class="pre">u32_nat</span></code> そのものとして表現することです。これにより、<code class="docutils literal notranslate"><span class="pre">t</span></code> とその論理モデルの対応付けの証明はほぼ自明になります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> UInt32
+
+<span class="k">let</span> t = n:nat { n &lt;= pow2 32 - 1}
+
+<span class="k">let</span> v (x:t) = x
+<span class="k">let</span> u (x:u32_nat) = x
+
+<span class="k">let</span> uv_inv x = ()
+<span class="k">let</span> vu_inv x = ()
+
+<span class="k">let</span> add_mod a b = (a + b) % pow2 32
+<span class="k">let</span> sub_mod a b = (a - b) % pow2 32
+
+<span class="k">let</span> add a b = a + b
+<span class="k">let</span> sub a b = a - b
+
+<span class="k">let</span> lt (a:t) (b:t) = v a &lt; v b
+</pre></div>
+</div>
+<p>別の選択肢として、<code class="docutils literal notranslate"><span class="pre">t</span></code> を 32 ビットベクタで表現する方法もあります。こちらは少し難しく、インターフェースに対して正しいことの証明には Z3 のビットベクタ理論と非解釈関数の相互作用を扱う必要があります。これはタクティクで対処します。やや高度で、F* のタクティク支援についてはまだ扱っていませんが、参考としてコードを示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">open</span> FStar.BV
+<span class="k">open</span> FStar.Tactics
+
+<span class="k">let</span> t = bv_t 32
+<span class="k">let</span> v (x:t) = bv2int x
+<span class="k">let</span> u x = int2bv x
+
+<span class="k">let</span> sym (#a:Type) (x y:a)
+  : <span class="k">Lemma</span> (<span class="k">requires</span> x == y)
+          (<span class="k">ensures</span> y == x)
+  = ()
+
+<span class="k">let</span> dec_eq (#a:eqtype) (x y:a)
+  : <span class="k">Lemma</span> (<span class="k">requires</span> x = y)
+          (<span class="k">ensures</span> x == y)
+  = ()
+
+<span class="k">let</span> uv_inv (x:t)
+  = <span class="k">assert</span> (u (v x) == x)
+        <span class="k">by</span> (mapply (`sym);
+            mapply (`dec_eq);
+            mapply (`inverse_vec_lemma))
+
+<span class="k">let</span> ty (x y:u32_nat)
+  : <span class="k">Lemma</span> (<span class="k">requires</span> eq2 #(FStar.UInt.uint_t 32) x y)
+          (<span class="k">ensures</span> x == y)
+  = ()
+
+<span class="k">let</span> vu_inv (x:u32_nat)
+  = <span class="k">assert</span> (v (u x) == x)
+        <span class="k">by</span> (mapply (`ty);
+            mapply (`sym);
+            mapply (`dec_eq);
+            mapply (`inverse_num_lemma))
+
+<span class="k">let</span> add_mod a b =
+  <span class="k">let</span> <span class="k">unfold</span> y = bvadd #32 a b <span class="k">in</span>
+  <span class="k">assert</span> (y == u (FStar.UInt.add_mod #32 (v a) (v b)))
+     <span class="k">by</span>  (mapply (`sym);
+          mapply (`int2bv_add);
+          pointwise
+              (<span class="k">fun</span> <span class="k">_</span> -&gt; <span class="k">try</span> mapply (`uv_inv) <span class="k">with</span> | <span class="k">_</span> -&gt; trefl());
+          trefl());
+  vu_inv ((FStar.UInt.add_mod #32 (v a) (v b)));
+  y
+
+<span class="k">let</span> sub_mod a b =
+  <span class="k">let</span> <span class="k">unfold</span> y = bvsub #32 a b <span class="k">in</span>
+  <span class="k">assert</span> (y == u (FStar.UInt.sub_mod #32 (v a) (v b)))
+     <span class="k">by</span>
+         (mapply (`sym);
+          mapply (`int2bv_sub);
+          pointwise
+              (<span class="k">fun</span> <span class="k">_</span> -&gt; <span class="k">try</span> mapply (`uv_inv) <span class="k">with</span> | <span class="k">_</span> -&gt; trefl());
+          trefl());
+  vu_inv ((FStar.UInt.sub_mod #32 (v a) (v b)));
+  y
+
+<span class="k">let</span> add a b =
+  <span class="k">let</span> y = add_mod a b <span class="k">in</span>
+  FStar.Math.Lemmas.modulo_lemma (v a + v b) (pow2 32);
+  y
+
+<span class="k">let</span> sub a b =
+  <span class="k">let</span> y = sub_mod a b <span class="k">in</span>
+  FStar.Math.Lemmas.modulo_lemma (v a - v b) (pow2 32);
+  y
+
+<span class="k">let</span> lt (a:t) (b:t) = v a &lt; v b
+</pre></div>
+</div>
+<p>どちらの実装も <code class="docutils literal notranslate"><span class="pre">UInt32</span></code> インターフェースを満たしますが、F* ではどちらか 1 つを選ぶ必要があります。他の ML 系言語のモジュールシステムのように、インターフェースが第一級で複数の実装を持てるわけではありません。F* では 1 つのインターフェースに対して実装は高々 1 つです。複数実装を切り替えたい場合は型クラスを用います。</p>
+</section>
+<section id="interleaving-a-quirk">
+<h3>インターリーブ：現在の癖<a class="headerlink" href="#interleaving-a-quirk" title="Link to this heading"></a></h3>
+<p>現在の F* の実装は、インターフェースとその実装を、1 つのモジュールの 2 つの未完成な半分として扱います。実装がインターフェースを正しく実装しているか検査するとき、F* は両者を型検査の前に結合して完全なモジュールにしようとします。その際、インターフェースと実装のトップレベル要素を、それぞれの相対順序を保ちながら <em>インターリーブ</em> しようとします。</p>
+<p>この戦略は様々な点で最適とは言えず、F* が分割コンパイルをサポートしていなかった頃の名残です。将来的には変更される可能性が高いです（詳細は <a class="reference external" href="https://github.com/FStarLang/FStar/issues/1770">この Issue</a> を参照）。</p>
+<p>当面、インターフェースを実装する際に注意すべき主な点は次のとおりです。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>実装側の定義順は、インターフェースの <code class="docutils literal notranslate"><span class="pre">val</span></code> 宣言の順序に一致していなければなりません。例えば、インターフェースが <code class="docutils literal notranslate"><span class="pre">val</span> <span class="pre">f</span> <span class="pre">:</span> <span class="pre">tf</span></code> の後に <code class="docutils literal notranslate"><span class="pre">val</span> <span class="pre">g</span> <span class="pre">:</span> <span class="pre">tg</span></code> を含むなら、実装でも <code class="docutils literal notranslate"><span class="pre">f</span></code> の実装が <code class="docutils literal notranslate"><span class="pre">g</span></code> の実装より先に来る必要があります。</p></li>
+</ul>
+</div></blockquote>
+<p>また、インターフェースで <code class="docutils literal notranslate"><span class="pre">val</span></code> 宣言を書くときは、宇宙（universe）レベルを明示するのが得策です。詳しくは <a class="reference internal" href="../part2/part2_universes.html#part2-tips-for-universes"><span class="std std-ref">こちら</span></a> を参照してください。</p>
+<p>インターリーブに関連する他の問題で、インターフェース関連のコンパイラエラーのデバッグに役立つもの：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://github.com/FStarLang/FStar/issues/2020">Issue 2020</a></p></li>
+<li><p><a class="reference external" href="https://github.com/FStarLang/FStar/issues/1770">Issue 1770</a></p></li>
+<li><p><a class="reference external" href="https://github.com/FStarLang/FStar/issues/959">Issue 959</a></p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="comparison-with-machine-integers-in-the-f-library">
+<h3>F* ライブラリの機械語整数との比較<a class="headerlink" href="#comparison-with-machine-integers-in-the-f-library" title="Link to this heading"></a></h3>
+<p>F* の標準ライブラリには <code class="docutils literal notranslate"><span class="pre">FStar.UInt32</span></code> が含まれており、そのインターフェースは本章の <code class="docutils literal notranslate"><span class="pre">UInt32</span></code> と類似しつつ、より多機能です。例えば <code class="docutils literal notranslate"><span class="pre">FStar.UInt32</span></code> には乗算、除算、剰余、ビット演算なども含まれます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">FStar.UInt32</span></code> の実装では、<code class="docutils literal notranslate"><span class="pre">FStar.UInt32.t</span></code> の表現として <code class="docutils literal notranslate"><span class="pre">u32_nat</span></code> に似たものを選びますが、F* コンパイラはこのモジュールを特別扱いします。<code class="docutils literal notranslate"><span class="pre">FStar.UInt32.t</span></code> をプリミティブ型として扱い、その演算をプラットフォーム固有の方法で機械語整数にコンパイルします。<code class="docutils literal notranslate"><span class="pre">FStar.UInt32</span></code> の実装の役割は、有界自然数によるモデルを与えることで、そのインターフェースが論理的に整合していることを示す点にあります。</p>
+<p>ライブラリには <code class="docutils literal notranslate"><span class="pre">FStar.UInt32</span></code> のほかにも、<code class="docutils literal notranslate"><span class="pre">FStar.UInt8</span></code>、<code class="docutils literal notranslate"><span class="pre">FStar.UInt16</span></code>、<code class="docutils literal notranslate"><span class="pre">FStar.UInt64</span></code> などの符号なし機械語整数型が用意されています。F* には符号付きの機械語整数型もいくつかあります。</p>
+<p>これらのモジュールは非常によく似ていますが、言語において第一級の存在ではないため、すべてのモジュールにより具現化される一般的なインターフェースを定義する方法はありません。実際、これらのバリエーションは共通テンプレートからスクリプトで自動生成されています。</p>
+<p>インターフェースは情報隠蔽やモジュール構造の単純なパターンには適していますが、次に学ぶように、より強力で汎用的な解決策を与えるのは型クラスです（ときに高階コードを必要とします）。</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part3.html" class="btn btn-neutral float-left" title="インターフェースと型クラスによるモジュール性" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part3_typeclasses.html" class="btn btn-neutral float-right" title="型クラス" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

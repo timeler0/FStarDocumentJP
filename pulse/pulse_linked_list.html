@@ -1,0 +1,620 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>連結リスト &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="アトミック操作と不変条件" href="pulse_atomics_and_invariants.html" />
+    <link rel="prev" title="含意と全称量化" href="pulse_implication_and_forall.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">連結リスト</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#representing-a-linked-list">連結リストの表現</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#boilerplate-introducing-and-eliminating-is-list">定型作業：<code class="docutils literal notranslate"><span class="pre">is_list</span></code> の導入と除去</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#case-analyzing-a-nullable-pointer">ヌル許容ポインタの場合分け</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#length-recursively">長さ（再帰版）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exercise-1">練習問題 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exercise-2">練習問題 2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#length-iteratively-with-trades">長さ（反復版、Trade 付き）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#trade-tails">末尾のトレード</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tail-of-a-list">リストの末尾</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#length-iter"><code class="docutils literal notranslate"><span class="pre">length_iter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#append-recursively">連結（再帰版）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#append-iteratively">連結（反復版）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exercise-3">練習問題 3</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exercise-4">練習問題 4</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">連結リスト</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="linked-lists">
+<span id="pulse-linked-list"></span><h1>連結リスト<a class="headerlink" href="#linked-lists" title="Link to this heading"></a></h1>
+<p>この章では連結リストのライブラリを作っていきます。その過程で、再帰述語や trade、全称量化の使い方も学びます。</p>
+<section id="representing-a-linked-list">
+<h2>連結リストの表現<a class="headerlink" href="#representing-a-linked-list" title="Link to this heading"></a></h2>
+<p>まずは単方向連結リストの型を定義しましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> node (t:Type0) = {
+    head : t;
+    tail : llist t;
+}
+
+<span class="k">and</span> node_ptr (t:Type0) = ref (node t)
+
+<span class="c">//A nullable pointer to a node</span>
+<span class="k">and</span> llist (t:Type0) = option (node_ptr t)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">node</span> <span class="pre">t</span></code> は <code class="docutils literal notranslate"><span class="pre">head:t</span></code> と <code class="docutils literal notranslate"><span class="pre">tail:llist</span> <span class="pre">t</span></code> を持ちます。<code class="docutils literal notranslate"><span class="pre">tail</span></code> はリストの残りを指す ヌル許容参照です。ヌル許容参照は、<a class="reference internal" href="pulse_conditionals.html#pulse-nullable-ref-helpers"><span class="std std-ref">以前に見た</span></a> とおり option で表現します。</p>
+<p>次に、仕様で使うために、連結リストとその論理的表現を結びつける述語が必要です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> is_list #t (x:llist t) (l:list t)
+: <span class="k">Tot</span> slprop (<span class="k">decreases</span> l)
+= <span class="k">match</span> l <span class="k">with</span>
+  | [] -&gt; pure (x == None)
+  | head::tl -&gt; 
+    <span class="k">exists</span>* (p:node_ptr t) (tail:llist t).
+      pure (x == Some p) **
+      pts_to p { head; tail } **
+      is_list tail tl
+</pre></div>
+</div>
+<p>述語 <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">x</span> <span class="pre">l</span></code> は再帰述語です。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">==</span> <span class="pre">[]</span></code> のとき、参照 <code class="docutils literal notranslate"><span class="pre">x</span></code> は null でなければなりません。</p></li>
+<li><p>それ以外、すなわち <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">==</span> <span class="pre">head</span> <span class="pre">::</span> <span class="pre">tl</span></code> のとき、<code class="docutils literal notranslate"><span class="pre">x</span></code> は有効な参照 <code class="docutils literal notranslate"><span class="pre">p</span></code> を含み、<code class="docutils literal notranslate"><span class="pre">p</span></code> は <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">head;</span> <span class="pre">tail</span> <span class="pre">}</span></code> を指し、かつ再帰的に <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">tail</span> <span class="pre">tl</span></code> が成り立ちます。</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="boilerplate-introducing-and-eliminating-is-list">
+<h2>定型作業：<code class="docutils literal notranslate"><span class="pre">is_list</span></code> の導入と除去<a class="headerlink" href="#boilerplate-introducing-and-eliminating-is-list" title="Link to this heading"></a></h2>
+<p><a class="reference internal" href="pulse_ghost.html#pulse-recursive-predicates"><span class="std std-ref">前の章</span></a> で再帰述語を見ましたが、そこでと同様に <code class="docutils literal notranslate"><span class="pre">is_list</span></code> を扱うための補助ゴースト関数が必要です。将来的には Pulse チェッカがこの種の定型ゴースト補題を自動化する予定ですが、現時点では手書きする必要があります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> elim_is_list_nil (#t:Type0) (x:llist t)
+<span class="k">requires</span> is_list x &#39;l ** pure (&#39;l == [])
+<span class="k">ensures</span> pure (x == None)
+{
+   <span class="k">rewrite</span> <span class="k">each</span> &#39;l as Nil #t;
+   <span class="k">unfold</span> (is_list x [])
+}
+
+
+
+<span class="k">ghost</span>
+<span class="k">fn</span> intro_is_list_nil (#t:Type0) (x:llist t)
+<span class="k">requires</span> pure (x == None)
+<span class="k">ensures</span> is_list x []
+{
+    <span class="k">fold</span> (is_list x []);
+}
+
+
+
+<span class="k">ghost</span>
+<span class="k">fn</span> elim_is_list_cons (#t:Type0) (x:llist t) (l:list t) (head:t) (tl:list t)
+<span class="k">requires</span> is_list x l ** pure (l == head::tl)
+<span class="k">ensures</span> (
+  <span class="k">exists</span>* (p:node_ptr t) (tail:llist t).
+    pure (x == Some p) **
+    pts_to p { head; tail } **
+    is_list tail tl
+)
+{
+  <span class="k">rewrite</span> <span class="k">each</span> l as (head::tl);
+  <span class="k">unfold</span> (is_list x (head::tl));
+}
+
+    
+
+
+<span class="k">ghost</span>
+<span class="k">fn</span> intro_is_list_cons (#t:Type0) (x:llist t) (v:node_ptr t) (#node:node t) (#tl:list t)
+<span class="k">requires</span>
+  pts_to v node **
+  is_list node.tail tl **
+  pure (x == Some v)
+<span class="k">ensures</span>
+  is_list x (node.head::tl)
+{
+    <span class="k">rewrite</span> (pts_to v node) as (pts_to v { head=node.head; tail=node.tail });
+    <span class="k">fold</span> (is_list x (node.head::tl));
+}
+</pre></div>
+</div>
+</section>
+<section id="case-analyzing-a-nullable-pointer">
+<h2>ヌル許容ポインタの場合分け<a class="headerlink" href="#case-analyzing-a-nullable-pointer" title="Link to this heading"></a></h2>
+<p>連結リストを扱うときは、与えられた <code class="docutils literal notranslate"><span class="pre">x:llist</span> <span class="pre">t</span></code> が null かどうかを最初に調べるのが普通です。しかし <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">x</span> <span class="pre">l</span></code> は <code class="docutils literal notranslate"><span class="pre">x:llist</span> <span class="pre">t</span></code> ではなく <code class="docutils literal notranslate"><span class="pre">l:list</span> <span class="pre">t</span></code> に対する場合分けで定義されています。これは <code class="docutils literal notranslate"><span class="pre">l</span></code> の末尾に再帰して述語を書けるようにするためです。そこで、<code class="docutils literal notranslate"><span class="pre">x</span></code> が null かどうかに応じて <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">x</span> <span class="pre">l</span></code> を反転させる述語 <code class="docutils literal notranslate"><span class="pre">is_list_cases</span> <span class="pre">x</span> <span class="pre">l</span></code> を用意します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> is_list_cases #t (x:llist t) (l:list t)
+: slprop 
+= <span class="k">match</span> x <span class="k">with</span>
+  | None -&gt; pure (l == [])
+  | Some v -&gt; 
+    <span class="k">exists</span>* (n:node t) (tl:list t).
+      pts_to v n **
+      pure (l == n.head::tl) **
+      is_list n.tail tl
+</pre></div>
+</div>
+<p>次に、<code class="docutils literal notranslate"><span class="pre">is_list</span></code> を <code class="docutils literal notranslate"><span class="pre">is_list_cases</span></code> に反転させるゴースト関数を定義します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> cases_of_is_list #t (x:llist t) (l:list t)
+<span class="k">requires</span> is_list x l
+<span class="k">ensures</span> is_list_cases x l
+{
+  <span class="k">match</span> l {
+    [] -&gt; {
+      <span class="k">unfold</span> (is_list x []);
+      <span class="k">fold</span> (is_list_cases None l);
+      <span class="k">rewrite</span> <span class="k">each</span> (None #(ref (node t))) as x;
+    }
+    head :: tl -&gt; {
+      <span class="k">unfold</span> (is_list x (head::tl));
+      <span class="k">with</span> w tail. <span class="k">_</span>;
+      <span class="k">let</span> v = Some?.v x;
+      <span class="k">rewrite</span> <span class="k">each</span> w as v;
+      <span class="k">rewrite</span> <span class="k">each</span> tail as (({ head; tail }).tail) <span class="k">in</span> (is_list tail tl);
+      <span class="k">fold</span> (is_list_cases (Some v) l);
+      <span class="k">rewrite</span> <span class="k">each</span> (Some #(ref (node t)) v) as x;
+    }
+  }
+}
+</pre></div>
+</div>
+<p>さらに <code class="docutils literal notranslate"><span class="pre">cases_of_is_list</span></code> の呼び出しを包むゴースト関数を二つ定義します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> is_list_case_none (#t:Type) (x:llist t) (#l:list t)
+<span class="k">requires</span> is_list x l ** pure (x == None)
+<span class="k">ensures</span> is_list x l ** pure (l == [])
+{
+  cases_of_is_list x l;
+  <span class="k">rewrite</span> <span class="k">each</span> x as (None #(ref (node t)));
+  <span class="k">unfold</span> (is_list_cases None l);
+  <span class="k">fold</span> (is_list x []);
+}
+</pre></div>
+</div>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> is_list_case_some (#t:Type) (x:llist t) (v:node_ptr t) (#l:list t) 
+<span class="k">requires</span> is_list x l ** pure (x == Some v)
+<span class="k">ensures</span>
+  <span class="k">exists</span>* (node:node t) (tl:list t).
+    pts_to v node **
+    is_list node.tail tl **
+    pure (l == node.head::tl)
+{
+  cases_of_is_list x l;
+  <span class="k">rewrite</span> <span class="k">each</span> x as (Some v);
+  <span class="k">unfold</span> (is_list_cases (Some v) l);
+}
+</pre></div>
+</div>
+</section>
+<section id="length-recursively">
+<h2>長さ（再帰版）<a class="headerlink" href="#length-recursively" title="Link to this heading"></a></h2>
+<p>補助関数がそろったので、実際のコードを書いていきます。まずは <code class="docutils literal notranslate"><span class="pre">llist</span></code> の長さを計算する関数です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="k">rec</span> length (#t:Type0) (x:llist t)
+<span class="k">requires</span> is_list x &#39;l
+<span class="k">returns</span> n:nat
+<span class="k">ensures</span> is_list x &#39;l ** pure (n == List.<span class="k">Tot</span>.length &#39;l)
+{
+  <span class="k">match</span> x {
+    None -&gt; {
+      is_list_case_none x;
+      0
+    }
+    Some vl -&gt; {
+      is_list_case_some x vl;
+      <span class="k">let</span> node = !vl;
+      <span class="k">let</span> n = length node.tail;
+      intro_is_list_cons x vl;
+      (1 + n)
+    }
+  }
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">None</span></code> の場合は簡単です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Some</span></code> の場合の注意点：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>存在量化された証人を「取り出す」ために <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">_node</span> <span class="pre">_tl.</span> <span class="pre">_</span></code> を使います。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">node</span> <span class="pre">=</span> <span class="pre">!vl</span></code> と読んだ後、再帰呼び出しには <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">node.tail</span> <span class="pre">_tl</span></code> が必要ですが、文脈には <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">_node.tail</span> <span class="pre">_tl</span></code> と <code class="docutils literal notranslate"><span class="pre">node</span> <span class="pre">==</span> <span class="pre">_node</span></code> があるだけです。したがって書き換えが必要です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">is_list</span></code> を再導入し、<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">+</span> <span class="pre">n</span></code> を返します。<code class="docutils literal notranslate"><span class="pre">intro_is_list_cons</span> <span class="pre">x</span> <span class="pre">vl</span></code> はゴースト手続きなので実行前に消去されますが、加算は消えないため、この関数は末尾再帰ではありません。</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="exercise-1">
+<h2>練習問題 1<a class="headerlink" href="#exercise-1" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">length</span></code> の末尾再帰版を書いてください。</p>
+</section>
+<section id="exercise-2">
+<h2>練習問題 2<a class="headerlink" href="#exercise-2" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">is_list</span></code> 述語に分数パーミッションの添字を付けてください。分割（share）と合成（gather）を行うためのゴースト関数も作成しましょう。</p>
+</section>
+<section id="length-iteratively-with-trades">
+<h2>長さ（反復版、Trade 付き）<a class="headerlink" href="#length-iteratively-with-trades" title="Link to this heading"></a></h2>
+<p>C のような言語でより慣用的な while ループで <code class="docutils literal notranslate"><span class="pre">length</span></code> を実装したい場合はどうでしょう。そこに到達するには段階が必要で、証明の構造化に trade 演算子（<code class="docutils literal notranslate"><span class="pre">&#64;==&gt;</span></code>）を用います。</p>
+<section id="trade-tails">
+<h3>末尾のトレード<a class="headerlink" href="#trade-tails" title="Link to this heading"></a></h3>
+<p>最初のステップは補題 <code class="docutils literal notranslate"><span class="pre">tail_for_cons</span></code> の定義です。これは、ノードポインタ（<code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">v</span> <span class="pre">n</span></code>）の許可があれば、そのノードから始まる cons セルの許可と、尾部の許可とをトレードできることを述べます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> tail_for_cons (#t:Type) (v:node_ptr t) (#n:node t) (tl:erased (list t))
+<span class="k">requires</span> 
+  pts_to v n
+<span class="k">ensures</span> 
+  (is_list n.tail tl @==&gt; is_list (Some v) (n.head::tl))
+{
+  intro (is_list n.tail tl @==&gt; is_list (Some v) (n.head::tl)) #(pts_to v n) <span class="k">fn</span> <span class="k">_</span>
+  {
+    intro_is_list_cons (Some v) v
+  };
+}
+</pre></div>
+</div>
+</section>
+<section id="tail-of-a-list">
+<h3>リストの末尾<a class="headerlink" href="#tail-of-a-list" title="Link to this heading"></a></h3>
+<p>次に、連結リストの基本操作です。cons セルへのポインタが与えられたら、その末尾へのポインタを返します。以下は簡単な図です。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span>             <span class="n">tl</span>
+<span class="o">|</span>             <span class="o">|</span>
+<span class="n">v</span>             <span class="n">v</span>
+<span class="o">.---.---.</span>     <span class="o">.---.---.</span>
+<span class="o">|</span>   <span class="o">|</span> <span class="o">--|---&gt;</span> <span class="o">|</span>   <span class="o">|</span> <span class="o">--|--&gt;</span> <span class="o">...</span>
+<span class="o">.---.---.</span>     <span class="o">.---.---.</span>
+</pre></div>
+</div>
+<p>リスト先頭の cons セルへのポインタ <code class="docutils literal notranslate"><span class="pre">x</span></code> が与えられており、次のセルへのポインタ <code class="docutils literal notranslate"><span class="pre">tl``（末尾なら</span> <span class="pre">``None</span></code>）を返したいとします。しかし <code class="docutils literal notranslate"><span class="pre">tl</span></code> を返すにはパーミッションの勘定に問題が生じます。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>呼び出し元に <code class="docutils literal notranslate"><span class="pre">x</span></code> の許可をそのまま返すことはできません。戻り値の <code class="docutils literal notranslate"><span class="pre">tl</span></code> と <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">next</span></code> の二つの <em>別名</em> が次のセルを指してしまうからです。</p></li>
+<li><p>しかし <code class="docutils literal notranslate"><span class="pre">x</span></code> の許可を消費してしまうこともできません。戻り値 <code class="docutils literal notranslate"><span class="pre">tl</span></code> がスコープを抜けたら、<code class="docutils literal notranslate"><span class="pre">x</span></code> の許可を元に戻したいからです。</p></li>
+</ul>
+</div></blockquote>
+<p>ここでの解決策は trade を使うことです。以下の <code class="docutils literal notranslate"><span class="pre">tail</span></code> の型は、<code class="docutils literal notranslate"><span class="pre">x</span></code> が <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">x</span> <span class="pre">'l</span></code> を満たす非 null ポインタなら、<code class="docutils literal notranslate"><span class="pre">tail</span></code> は <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">y</span> <span class="pre">tl</span></code> を満たすポインタ <code class="docutils literal notranslate"><span class="pre">y``（ここで</span> <span class="pre">``tl</span></code> は <code class="docutils literal notranslate"><span class="pre">'l</span></code> の尾部）を返し、さらに <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">y</span> <span class="pre">tl</span></code> をトレードして <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">x</span> <span class="pre">'l</span></code> の許可を取り戻せる、と述べます。つまり同時に <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">x</span> <span class="pre">'l</span></code> と <code class="docutils literal notranslate"><span class="pre">is_list</span> <span class="pre">y</span> <span class="pre">tl</span></code> の両方の許可を持つことはできず、<code class="docutils literal notranslate"><span class="pre">y</span></code> の許可を手放せば <code class="docutils literal notranslate"><span class="pre">x</span></code> の元の許可を回収できる、ということです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> tail (#t:Type) (x:llist t)
+<span class="k">requires</span> is_list x &#39;l ** pure (Some? x)
+<span class="k">returns</span> y:llist t
+<span class="k">ensures</span> <span class="k">exists</span>* tl.
+    is_list y tl **
+    (is_list y tl @==&gt; is_list x &#39;l) **
+    pure (Cons? &#39;l /\ tl == Cons?.tl &#39;l)
+{ 
+    <span class="k">let</span> np = Some?.v x;
+    is_list_case_some x np;
+    <span class="k">with</span> node tl. <span class="k">_</span>;
+    <span class="k">let</span> nd = !np;
+    tail_for_cons np tl;
+    nd.tail
+}
+</pre></div>
+</div>
+</section>
+<section id="length-iter">
+<h3><code class="docutils literal notranslate"><span class="pre">length_iter</span></code><a class="headerlink" href="#length-iter" title="Link to this heading"></a></h3>
+<p>以下は <code class="docutils literal notranslate"><span class="pre">length</span></code> の反復実装です。基本アイデアは単純ですが、証明は少し手間がかかります。現在ポインタ <code class="docutils literal notranslate"><span class="pre">cur</span></code> をリスト先頭、カウンタ <code class="docutils literal notranslate"><span class="pre">ctr</span></code> を 0 に初期化し、<code class="docutils literal notranslate"><span class="pre">cur</span></code> が null でない間、<code class="docutils literal notranslate"><span class="pre">cur</span></code> を末尾へ進めつつ <code class="docutils literal notranslate"><span class="pre">ctr</span></code> をインクリメントします。最後に <code class="docutils literal notranslate"><span class="pre">!ctr</span></code> を返します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> length_iter (#t:Type) (x: llist t)
+<span class="k">requires</span> is_list x &#39;l
+<span class="k">returns</span> n:nat
+<span class="k">ensures</span> is_list x &#39;l ** pure (n == List.<span class="k">Tot</span>.length &#39;l)
+{
+  <span class="k">open</span> I;
+  <span class="k">let</span> <span class="k">mut</span> cur = x;
+  <span class="k">let</span> <span class="k">mut</span> ctr = 0; 
+  I.refl (is_list x &#39;l); <span class="c">//initialize the trade for the invariant</span>
+  <span class="k">while</span> (
+    Some? !cur
+  )
+  <span class="k">invariant</span>
+  <span class="k">exists</span>* n ll suffix.
+    pts_to ctr n **
+    pts_to cur ll **
+    is_list ll suffix **
+    pure (n == List.<span class="k">Tot</span>.length &#39;l - List.<span class="k">Tot</span>.length suffix) **
+    (is_list ll suffix @==&gt; is_list x &#39;l)
+  {
+    <span class="k">let</span> n = !ctr;
+    <span class="k">let</span> ll = !cur;
+    <span class="k">let</span> next = tail ll;     <span class="c">//tail gives us back a trade</span>
+    <span class="k">with</span> tl. <span class="k">_</span>;
+    I.trans (is_list next tl) <span class="k">_</span> <span class="k">_</span>; <span class="c">//extend the trade, transitively</span>
+    cur := next;
+    ctr := n + 1;
+  };
+  <span class="k">with</span> _n ll _sfx. <span class="k">_</span>;
+  is_list_case_none ll; <span class="c">//this tells us that suffix=[]; so n == List.Tot.length &#39;l</span>
+  I.elim <span class="k">_</span> <span class="k">_</span>;           <span class="c">//regain ownership of x, giving up ll</span>
+  <span class="k">let</span> n = !ctr;
+  n
+}
+</pre></div>
+</div>
+<p>では証明です。主役はループ不変量で、内容は次のとおりです。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>カウンタの現在値は <code class="docutils literal notranslate"><span class="pre">n</span></code> である。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cur</span></code> はリストポインタ <code class="docutils literal notranslate"><span class="pre">ll</span></code> を指し、<code class="docutils literal notranslate"><span class="pre">ll</span></code> は <code class="docutils literal notranslate"><span class="pre">suffix</span></code> で表されるリストを保持している。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span></code> はこれまでに走査した接頭部分の長さである。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">b</span></code> が真、すなわちリストポインタ <code class="docutils literal notranslate"><span class="pre">l</span></code> が <code class="docutils literal notranslate"><span class="pre">None</span></code> でない限りループは続く。</p></li>
+<li><p>そして重要点：<code class="docutils literal notranslate"><span class="pre">ll</span></code> の所有権をトレードして、元のリスト <code class="docutils literal notranslate"><span class="pre">x</span></code> の所有権を取り戻せる。</p></li>
+</ul>
+</div></blockquote>
+<p>いくつかの書き換えを避けるなど、簡略化できる箇所もあります。</p>
+<p>ここで trade が役立つ理由は、<code class="docutils literal notranslate"><span class="pre">length_iter</span></code> を再帰版 <code class="docutils literal notranslate"><span class="pre">length</span></code> と比べるとわかります。<code class="docutils literal notranslate"><span class="pre">length</span></code> では各再帰呼び出しから戻るたび、尾部の許可を取り出したあとに cons セルの許可を再パッケージするゴースト関数を呼びます。これらのゴーストコードは再帰のコールスタックで管理されます。反復版では、コールスタックの代わりに trade を使って、必要なゴースト関数群をパッケージ化します。ループ終了時に <code class="docutils literal notranslate"><span class="pre">I.elim</span></code> でそれらを一括実行します。</p>
+<p>もちろん本例では再帰版 <code class="docutils literal notranslate"><span class="pre">length</span></code> の方がはるかに簡単ですが、trade でゴースト関数をパッケージ化するパターンは広く有用です。</p>
+</section>
+</section>
+<section id="append-recursively">
+<h2>連結（再帰版）<a class="headerlink" href="#append-recursively" title="Link to this heading"></a></h2>
+<p>もう一つの再帰関数です。<code class="docutils literal notranslate"><span class="pre">append</span></code> は <code class="docutils literal notranslate"><span class="pre">x</span></code> の末尾に <code class="docutils literal notranslate"><span class="pre">y</span></code> を連結します。</p>
+<p>手順は単純で、<code class="docutils literal notranslate"><span class="pre">x</span></code> の最後のノード（<code class="docutils literal notranslate"><span class="pre">tail</span></code> が <code class="docutils literal notranslate"><span class="pre">None</span></code>）に到達するまで再帰し、その <code class="docutils literal notranslate"><span class="pre">tail</span></code> を <code class="docutils literal notranslate"><span class="pre">y</span></code> に差し替えます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="k">rec</span> append (#t:Type0) (x y:llist t)
+<span class="k">requires</span> is_list x &#39;l1 ** is_list y &#39;l2 ** pure (Some? x)
+<span class="k">ensures</span> is_list x (&#39;l1 @ &#39;l2)
+{
+  <span class="k">let</span> np = Some?.v x;
+  is_list_case_some x np;
+  <span class="k">let</span> node = !np;
+  <span class="k">match</span> node.tail {
+    None -&gt; {
+      is_list_case_none node.tail;
+      elim_is_list_nil node.tail;
+      np := { node <span class="k">with</span> tail = y };
+      intro_is_list_cons x np; 
+    }
+    Some <span class="k">_</span> -&gt; {
+      append node.tail y;
+      intro_is_list_cons x np;
+    }
+  }
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Some</span> <span class="pre">_</span></code> の場合は末尾再帰になりますが、再帰呼び出し <em>後</em> にゴースト関数呼び出しがあります。<code class="docutils literal notranslate"><span class="pre">length</span></code> のときのように、このスタック上のゴーストコードを trade に織り込んで反復版 <code class="docutils literal notranslate"><span class="pre">append</span></code> を実装できるでしょうか。</p>
+</section>
+<section id="append-iteratively">
+<h2>連結（反復版）<a class="headerlink" href="#append-iteratively" title="Link to this heading"></a></h2>
+<p>まず、先ほどの <code class="docutils literal notranslate"><span class="pre">tail</span></code> の一般化版を定義します。<code class="docutils literal notranslate"><span class="pre">tail_alt</span></code> の事後条件は全称量化を用いて、戻り値 <code class="docutils literal notranslate"><span class="pre">y</span></code> がどんなリスト <code class="docutils literal notranslate"><span class="pre">tl'</span></code> を指していても、それを <code class="docutils literal notranslate"><span class="pre">tl</span></code> を先頭に cons した <code class="docutils literal notranslate"><span class="pre">x</span></code> のポインタにトレードできる、と大づかみに述べます。以前の <code class="docutils literal notranslate"><span class="pre">tail</span></code> は <code class="docutils literal notranslate"><span class="pre">tl'</span></code> を <code class="docutils literal notranslate"><span class="pre">tl</span></code> に具体化すれば得られます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> tail_alt (#t:Type) (x:llist t)
+<span class="k">requires</span> is_list x &#39;l ** pure (Some? x)
+<span class="k">returns</span> y:llist t
+<span class="k">ensures</span> <span class="k">exists</span>* hd tl.
+  is_list y tl **
+  (<span class="k">forall</span>* tl&#39;. is_list y tl&#39; @==&gt; is_list x (hd::tl&#39;)) **
+  pure (&#39;l == hd::tl)
+{ 
+  <span class="k">let</span> np = Some?.v x;
+  is_list_case_some x np;
+  <span class="k">with</span> _node _tl. <span class="k">_</span>;
+  <span class="k">let</span> node = !np;
+  intro (<span class="k">forall</span>* tl&#39;. is_list node.tail tl&#39; @==&gt; is_list x (node.head::tl&#39;))
+      #(pts_to np node) <span class="k">fn</span> <span class="k">_</span> tl&#39; {
+    intro_is_list_cons x np;
+  };
+  node.tail
+}
+</pre></div>
+</div>
+<p>以下に示す <code class="docutils literal notranslate"><span class="pre">append_iter</span></code> の不変量で、これらの量化付き trade を使います。実装の主眼は、while ループで最初のリスト <code class="docutils literal notranslate"><span class="pre">x</span></code> の末尾まで走査し、最後の要素の <code class="docutils literal notranslate"><span class="pre">next</span></code> を <code class="docutils literal notranslate"><span class="pre">y</span></code> に設定することです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> append_iter (#t:Type) (x y:llist t)
+<span class="k">requires</span> is_list x &#39;l1 ** is_list y &#39;l2 ** pure (Some? x)
+<span class="k">ensures</span> is_list x (&#39;l1 @ &#39;l2)
+{
+  <span class="k">let</span> <span class="k">mut</span> cur = x;
+  <span class="c">//the base case, set up the initial invariant</span>
+  intro (<span class="k">forall</span>* l. is_list x l @==&gt; is_list x ([] @ l)) <span class="k">fn</span> <span class="k">_</span> l {};
+  <span class="k">while</span> (not_is_last_cell (!cur)) <span class="c">//check if we are at the last cell</span>
+  <span class="k">invariant</span> <span class="k">exists</span>* ll pfx sfx.
+    pts_to cur ll **   <span class="c">//cur holds the pointer to the current head of the traversal, ll</span>
+    is_list ll sfx **  <span class="c">//ll points to some suffix of the original list, since `pfx@sfx = &#39;l1` below</span>
+    <span class="c">//the main bit: whatever ll points to `sfx&#39;`, trade it for x pointing to the concatenation ``pfx @ sfx&#39;`` </span>
+    (<span class="k">forall</span>* sfx&#39;. is_list ll sfx&#39; @==&gt; is_list x (pfx @ sfx&#39;)) ** 
+    pure (
+      pfx@sfx == &#39;l1 /\ <span class="c">//sfx is really the suffix</span>
+      Some? ll          <span class="c">//and the current list is always non-null</span>
+    )
+  {
+    <span class="k">with</span> ll pfx sfx. <span class="k">_</span>;
+    <span class="k">let</span> l = !cur;
+    <span class="k">let</span> next = tail_alt l;
+    <span class="k">with</span> hd tl. <span class="k">_</span>;
+    <span class="c">(* this is the key induction step *)</span>
+    FA.trans_compose
+        (is_list next) (is_list l) (is_list x)
+        (<span class="k">fun</span> tl -&gt; hd :: tl)
+        (<span class="k">fun</span> tl -&gt; pfx @ tl);
+    <span class="c">//Use F* sugar for classical connectives to introduce a property</span>
+    <span class="c">//needed for the next rewrite</span>
+    (<span class="k">introduce</span> <span class="k">forall</span> tl. pfx @ (hd :: tl) == (pfx @ [hd]) @ tl
+      <span class="k">with</span> List.<span class="k">Tot</span>.Properties.append_assoc pfx [hd] tl);
+    <span class="k">rewrite</span> (<span class="k">forall</span>* tl. is_list next tl @==&gt; is_list x (pfx@(hd::tl)))
+          as (<span class="k">forall</span>* tl. is_list next tl @==&gt; is_list x ((pfx@[hd])@tl));
+    cur := next;
+    non_empty_list next; <span class="c">//need to prove that Some? next, for the invariant</span>
+  };
+  <span class="k">with</span> ll pfx sfx. <span class="k">_</span>;
+  <span class="k">let</span> last = !cur;
+  append_at_last_cell last y;
+  FA.elim_forall_imp (is_list last) (<span class="k">fun</span> sfx&#39; -&gt; is_list x (pfx @ sfx&#39;)) (sfx@&#39;l2);
+  List.<span class="k">Tot</span>.Properties.append_assoc pfx sfx &#39;l2;
+  ()
+}
+</pre></div>
+</div>
+<p>いくつか注目すべき点があります。</p>
+<blockquote>
+<div><ul>
+<li><p>要点は不変量中の量化付き trade で、走査の進行に合わせて、最後に初期のリストポインタ <code class="docutils literal notranslate"><span class="pre">x</span></code> の許可を回復するために実行すべきゴーストコードを包み込んでいきます。</p></li>
+<li><p>ライブラリ関数 <code class="docutils literal notranslate"><span class="pre">FA.trans_compose</span></code> は次のシグネチャを持ちます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> trans_compose (#a #b #c:Type0)
+                 (p: a -&gt; slprop)
+                 (q: b -&gt; slprop)
+                 (r: c -&gt; slprop)
+                 (f: a -&gt; <span class="k">GTot</span> b)
+                 (g: b -&gt; <span class="k">GTot</span> c)
+<span class="k">requires</span>
+  (<span class="k">forall</span>* x. p x @==&gt; q (f x)) **
+  (<span class="k">forall</span>* x. q x @==&gt; r (g x))
+<span class="k">ensures</span>
+  <span class="k">forall</span>* x. p x @==&gt; r (g (f x))
+</pre></div>
+</div>
+<p>リストを一段進める帰納ステップの要所でこれを使います。<code class="docutils literal notranslate"><span class="pre">length_iter</span></code> のときと似ていますが、今回は量化子付きです。</p>
+</li>
+<li><p>Pulse が純粋 F* の上位集合であることの再例として、<code class="docutils literal notranslate"><span class="pre">introduce</span> <span class="pre">forall</span></code> 内で <a class="reference internal" href="../part2/part2_logical_connectives.html#part2-connectives"><span class="std std-ref">F* の砂糖構文</span></a> を用い、Pulse の書き換えに必要な性質を示します。</p></li>
+<li><p>最後に、ループの終わりで <code class="docutils literal notranslate"><span class="pre">FA.elim_forall_imp</span></code> を使って <code class="docutils literal notranslate"><span class="pre">x</span></code> の許可を回復します（今度は連結後のリストを指す）。これにより、走査中に蓄積したゴーストコードを実質的に一括実行します。</p></li>
+</ul>
+</div></blockquote>
+<p>ここから得られる教訓は、おそらく「再帰的なプログラムの方が反復的なものより、書くのも正しさを示すのも容易だ」という点でしょう。とはいえ、trade と量化子がどのように働き、どんな証明で有用かが見えたはずです――再帰を反復に書き換える用途に限りません。</p>
+<section id="exercise-3">
+<h3>練習問題 3<a class="headerlink" href="#exercise-3" title="Link to this heading"></a></h3>
+<p>リストの特定位置に要素を挿入する関数を書いてください。</p>
+</section>
+<section id="exercise-4">
+<h3>練習問題 4<a class="headerlink" href="#exercise-4" title="Link to this heading"></a></h3>
+<p>リストを反転する関数を書いてください。</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_implication_and_forall.html" class="btn btn-neutral float-left" title="含意と全称量化" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_atomics_and_invariants.html" class="btn btn-neutral float-right" title="アトミック操作と不変条件" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,736 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>プリミティブ効果の精錬（リファインメント） &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="Meta-F* によるタクティクスとメタプログラミング" href="../part5/part5.html" />
+    <link rel="prev" title="発散（非停止）" href="part4_div.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part4.html">計算効果</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part4_background.html">依存関係を追跡する計算型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part4_computation_types_and_tot.html">Total な計算の効果</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part4_ghost.html">消去とゴースト効果</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part4_div.html">発散（非停止）</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">プリミティブ効果の精錬（リファインメント）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-primer-on-floyd-hoare-logic-and-weakest-preconditions">Floyd–Hoare 論理と最弱前提の入門</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#operational-semantics">操作的意味論</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#floyd-hoare-logic">Floyd–Hoare 論理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#weakest-preconditions">最弱前提（Weakest Precondition）</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#a-sample-program-proof">サンプルプログラムの証明</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#the-pure-effect-a-dijkstra-monad-for-pure-computations"><code class="docutils literal notranslate"><span class="pre">PURE</span></code> 効果：純粋計算のための Dijkstra モナド</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pure-and-tot"><code class="docutils literal notranslate"><span class="pre">PURE</span></code> と <code class="docutils literal notranslate"><span class="pre">Tot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pure-hoare-triples-for-pure"><code class="docutils literal notranslate"><span class="pre">Pure</span></code>：<code class="docutils literal notranslate"><span class="pre">PURE</span></code> のための Hoare 三つ組</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ghost-and-div"><code class="docutils literal notranslate"><span class="pre">GHOST</span></code> と <code class="docutils literal notranslate"><span class="pre">DIV</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-lemma-abbreviation"><code class="docutils literal notranslate"><span class="pre">Lemma</span></code> 略記</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part4.html">計算効果</a></li>
+      <li class="breadcrumb-item active">プリミティブ効果の精錬（リファインメント）</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="primitive-effect-refinements">
+<span id="part4-pure"></span><h1>プリミティブ効果の精錬（リファインメント）<a class="headerlink" href="#primitive-effect-refinements" title="Link to this heading"></a></h1>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>本章では、Floyd–Hoare 論理と最弱前提（weakest precondition; WP）に基づく検証条件生成の基礎を述べます。これは、F* がプログラムの正当性を証明するために必要な論理制約をどのように推論するのかを理解するうえで不可欠です。また、F* で独自の効果（状態・例外・並行性など）を定義する後続章の発展的内容に向けた有用な背景知識にもなります。</p>
+</div>
+<p>篩型 <code class="docutils literal notranslate"><span class="pre">x:t{p}</span></code> は値型 <code class="docutils literal notranslate"><span class="pre">t</span></code> を*精錬*し、プログラム中の値についてより精密な主張を可能にします。例えば <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">:</span> <span class="pre">x:int{</span> <span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">0</span> <span class="pre">}</span></code> であれば、<code class="docutils literal notranslate"><span class="pre">v</span></code> が <code class="docutils literal notranslate"><span class="pre">int</span></code> であるだけでなく <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code> でもあることが分かります。</p>
+<p>同様に、F* では計算のふるまいを記述する仕様で計算型を精錬することができます。これらの <em>効果リファインメント</em> は一般に利用者が選んだ推論体系で定義でき、たとえばセパレーションロジックを用いたり、計算ステップ数を数えたりできます。</p>
+<p>しかし F* には、純粋プログラムの仕様を Floyd–Hoare 論理や最弱前提計算に基づく標準的原理で精錬する組み込みの仕組みがあります。本章の予告として、<code class="docutils literal notranslate"><span class="pre">factorial</span></code> 関数に次のような仕様を書けます：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">open</span> FStar.Mul
+<span class="k">let</span> <span class="k">rec</span> factorial (x:int)
+  : Pure int (<span class="k">requires</span> x &gt;= 0) (<span class="k">ensures</span> <span class="k">fun</span> r -&gt; r &gt;= 1)
+  = <span class="k">if</span> x = 0
+    <span class="k">then</span> 1
+    <span class="k">else</span> x * factorial (x - 1)
+</pre></div>
+</div>
+<p>直観的には、この型は <code class="docutils literal notranslate"><span class="pre">factorial</span> <span class="pre">x</span></code> が <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code> のときにのみ定義され、常に停止して <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">&gt;=</span> <span class="pre">1</span></code> を返すことを述べています。これはこれまでに与えた <code class="docutils literal notranslate"><span class="pre">nat</span> <span class="pre">-&gt;</span> <span class="pre">pos</span></code> などの型とも密接に関係しており、実際 <code class="docutils literal notranslate"><span class="pre">factorial</span></code> はその型でも使用できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> fact (x:nat) : pos = factorial x
+</pre></div>
+</div>
+<p>実際には、これまで見てきたコードでは、F* は純粋プログラムに対して <code class="docutils literal notranslate"><span class="pre">Pure</span> <span class="pre">t</span> <span class="pre">pre</span> <span class="pre">post</span></code> に類する型を推論し、それがユーザ記述の <code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">t'</span></code> 形式の仕様に包含（サブサム）されるかを検査しています。</p>
+<p>本章では、Floyd–Hoare 論理と最弱前提計算の入門から始めて、<code class="docutils literal notranslate"><span class="pre">Pure</span></code> 仕様がどのように働くのかを見ていきます。これらに馴染みがあるなら次の小節は飛ばしても構いませんが、たとえ専門家でも、この種のプログラム論理が F* でどのように形式化されるかは興味深いでしょう。</p>
+<section id="a-primer-on-floyd-hoare-logic-and-weakest-preconditions">
+<span id="part4-floyd-hoare"></span><h2>Floyd–Hoare 論理と最弱前提の入門<a class="headerlink" href="#a-primer-on-floyd-hoare-logic-and-weakest-preconditions" title="Link to this heading"></a></h2>
+<p>Floyd–Hoare 論理は、プログラムの論理的性質を扱う仕様と規則の体系で、Robert Floyd の <cite>Assigning Meaning to Programs</cite> と Tony Hoare の <cite>An Axiomatic Basis for Computer Programming</cite> によって提案されました。現代的な表記（Hoare 三つ組）は Hoare によるものです。Edsger Dijkstra は <em>最弱前提</em> を用いて三つ組を計算するアルゴリズムを <cite>EWD472</cite> で提示しました。これらの業績により、彼らはいずれもチューリング賞を受賞しています。</p>
+<p>これらの考えを紹介するため、グローバル変数を持つ小さな命令型言語を作り、次を示します。</p>
+<ul class="simple">
+<li><p>インタプリタとして形式化した操作的意味論。</p></li>
+<li><p>操作的意味論に対して健全であることを証明した Floyd–Hoare プログラム論理。</p></li>
+<li><p>そして最後に、Floyd–Hoare 論理に対して健全であると証明された最弱前提の計算アルゴリズム。</p></li>
+</ul>
+<p>言語の抽象構文は次のとおりです：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> var = nat
+
+<span class="k">type</span> expr =
+  | EConst : int -&gt; expr                           <span class="c">// constants: ..., -1, 0, 1, ...</span>
+  | EVar   : var -&gt; expr                           <span class="c">// global variables</span>
+  | EAdd   : expr -&gt; expr -&gt; expr                  <span class="c">// arithmetic: e1 + e2</span>
+  
+<span class="k">type</span> program = 
+  | Assign : var -&gt; expr -&gt; program                <span class="c">// x := e</span>
+  | Seq    : program -&gt; program -&gt; program         <span class="c">// p1; p2</span>
+  | If     : expr -&gt; program -&gt; program -&gt; program <span class="c">// if e then p1 else p2</span>
+  | Repeat : expr -&gt; program -&gt; program            <span class="c">// repeat n { p }</span>
+</pre></div>
+</div>
+<p>式は整数定数、グローバル変数（自然数で表現）、および加算などの算術式を含みます。</p>
+<p>プログラムは次を含みます：</p>
+<ul class="simple">
+<li><p>代入 <code class="docutils literal notranslate"><span class="pre">EAssign</span> <span class="pre">x</span> <span class="pre">e</span></code>。式 <code class="docutils literal notranslate"><span class="pre">e</span></code> の結果をグローバル変数 <code class="docutils literal notranslate"><span class="pre">x</span></code> に代入する（<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">:=</span> <span class="pre">e</span></code>）。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Seq</span></code>：逐次合成。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">If</span></code>：条件分岐。</p></li>
+<li><p>さらに <code class="docutils literal notranslate"><span class="pre">Repeat</span> <span class="pre">n</span> <span class="pre">p</span></code>。これは <code class="docutils literal notranslate"><span class="pre">for</span></code> ループ（または原始再帰）に似た構成で、<code class="docutils literal notranslate"><span class="pre">n</span></code> を非負整数に評価して、プログラム <code class="docutils literal notranslate"><span class="pre">p</span></code> を <code class="docutils literal notranslate"><span class="pre">n</span></code> 回繰り返します。</p></li>
+</ul>
+<p>本言語には <code class="docutils literal notranslate"><span class="pre">while</span></code> ループはありません。<code class="docutils literal notranslate"><span class="pre">while</span></code> の意味論はやや繊細で、後続章で扱います。</p>
+<section id="operational-semantics">
+<h3>操作的意味論<a class="headerlink" href="#operational-semantics" title="Link to this heading"></a></h3>
+<p>まずは意味論を与えるため、グローバル変数の値を保持するメモリを変換しながらプログラムを実行するインタプリタを定義します。</p>
+<p>このメモリを表現するため、以下の <code class="docutils literal notranslate"><span class="pre">state</span></code> 型を用います：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">// The state of a program is a map from global variable to integers</span>
+<span class="k">let</span> state = var -&gt; int
+<span class="k">let</span> read (s:state) (i:var) : int = s i
+<span class="k">let</span> write (s:state) (i:var) (v:int)
+  : state
+  = <span class="k">fun</span> j -&gt; <span class="k">if</span> i=j <span class="k">then</span> v <span class="k">else</span> read s j
+</pre></div>
+</div>
+<p>式の小さな評価器は簡単に書けます：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> eval_expr (e:expr) (s:state)
+  : int
+  = <span class="k">match</span> e <span class="k">with</span>
+    | EConst v -&gt;
+      v
+      
+    | EVar x -&gt;
+      read s x
+      
+    | EAdd e1 e2 -&gt;
+      eval_expr e1 s + eval_expr e2 s
+</pre></div>
+</div>
+<p>プログラム本体のインタプリタは状態の読み書きを行うため少し手間がかかります。これを構造化するため、単純な状態モナド <code class="docutils literal notranslate"><span class="pre">st</span> <span class="pre">a</span></code> を導入します。この構成は <a class="reference internal" href="../part2/part2_par.html#part2-monad-intro"><span class="std std-ref">前章</span></a> で見ました——不慣れなら参照してください。F* はモナディック let 演算子をサポートしており、<code class="docutils literal notranslate"><span class="pre">let!</span></code> は <code class="docutils literal notranslate"><span class="pre">st</span></code> 項の合成の糖衣構文です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> st (a:Type) = state -&gt; (a &amp; state)
+
+<span class="k">let</span> get : st state = <span class="k">fun</span> s -&gt; (s, s)
+
+<span class="k">let</span> put (s:state) : st unit = <span class="k">fun</span> <span class="k">_</span> -&gt; ((), s)
+
+<span class="k">let</span> (<span class="k">let</span>!) #a #b (f:st a) (g: a -&gt; st b) : st b = 
+  <span class="k">fun</span> s -&gt; <span class="k">let</span> v, s&#39; = f s <span class="k">in</span> g v s&#39;
+
+<span class="k">let</span> return #a (x:a) : st a = <span class="k">fun</span> s -&gt; (x, s)
+</pre></div>
+</div>
+<p>インタプリタ本体は全域再帰関数 <code class="docutils literal notranslate"><span class="pre">run</span></code> で、プログラム <code class="docutils literal notranslate"><span class="pre">p</span></code> を <code class="docutils literal notranslate"><span class="pre">st</span> <span class="pre">unit``（すなわち</span> <span class="pre">``state</span> <span class="pre">-&gt;</span> <span class="pre">unit</span> <span class="pre">&amp;</span> <span class="pre">state</span></code>）の状態受け渡し関数として解釈します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> run (p:program)
+  : <span class="k">Tot</span> (st unit)
+        (<span class="k">decreases</span> %[p;0])
+  = <span class="k">match</span> p <span class="k">with</span>
+    | Assign x e -&gt; 
+      <span class="k">let</span>! s = get <span class="k">in</span>
+      <span class="k">let</span> v = eval_expr e s <span class="k">in</span>
+      put (write s x v)
+
+    | Seq p1 p2 -&gt; 
+      run p1;!
+      run p2
+
+    | If e p1 p2 -&gt;
+      <span class="k">let</span>! s = get <span class="k">in</span>
+      <span class="k">let</span> n = eval_expr e s <span class="k">in</span>
+      <span class="k">if</span> n &lt;&gt; 0 <span class="k">then</span> run p1 <span class="k">else</span> run p2
+      
+    | Repeat e p -&gt;
+      <span class="k">let</span>! s = get <span class="k">in</span>
+      <span class="k">let</span> n = eval_expr e s <span class="k">in</span>
+      <span class="k">if</span> n &lt;= 0 <span class="k">then</span> return ()
+      <span class="k">else</span> run_repeat p n
+
+<span class="k">and</span> run_repeat (p:program) (n:nat)
+  : <span class="k">Tot</span> (st unit)
+        (<span class="k">decreases</span> %[p; 1; n])
+  = <span class="k">if</span> n = 0 <span class="k">then</span> return ()
+    <span class="k">else</span> ( run p ;! run_repeat p (n - 1) )
+</pre></div>
+</div>
+<p>定義を詳しく見ていきます：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Assign</span> <span class="pre">x</span> <span class="pre">e</span></code>：現在の状態で <code class="docutils literal notranslate"><span class="pre">e</span></code> を評価し、その結果で <code class="docutils literal notranslate"><span class="pre">x</span></code> を更新します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Seq</span> <span class="pre">p1</span> <span class="pre">p2</span></code>：<code class="docutils literal notranslate"><span class="pre">p1</span></code> を実行してから <code class="docutils literal notranslate"><span class="pre">p2</span></code> を実行します。<code class="docutils literal notranslate"><span class="pre">;!</span></code> は <code class="docutils literal notranslate"><span class="pre">let!</span> <span class="pre">_</span> <span class="pre">=</span> <span class="pre">run</span> <span class="pre">p1</span> <span class="pre">in</span> <span class="pre">run</span> <span class="pre">p2</span></code> の糖衣構文です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">If</span> <span class="pre">e</span> <span class="pre">p1</span> <span class="pre">p2</span></code>：現在の状態で <code class="docutils literal notranslate"><span class="pre">e</span></code> を評価し、その結果で分岐して <code class="docutils literal notranslate"><span class="pre">p1</span></code> か <code class="docutils literal notranslate"><span class="pre">p2</span></code> を実行します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Repeat</span> <span class="pre">e</span> <span class="pre">p</span></code>：<code class="docutils literal notranslate"><span class="pre">e</span></code> を <code class="docutils literal notranslate"><span class="pre">n</span></code> に評価し、<code class="docutils literal notranslate"><span class="pre">n</span></code> が正なら相互再帰関数 <code class="docutils literal notranslate"><span class="pre">run_repeat</span> <span class="pre">n</span> <span class="pre">p</span></code> を呼びます。ここでの要点は、この相互再帰が停止することを F* に納得させる部分ですが、方法を知っていれば容易です——<a class="reference internal" href="../part1/part1_termination.html#part1-mutual-recursion"><span class="std std-ref">相互再帰の停止性証明</span></a> を参照してください。</p></li>
+</ul>
+</div></blockquote>
+<p>これらの操作的意味論がこの言語における基準であり、プログラムの実行方法を定義します。準備ができたので、Floyd–Hoare 論理でどのように体系的にプログラムを推論できるかを見ていきます。</p>
+</section>
+<section id="floyd-hoare-logic">
+<h3>Floyd–Hoare 論理<a class="headerlink" href="#floyd-hoare-logic" title="Link to this heading"></a></h3>
+<p>Floyd–Hoare 論理の目標は、操作的意味論そのものではなく、構文構造に基づいてプログラムを推論する方法を提供することです。推論の単位は <em>Hoare 三つ組</em> <code class="docutils literal notranslate"><span class="pre">{P}</span> <span class="pre">c</span> <span class="pre">{Q}</span></code> で、<code class="docutils literal notranslate"><span class="pre">P</span></code> と <code class="docutils literal notranslate"><span class="pre">Q</span></code> は状態に関する述語、<code class="docutils literal notranslate"><span class="pre">c</span></code> はプログラム本体です。</p>
+<p>本言語の Hoare 三つ組は、操作的意味論に関する主張として <em>定義</em> できます。すなわち <code class="docutils literal notranslate"><span class="pre">triple</span> <span class="pre">p</span> <span class="pre">c</span> <span class="pre">q</span></code> を <code class="docutils literal notranslate"><span class="pre">{p}</span> <span class="pre">c</span> <span class="pre">{q}</span></code> の形式的な表現とします。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> triple (pre:state -&gt; prop)
+           (c:program)
+           (post:state -&gt; prop)
+  = <span class="k">forall</span> s0. pre s0 ==&gt; post (snd (run c s0))
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">triple</span> <span class="pre">p</span> <span class="pre">c</span> <span class="pre">q</span></code> は、<code class="docutils literal notranslate"><span class="pre">p</span></code> を満たす状態で <code class="docutils literal notranslate"><span class="pre">c</span></code> を実行すると <code class="docutils literal notranslate"><span class="pre">q</span></code> を満たす状態になるとき妥当です。<code class="docutils literal notranslate"><span class="pre">p</span></code> と <code class="docutils literal notranslate"><span class="pre">q</span></code> をそれぞれ <code class="docutils literal notranslate"><span class="pre">c</span></code> の事前条件・事後条件と呼びます。</p>
+<p>各構文要素ごとに、その要素に対する <code class="docutils literal notranslate"><span class="pre">triple</span></code> を構成する方法を示す補題を証明できます。あとはそれらをつなぎ合わせて <code class="docutils literal notranslate"><span class="pre">triple</span> <span class="pre">p</span> <span class="pre">main</span> <span class="pre">q</span></code> を得れば、<code class="docutils literal notranslate"><span class="pre">main</span></code> プログラムの正当性が述べられます。</p>
+<section id="assignment">
+<h4>代入<a class="headerlink" href="#assignment" title="Link to this heading"></a></h4>
+<p>最初の規則は変数代入の推論規則です：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> assignment (x:var) (e:expr) (post:state -&gt; prop)
+  : <span class="k">Lemma</span> (triple (<span class="k">fun</span> s0 -&gt; post (write s0 x (eval_expr e s0)))
+                  (Assign x e)
+                  post)
+  = ()
+</pre></div>
+</div>
+<p>この補題は、初期状態 <code class="docutils literal notranslate"><span class="pre">s0</span></code> で <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">:=</span> <span class="pre">e</span></code> を実行した後に <code class="docutils literal notranslate"><span class="pre">post</span></code> が成り立つのは、<code class="docutils literal notranslate"><span class="pre">e</span></code> の値で <code class="docutils literal notranslate"><span class="pre">x</span></code> を更新した状態に対して <code class="docutils literal notranslate"><span class="pre">post</span></code> が成り立つときだ、と述べています。</p>
+<p>例えば <code class="docutils literal notranslate"><span class="pre">s0</span></code> で <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">:=</span> <span class="pre">y</span> <span class="pre">+</span> <span class="pre">1</span></code> を実行した後に <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> を期待するなら、代入規則は実行前に <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">s0</span> <span class="pre">y</span> <span class="pre">+</span> <span class="pre">1</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> が成り立つべきだと主張します。これは直観に一致します。</p>
+</section>
+<section id="sequence">
+<h4>逐次合成<a class="headerlink" href="#sequence" title="Link to this heading"></a></h4>
+<p>次の補題は、逐次合成された 2 つのプログラムの三つ組をつなぐものです：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sequence (p1 p2:program)
+             (pre pre_mid post:state -&gt; prop)
+  : <span class="k">Lemma</span> 
+    (<span class="k">requires</span> 
+      triple pre p1 pre_mid /\
+      triple pre_mid p2 post)
+    (<span class="k">ensures</span>
+      triple pre (Seq p1 p2) post)
+  = ()
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">p1</span></code> の事後条件が <code class="docutils literal notranslate"><span class="pre">p2</span></code> の事前条件と一致するようにそれぞれの三つ組を導ければ、それらを合成できる、と述べています。</p>
+</section>
+<section id="conditional">
+<h4>条件分岐<a class="headerlink" href="#conditional" title="Link to this heading"></a></h4>
+<p>条件分岐の補題は次のとおりです：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> conditional (e:expr)
+                (p1 p2:program)
+                (pre post:state -&gt; prop)
+  : <span class="k">Lemma</span> 
+    (<span class="k">requires</span> 
+      triple (<span class="k">fun</span> s -&gt; pre s /\ eval_expr e s =!= 0) p1 post /\
+      triple (<span class="k">fun</span> s -&gt; pre s /\ eval_expr e s == 0)  p2 post)
+    (<span class="k">ensures</span>
+      triple pre (If e p1 p2) post)
+  = ()
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">If</span> <span class="pre">e</span> <span class="pre">p1</span> <span class="pre">p2</span></code> から事後条件 <code class="docutils literal notranslate"><span class="pre">post</span></code> を導くには、同じ事前条件 <code class="docutils literal notranslate"><span class="pre">pre</span></code> の下で各分岐からも <code class="docutils literal notranslate"><span class="pre">post</span></code> を導けるべきだ、と述べます。さらに、<code class="docutils literal notranslate"><span class="pre">p1</span></code> は <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">≠</span> <span class="pre">0</span></code> のときだけ実行される事実などを各分岐の事前条件に追加できます。</p>
+</section>
+<section id="repeat">
+<h4>繰り返し<a class="headerlink" href="#repeat" title="Link to this heading"></a></h4>
+<p>ここまでの補題は F* と Z3 により自動で証明できますが、繰り返しでは帰納法が関わるため少し追加作業が必要です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">repeat</span></code> の規則には <em>ループ不変量</em> <code class="docutils literal notranslate"><span class="pre">inv</span></code> が必要です。これは、ループ開始前に成り立ち、各反復で保存され、ループの事後条件として供される主張です。</p>
+<p>次の補題は、<code class="docutils literal notranslate"><span class="pre">triple</span> <span class="pre">inv</span> <span class="pre">p</span> <span class="pre">inv</span></code> が証明できれば <code class="docutils literal notranslate"><span class="pre">triple</span> <span class="pre">inv</span> <span class="pre">(Repeat</span> <span class="pre">e</span> <span class="pre">p)</span> <span class="pre">inv</span></code> も証明できると述べます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">// We need an auxilary lemma to prove it by induction for repeat_n</span>
+<span class="k">let</span> <span class="k">rec</span> repeat_n (p:program) (inv:state -&gt; prop) (n:nat)
+  : <span class="k">Lemma</span>
+    (<span class="k">requires</span> triple inv p inv)
+    (<span class="k">ensures</span> (<span class="k">forall</span> s0. inv s0 ==&gt; inv (snd (run_repeat p n s0))))
+ = <span class="k">if</span> n = 0 <span class="k">then</span> ()
+   <span class="k">else</span> repeat_n p inv (n - 1)
+
+<span class="c">// Then, we use that auxiliary lemma to prove the main</span>
+<span class="c">// rule for reasoning about repeat using an invariant</span>
+<span class="k">let</span> repeat (e:expr) (p:program) (inv:state -&gt; prop)
+  : <span class="k">Lemma</span>
+    (<span class="k">requires</span> triple inv p inv)
+    (<span class="k">ensures</span> triple inv (Repeat e p) inv)
+  = <span class="k">introduce</span> <span class="k">forall</span> s0. inv s0 ==&gt; inv (snd (run (Repeat e p) s0)) <span class="k">with</span>
+    <span class="k">introduce</span> <span class="k">_</span> ==&gt; <span class="k">_</span>  <span class="k">with</span>
+      inv_s0 . (
+        <span class="k">let</span> n = eval_expr e s0 <span class="k">in</span>
+        <span class="k">if</span> n &lt;= 0 <span class="k">then</span> ()
+        <span class="k">else</span> repeat_n p inv n
+    )
+</pre></div>
+</div>
+<p>補助補題 <code class="docutils literal notranslate"><span class="pre">repeat_n</span></code> は、<code class="docutils literal notranslate"><span class="pre">p</span></code> が <code class="docutils literal notranslate"><span class="pre">inv</span></code> を保存するなら <code class="docutils literal notranslate"><span class="pre">run_repeat</span> <span class="pre">p</span> <span class="pre">n</span></code> も <code class="docutils literal notranslate"><span class="pre">inv</span></code> を保存することを証明します。</p>
+<p>メインの <code class="docutils literal notranslate"><span class="pre">repeat</span></code> 補題からこれを呼ぶには初期状態 <code class="docutils literal notranslate"><span class="pre">s0</span></code> を手元に取り出す必要があり、<a class="reference internal" href="../part2/part2_logical_connectives.html#part2-connectives"><span class="std std-ref">論理連結子を扱う糖衣構文</span></a> がそれを可能にします。</p>
+</section>
+<section id="consequence">
+<h4>帰結規則<a class="headerlink" href="#consequence" title="Link to this heading"></a></h4>
+<p>三つ組に関する最後の補題は帰結規則と呼ばれ、事前条件の強化と事後条件の弱化を許します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> consequence (p:program) (pre pre&#39; post post&#39;:state -&gt; prop)
+  : <span class="k">Lemma</span>
+    (<span class="k">requires</span> 
+      triple pre p post /\
+      (<span class="k">forall</span> s. pre&#39; s ==&gt; pre s) /\
+      (<span class="k">forall</span> s. post s ==&gt; post&#39; s))
+    (<span class="k">ensures</span>
+      triple pre&#39; p post&#39;)
+  = ()
+</pre></div>
+</div>
+<p>事前条件は実行前の義務です。したがって <code class="docutils literal notranslate"><span class="pre">p</span></code> が <code class="docutils literal notranslate"><span class="pre">pre</span></code> を要求するなら、<code class="docutils literal notranslate"><span class="pre">pre'</span> <span class="pre">==&gt;</span> <span class="pre">pre</span></code> が成り立つ限り <code class="docutils literal notranslate"><span class="pre">pre'</span></code> へ強化してもよく、より強い要求は論理的に健全です。同様に事後条件は保証です。<code class="docutils literal notranslate"><span class="pre">p</span></code> が <code class="docutils literal notranslate"><span class="pre">post</span></code> を保証するなら、<code class="docutils literal notranslate"><span class="pre">post</span> <span class="pre">==&gt;</span> <span class="pre">post'</span></code> を満たす <code class="docutils literal notranslate"><span class="pre">post'</span></code> へ弱めても構いません。</p>
+</section>
+</section>
+<section id="weakest-preconditions">
+<h3>最弱前提（Weakest Precondition）<a class="headerlink" href="#weakest-preconditions" title="Link to this heading"></a></h3>
+<p>Floyd–Hoare 論理の規則は抽象的な推論方法を与えますが、規則自体は宣言的です。例えば <code class="docutils literal notranslate"><span class="pre">sequence</span></code> 規則を適用するには、中間状態に関する同一の主張（<code class="docutils literal notranslate"><span class="pre">pre_mid</span></code>）が得られるよう各部分の三つ組を導く必要があり、それには多くの手がかりがあります（第1部の事後条件を弱める／第2部の事前条件を強める等）。</p>
+<p>Dijkstra の最弱前提体系はこの曖昧さを除去し、（各ループの不変量が与えられれば）妥当な三つ組を計算する*アルゴリズム*を提供します。そのため、最弱前提は多くのプログラム検証ツールの基盤です。ループ不変量付きのプログラムから、正当性を含意する検証条件を機械的に算出できるからです。</p>
+<p>この手法の中心は関数 <code class="docutils literal notranslate"><span class="pre">WP</span> <span class="pre">(c,</span> <span class="pre">Q)</span></code> で、プログラム <code class="docutils literal notranslate"><span class="pre">c</span></code> と事後条件 <code class="docutils literal notranslate"><span class="pre">Q</span></code> に対し、一意な最弱前提 <code class="docutils literal notranslate"><span class="pre">P</span></code> を計算します。<code class="docutils literal notranslate"><span class="pre">WP</span> <span class="pre">(c,</span> <span class="pre">Q)</span></code> は、<code class="docutils literal notranslate"><span class="pre">c</span></code> 実行後に <code class="docutils literal notranslate"><span class="pre">Q</span></code> が成り立つために、実行前に満たすべき最弱の条件です。すなわち <code class="docutils literal notranslate"><span class="pre">WP</span></code> は事後条件 <code class="docutils literal notranslate"><span class="pre">Q</span></code> を事前条件へ写す変換としてプログラムに意味を与えます。</p>
+<p>この小さな命令型言語に対する <code class="docutils literal notranslate"><span class="pre">wp</span></code> 関数は次のとおりです：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> wp (c:program) (post: state -&gt; prop) 
+  : state -&gt; prop 
+  = <span class="k">match</span> c <span class="k">with</span>
+    | Assign x e -&gt; 
+      <span class="k">fun</span> s0 -&gt; post (write s0 x (eval_expr e s0))
+      
+    | Seq p1 p2 -&gt;
+      wp p1 (wp p2 post)
+
+    | If e p1 p2 -&gt; 
+      <span class="k">fun</span> s0 -&gt; 
+        (eval_expr e s0 =!= 0 ==&gt; wp p1 post s0) /\
+        (eval_expr e s0 == 0  ==&gt; wp p2 post s0)
+      
+    | Repeat e p -&gt;
+      <span class="k">fun</span> s0 -&gt;
+        (<span class="k">exists</span> (inv:state -&gt; prop). 
+          inv s0 /\
+          (<span class="k">forall</span> s. inv s ==&gt; post s) /\
+          (<span class="k">forall</span> s. inv s ==&gt; wp p inv s))
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Assign</span></code> の場合は前掲の代入補題と同一です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Seq</span></code> は WP を逐次合成します。すなわち <code class="docutils literal notranslate"><span class="pre">p1</span> <span class="pre">;;</span> <span class="pre">p2</span></code> 後に <code class="docutils literal notranslate"><span class="pre">post</span></code> を示すには、<code class="docutils literal notranslate"><span class="pre">p1</span></code> 後に <code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">p2</span> <span class="pre">post</span></code> を示す必要があります。これは <code class="docutils literal notranslate"><span class="pre">fun</span> <span class="pre">s0</span> <span class="pre">-&gt;</span> <span class="pre">wp</span> <span class="pre">p1</span> <span class="pre">(fun</span> <span class="pre">s1</span> <span class="pre">-&gt;</span> <span class="pre">wp</span> <span class="pre">p2</span> <span class="pre">post</span> <span class="pre">s1)</span> <span class="pre">s0</span></code> と読むと分かりやすいでしょう。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">If</span></code> は各分岐の WP を計算し、適切な分岐条件の下でそれを証明することを求めます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Repeat</span></code> は興味深く、存在量化された不変量 <code class="docutils literal notranslate"><span class="pre">inv``（ループ不変量）が関わります。すなわち</span> <span class="pre">``Repeat</span> <span class="pre">n</span> <span class="pre">p</span></code> を扱うには、初期に成り立ち、ループ本体の WP と最終事後条件の双方を導く <code class="docutils literal notranslate"><span class="pre">inv</span></code> を見つける必要があります。</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">wp</span></code> 関数は十分条件を計算するという意味で健全であり、次の補題で示されます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> wp_soundness (p:program) (post:state -&gt; prop)
+  : <span class="k">Lemma</span> (triple (wp p post) p post)
+  = <span class="k">match</span> p <span class="k">with</span>
+    | Assign x e -&gt; ()
+    | Seq p1 p2 -&gt;
+      wp_soundness p2 post;
+      wp_soundness p1 (wp p2 post)
+    | If e p1 p2 -&gt;
+      wp_soundness p1 post;
+      wp_soundness p2 post
+    | Repeat e p -&gt;
+      <span class="k">introduce</span> <span class="k">forall</span> s0. wp (Repeat e p) post s0 ==&gt; 
+                      post (snd (run (Repeat e p) s0)) <span class="k">with</span>
+      <span class="k">introduce</span> <span class="k">_</span> ==&gt; <span class="k">_</span> <span class="k">with</span>
+        <span class="k">_</span> . ( 
+          <span class="k">eliminate</span> <span class="k">exists</span> (inv:state -&gt; prop).
+                            inv s0 /\                      
+                            (<span class="k">forall</span> s. inv s ==&gt; post s) /\
+                            (<span class="k">forall</span> s. inv s ==&gt; wp p inv s)
+          <span class="k">returns</span> <span class="k">_</span>
+          <span class="k">with</span> inv_props. (
+            wp_soundness p inv;
+            repeat e p inv
+          )
+      )
+</pre></div>
+</div>
+<p>また、<code class="docutils literal notranslate"><span class="pre">wp</span></code> が最弱前提を計算する（<code class="docutils literal notranslate"><span class="pre">triple</span> <span class="pre">p</span> <span class="pre">c</span> <span class="pre">q</span></code> なら <code class="docutils literal notranslate"><span class="pre">forall</span> <span class="pre">s.</span> <span class="pre">p</span> <span class="pre">s</span> <span class="pre">==&gt;</span> <span class="pre">wp</span> <span class="pre">c</span> <span class="pre">q</span> <span class="pre">s</span></code>）ことも証明できますが、ここでは省略します。</p>
+</section>
+<section id="a-sample-program-proof">
+<h3>サンプルプログラムの証明<a class="headerlink" href="#a-sample-program-proof" title="Link to this heading"></a></h3>
+<p>ここでは三つ組と <code class="docutils literal notranslate"><span class="pre">wp</span></code> を用いたサンプル証明を示します。Hoare 三つ組が実行に関する*抽象的*な推論手段であることを強調するため、<code class="docutils literal notranslate"><span class="pre">triple</span> <span class="pre">p</span> <span class="pre">c</span> <span class="pre">q</span></code> に別名 <code class="docutils literal notranslate"><span class="pre">hoare</span> <span class="pre">p</span> <span class="pre">c</span> <span class="pre">q</span></code> を付け、属性で F* と Z3 が基底定義に直接触れられないようにします。そうしないと Z3 が操作的意味論に直接基づく証明を行い、大規模化に不向きになります。<code class="docutils literal notranslate"><span class="pre">opaque_to_smt</span></code> と <code class="docutils literal notranslate"><span class="pre">reveal_opaque</span></code> については <a class="reference internal" href="../under_the_hood/uth_smt.html#uth-opaque-to-smt"><span class="std std-ref">こちら</span></a> を参照。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>[@@&quot;opaque_to_smt&quot;]
+<span class="k">let</span> hoare p c q = triple p c q
+
+<span class="k">let</span> wp_hoare (p:program) (post:state -&gt; prop)
+  : squash (hoare (wp p post) p post)
+  = reveal_opaque (`%hoare) hoare;
+    wp_soundness p post
+
+<span class="k">let</span> hoare_consequence (#p:program)
+                     (#pre #post:state -&gt; prop)
+                     (pre_annot:state -&gt; prop)
+                     (<span class="k">_</span>: squash (hoare pre p post))
+                     (<span class="k">_</span>: squash (<span class="k">forall</span> s. pre_annot s ==&gt; pre s))
+  : squash (hoare pre_annot p post)
+  = reveal_opaque (`%hoare) hoare
+</pre></div>
+</div>
+<p>上記の補題は既に証明した <code class="docutils literal notranslate"><span class="pre">wp_soundness</span></code> と <code class="docutils literal notranslate"><span class="pre">consequence</span></code> の言い換えです。以後 <code class="docutils literal notranslate"><span class="pre">hoare</span> <span class="pre">p</span> <span class="pre">c</span> <span class="pre">q</span></code> を扱うために必要なのはこの 2 つだけです。</p>
+<p>次に、この小言語のプログラムを少し書きやすくするための記法を定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ( := ) (x:var) (y:expr) = Assign x y
+
+<span class="k">let</span> add (e1 e2:expr) = EAdd e1 e2
+
+<span class="k">let</span> c (i:int) : expr = EConst i
+
+<span class="k">let</span> v (x:var) : expr = EVar x
+
+<span class="k">let</span> <span class="k">rec</span> prog (p:list program { Cons? p }) 
+  : program 
+  = <span class="k">match</span> p <span class="k">with</span>
+    | [c] -&gt; c
+    | c::cs -&gt; Seq c (prog cs)
+
+<span class="k">let</span> x = 0
+<span class="k">let</span> y = 1
+<span class="k">let</span> z = 2
+</pre></div>
+</div>
+<p>最後に、<code class="docutils literal notranslate"><span class="pre">wp_hoare</span></code> で <code class="docutils literal notranslate"><span class="pre">wp</span></code> を計算し、<code class="docutils literal notranslate"><span class="pre">hoare_consequence</span></code> を適用して、注釈した事前条件が推論された WP を含意することを F* と Z3 に示すことで、単純なループのないプログラムの証明を自動化できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> swap = prog [ z := v x; x := v y; y := v z]
+<span class="k">let</span> proof_swap (lx ly:int)
+  : squash (hoare (<span class="k">fun</span> s -&gt; read s x = lx /\ read s y = ly) swap
+                  (<span class="k">fun</span> s -&gt; read s x = ly /\ read s y = lx))
+  = hoare_consequence <span class="k">_</span> (wp_hoare swap <span class="k">_</span>) ()
+</pre></div>
+</div>
+<p>WP によって検証条件を計算し、Z3 のようなソルバで注釈仕様に対して照合する作法は非常に一般的で強力です。実際、ここで小さな命令型言語に対して行った方法論は、F* の型検査器が（より大規模に、言語全体に対して）行っていることとまさに同じです。</p>
+</section>
+</section>
+<section id="the-pure-effect-a-dijkstra-monad-for-pure-computations">
+<h2><code class="docutils literal notranslate"><span class="pre">PURE</span></code> 効果：純粋計算のための Dijkstra モナド<a class="headerlink" href="#the-pure-effect-a-dijkstra-monad-for-pure-computations" title="Link to this heading"></a></h2>
+<p>F* は純粋計算を扱うための最弱前提計算を提供します。これは <em>Dijkstra モナド</em> に基づいており、最初に <cite>この論文</cite> で導入されました。本章では Dijkstra モナドと、その F* における仕様記述・証明への利用を学びます。</p>
+<p>先ほどの三つ組や最弱前提を F* の関数型設定へ適用する際の主な違いは、グローバル変数や可変状態がないことです（可変状態のモデル化は後で効果システムで扱います）。代わりに、F* の純粋式は値を*返し*、扱う事後条件は状態述語ではなく返り値に関する述語です。</p>
+<p>例として、純粋 WP の定義を概観します。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>WP c Q                      = Q c
+WP (let x = e1 in e2) Q     = WP e1 (fun x -&gt; WP e2 Q)
+WP (if e then e1 else e2) Q = (e ==&gt; WP e1 Q) /\ (~e ==&gt; WP e2 Q)
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>定数 <code class="docutils literal notranslate"><span class="pre">c</span></code> の WP は、単に <code class="docutils literal notranslate"><span class="pre">Q</span> <span class="pre">c</span></code> です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">let</span></code> 束縛の WP は、各部分式の*値*に対して適用する WP の逐次合成です。</p></li>
+<li><p>条件式の WP は各分岐の WP を分岐条件で弱めたものです。</p></li>
+</ul>
+<p>F* の型システムはこの WP 構成を内在化・一般化し、すべての項に適用します。具体的には計算型 <code class="docutils literal notranslate"><span class="pre">PURE</span> <span class="pre">a</span> <span class="pre">wp</span></code> として現れ、<code class="docutils literal notranslate"><span class="pre">prims.fst</span></code> で <code class="docutils literal notranslate"><span class="pre">PURE</span></code> はプリミティブ効果として以下のシグネチャで定義されています。<code class="docutils literal notranslate"><span class="pre">new_effect</span></code> 構文については後のユーザ定義効果の章で詳しく扱いますが、ここでは計算型コンストラクタを導入するための予約構文と捉えてください。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">new_effect</span> PURE (a:Type) (w:wp a) { ... }
+</pre></div>
+</div>
+<p>ここで</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> pre = Type0
+<span class="k">let</span> post (a:Type) = a -&gt; Type0
+<span class="k">let</span> wp (a:Type) = post a -&gt; pre
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">PURE</span> <span class="pre">a</span> <span class="pre">wp</span></code> 型のプログラム <code class="docutils literal notranslate"><span class="pre">e</span></code> は、次を満たす計算です：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">(fun</span> <span class="pre">_</span> <span class="pre">-&gt;</span> <span class="pre">True)</span></code> が成り立つときにのみ定義され、</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">post</span></code> が成り立つとき、<code class="docutils literal notranslate"><span class="pre">e</span></code> は副作用なしに停止し、<code class="docutils literal notranslate"><span class="pre">post</span> <span class="pre">v</span></code> を満たす <code class="docutils literal notranslate"><span class="pre">v:a</span></code> を返します。</p></li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">a</span></code> は、事後条件（<code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Type0</span></code>）を事前条件（<code class="docutils literal notranslate"><span class="pre">Type0</span></code>）に写す関数の型です。<a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> この <code class="docutils literal notranslate"><span class="pre">wp</span></code> 引数は <code class="docutils literal notranslate"><span class="pre">PURE</span></code> 効果の*インデックス*とも呼ばれます。<a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p>
+<p><code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">a</span></code> の return 演算子は以下のとおりで、先に示した定数や変数に対する <code class="docutils literal notranslate"><span class="pre">WP</span> <span class="pre">c</span> <span class="pre">Q</span></code> / <code class="docutils literal notranslate"><span class="pre">WP</span> <span class="pre">x</span> <span class="pre">Q</span></code> に対応します：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> return_wp (#a:Type) (x:a) : wp a = <span class="k">fun</span> post -&gt; post x
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">a</span></code> の bind 演算子は、先の <code class="docutils literal notranslate"><span class="pre">WP</span> <span class="pre">(let</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">e1</span> <span class="pre">in</span> <span class="pre">e2)</span> <span class="pre">Q</span></code> の逐次合成規則に対応します：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> bind_wp (#a #b:Type) (wp1:wp a) (wp2:a -&gt; wp b)
+  : wp b
+  = <span class="k">fun</span> post -&gt; wp1 (<span class="k">fun</span> x -&gt; wp2 x post)                
+</pre></div>
+</div>
+<p>最後に、条件分岐の WP 規則に対応して、分岐における <code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">a</span></code> の合成コンビネータを書けます：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> if_then_else_wp (#a:Type) (b:bool) (wp1 wp2:wp a)
+  : wp a
+  = <span class="k">fun</span> post -&gt; <span class="k">if</span> b <span class="k">then</span> wp1 post <span class="k">else</span> wp2 post
+</pre></div>
+</div>
+<p>これが純粋プログラムにおける Dijkstra モナドの本質です：値 <code class="docutils literal notranslate"><span class="pre">x</span></code> を*返す*計算の WP は <code class="docutils literal notranslate"><span class="pre">return_wp</span></code>、逐次合成の WP は <code class="docutils literal notranslate"><span class="pre">bind_wp</span></code> による合成、条件式の WP は <code class="docutils literal notranslate"><span class="pre">if_then_else_wp</span></code> による条件付き合成です。</p>
+<p>実のところ、純粋計算を恒等モナド <code class="docutils literal notranslate"><span class="pre">tot</span> <span class="pre">a</span></code> と見なすと次のようになり：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> tot (a:Type) = a
+<span class="k">let</span> return_tot (#a:Type) (x:a) : tot a = x
+<span class="k">let</span> bind_tot (#a #b:Type) (x:tot a) (y:a -&gt; tot b)
+  : tot b
+  = <span class="k">let</span> v = x <span class="k">in</span> y v
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">tot</span></code> モナドと <code class="docutils literal notranslate"><span class="pre">wp</span></code> の対応がより明確になります——<code class="docutils literal notranslate"><span class="pre">return_tot</span></code> の WP 版が <code class="docutils literal notranslate"><span class="pre">return_wp</span></code>、<code class="docutils literal notranslate"><span class="pre">bind_tot</span></code> の WP 版が <code class="docutils literal notranslate"><span class="pre">bind_wp</span></code> です。</p>
+<p>（単調な）最弱前提に対する <code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">a</span></code> 自体がモナドであることも分かります。以下にモナド則の証明で示します：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(* A monotonic WP maps stronger postconditions to stronger preconditions *)</span>
+<span class="k">let</span> monotonic (#a:Type) (wp:wp a) =
+  <span class="k">forall</span> (p q:post a). (<span class="k">forall</span> x. p x ==&gt; q x) ==&gt; (wp p ==&gt; wp q)
+
+<span class="k">let</span> mwp (a:Type) = w:wp a { monotonic w }
+
+<span class="c">(* An equivalence relation on WPs *)</span>
+<span class="k">let</span> ( =~= ) (#a:Type) (wp1 wp2:wp a)
+  : prop
+  = <span class="k">forall</span> post. wp1 post &lt;==&gt; wp2 post
+
+<span class="c">(* The three monad laws *)</span>
+<span class="k">let</span> left_identity (a b:Type) (x:a) (wp:a -&gt; mwp a)
+  : <span class="k">Lemma</span> (bind_wp (return_wp x) wp =~= wp x)
+  = ()
+
+<span class="k">let</span> right_identity (a b:Type) (wp:mwp a)
+  : <span class="k">Lemma</span> (wp =~= (bind_wp wp return_wp))
+  = ()
+
+<span class="k">let</span> associativity (a b c:Type) (wp1:mwp a) (wp2:a -&gt; mwp b) (wp3:b -&gt; mwp c)
+  : <span class="k">Lemma</span> (bind_wp wp1 (<span class="k">fun</span> x -&gt; bind_wp (wp2 x) wp3) =~=
+           bind_wp (bind_wp wp1 wp2) wp3)
+  = ()
+</pre></div>
+</div>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p><code class="docutils literal notranslate"><span class="pre">post</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">prop</span></code>、<code class="docutils literal notranslate"><span class="pre">pre</span> <span class="pre">=</span> <span class="pre">prop</span></code> と定義することも可能です。ただし F* の純粋 WP ライブラリは <code class="docutils literal notranslate"><span class="pre">prop</span></code> ではなく <code class="docutils literal notranslate"><span class="pre">Type0</span></code> を用いるため、ここでもそれに従います。</p>
+</aside>
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Dijkstra モナドは継続モナドにも関連します。継続モナドは CPS（Continuation Passing Style）をモデル化し、継続という形で明示的に制御を受け渡します。結果型 <code class="docutils literal notranslate"><span class="pre">r</span></code> に対する継続モナドは次のとおりです：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> cont (r:Type) (a:Type) = (a -&gt; r) -&gt; r  <span class="c">// (a -&gt; r) is the continuation</span>
+<span class="k">let</span> return #r (#a:Type) (x:a) : cont r a = <span class="k">fun</span> k -&gt; k x
+<span class="k">let</span> bind #r (#a #b:Type) (f:cont r a) (g:a -&gt; cont r b)
+  : cont r b
+  =  <span class="k">fun</span> k -&gt; f (<span class="k">fun</span> x -&gt; g x k)
+</pre></div>
+</div>
+<p>少し目を細めてみれば、先ほど定義した <code class="docutils literal notranslate"><span class="pre">wp</span></code> モナドは <code class="docutils literal notranslate"><span class="pre">Type0</span></code> への継続、すなわち <code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">cont</span> <span class="pre">Type0</span> <span class="pre">a``（あるいは</span> <span class="pre">``prop</span></code> を使うなら <code class="docutils literal notranslate"><span class="pre">cont</span> <span class="pre">prop</span> <span class="pre">a</span></code>）に他なりません。</p>
+</aside>
+</aside>
+</section>
+<section id="pure-and-tot">
+<h2><code class="docutils literal notranslate"><span class="pre">PURE</span></code> と <code class="docutils literal notranslate"><span class="pre">Tot</span></code><a class="headerlink" href="#pure-and-tot" title="Link to this heading"></a></h2>
+<p>型検査の際、F* はプログラムが型制約を満たすための必要条件を特徴付ける最弱前提を計算します。通常この WP は隠されますが、適切に注釈すれば次のように参照できます：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> square (n:int) 
+  : PURE nat (as_pure_wp #nat (<span class="k">fun</span> q -&gt; n*n &gt;= 0 /\ q (n * n)))
+  = n * n
+</pre></div>
+</div>
+<p>この型は <code class="docutils literal notranslate"><span class="pre">square</span> <span class="pre">n</span></code> が純粋関数で、任意の事後条件 <code class="docutils literal notranslate"><span class="pre">q:nat</span> <span class="pre">-&gt;</span> <span class="pre">prop</span></code> に対して、</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code> かつ <code class="docutils literal notranslate"><span class="pre">q</span> <span class="pre">(n</span> <span class="pre">*</span> <span class="pre">n)</span></code> が成り立つときにのみ定義され、</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">q</span> <span class="pre">m</span></code> を満たす <code class="docutils literal notranslate"><span class="pre">m:nat</span></code> を返す、と述べます。</p></li>
+</ul>
+</div></blockquote>
+<p>別の例を見てみましょう：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> maybe_incr (b:bool) (x:int)
+  : PURE int (as_pure_wp (if_then_else_wp b
+                                        (bind_wp (return_wp (x + 1)) (<span class="k">fun</span> y -&gt; return_wp y))
+                                        (return_wp x)))
+  = <span class="k">if</span> b
+    <span class="k">then</span> <span class="k">let</span> y = x + 1 <span class="k">in</span> y
+    <span class="k">else</span> x
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">PURE</span></code> の <code class="docutils literal notranslate"><span class="pre">wp</span></code> インデックスが計算の構造を忠実になぞっていることに注目してください——<code class="docutils literal notranslate"><span class="pre">if_then_else_wp</span></code> で始まり、最初の分岐では <code class="docutils literal notranslate"><span class="pre">bind_wp</span></code> と return、もう一方では <code class="docutils literal notranslate"><span class="pre">x</span></code> を返しています。</p>
+<p>このように、WP インデックスは計算を論理推論（SMT など）しやすい仕様へと単に“持ち上げて”います。純粋プログラムでは過剰に見えるかもしれませんが、篩型検査に起因する非自明な制約がある場合、プログラム全体を単一の制約へ持ち上げることで推論が簡潔になります。</p>
+<p>もちろん、下の例のように、プログラムの完全な論理リフティングより抽象的な仕様を書くことも多いです。返り値について <code class="docutils literal notranslate"><span class="pre">post</span></code> を示すために、すべての <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">&gt;=</span> <span class="pre">x</span></code> で <code class="docutils literal notranslate"><span class="pre">post</span></code> が成り立つことを前提にする、というものです。これは弱いながらも妥当な特性化です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> maybe_incr2 (b:bool) (x:int)
+  : PURE int (as_pure_wp (<span class="k">fun</span> post -&gt; <span class="k">forall</span> (y:int). y &gt;= x ==&gt; post y))
+  = <span class="k">if</span> b
+    <span class="k">then</span> <span class="k">let</span> y = x + 1 <span class="k">in</span> y
+    <span class="k">else</span> x
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">PURE</span></code> 計算型には組み込みの弱化規則があります。特に、項が <code class="docutils literal notranslate"><span class="pre">PURE</span> <span class="pre">a</span> <span class="pre">wp_a</span></code> と推論され、注釈で <code class="docutils literal notranslate"><span class="pre">PURE</span> <span class="pre">b</span> <span class="pre">wp_b</span></code> とされた場合、F* は次を行います：</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p>まず <code class="docutils literal notranslate"><span class="pre">a</span></code> が <code class="docutils literal notranslate"><span class="pre">b</span></code> の部分型であることを示すのに十分な制約 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Type0</span></code> を計算します。たとえば <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">int</span></code>、<code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">nat</span></code> なら <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">fun</span> <span class="pre">(x:int)</span> <span class="pre">-&gt;</span> <span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code> です。</p></li>
+<li><p>次に返り値が部分型制約 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">x</span></code> を満たすことを主張するよう <code class="docutils literal notranslate"><span class="pre">wp_a</span></code> を強化し、<code class="docutils literal notranslate"><span class="pre">assert_wp</span> <span class="pre">wp_a</span> <span class="pre">p</span></code> を構成します：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> assert_wp (#a:Type) (w:wp a) (p: a -&gt; Type0) 
+  : wp (x:a{ p x })
+  = <span class="k">fun</span> post -&gt; w (<span class="k">fun</span> (x:a) -&gt; p x /\ post x)
+</pre></div>
+</div>
+</li>
+<li><p>最後に <code class="docutils literal notranslate"><span class="pre">stronger_wp</span> <span class="pre">#b</span> <span class="pre">wp_b</span> <span class="pre">(assert_wp</span> <span class="pre">wp_a</span> <span class="pre">p)</span></code> という検証条件を生成します。<code class="docutils literal notranslate"><span class="pre">stronger_wp</span></code> は以下のように定義されます：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> stronger_wp (#a:Type) (wp1 wp2:wp a) : prop =
+   <span class="k">forall</span> post. wp1 post ==&gt; wp2 post
+</pre></div>
+</div>
+<p>すなわち任意の事後条件 <code class="docutils literal notranslate"><span class="pre">post</span></code> について、<code class="docutils literal notranslate"><span class="pre">wp_b</span> <span class="pre">post</span></code> は元の <code class="docutils literal notranslate"><span class="pre">wp_a</span> <span class="pre">post</span></code> と部分型制約 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">x</span></code> を含意します。これは「事前条件を強めるのは健全」という直観と一致します。</p>
+</li>
+</ol>
+</div></blockquote>
+<p>したがって F* で <code class="docutils literal notranslate"><span class="pre">e:PURE</span> <span class="pre">a</span> <span class="pre">wp</span></code> を得たとき、その <code class="docutils literal notranslate"><span class="pre">wp</span></code> は <code class="docutils literal notranslate"><span class="pre">e</span></code> の*ある*述語変換であり、必ずしも最弱とは限りません。</p>
+<p>もちろん <code class="docutils literal notranslate"><span class="pre">maybe_incr2</span></code> のような書き方は F* では必ずしも素直ではありません。通常は次のように篩型で注釈します：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> maybe_incr_tot (b:bool) (x:int)
+  : <span class="k">Tot</span> (y:int { y &gt;= x })
+  = <span class="k">if</span> b
+    <span class="k">then</span> <span class="k">let</span> y = x + 1 <span class="k">in</span> y
+    <span class="k">else</span> x
+</pre></div>
+</div>
+<p>コンパイラ内部では <code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">t</span></code> は次の <code class="docutils literal notranslate"><span class="pre">PURE</span></code> のインスタンスとして扱われます：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">Tot</span> t = PURE t (<span class="k">fun</span> post -&gt; <span class="k">forall</span> (x:t). post x)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">t</span></code> を <code class="docutils literal notranslate"><span class="pre">PURE</span></code> の一実体として捉えれば、ユーザ注釈 <code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">t</span></code> が推論された <code class="docutils literal notranslate"><span class="pre">PURE</span> <span class="pre">a</span> <span class="pre">wp</span></code> より強いかの判定は前述のとおりです。</p>
+<section id="pure-hoare-triples-for-pure">
+<h3><code class="docutils literal notranslate"><span class="pre">Pure</span></code>：<code class="docutils literal notranslate"><span class="pre">PURE</span></code> のための Hoare 三つ組<a class="headerlink" href="#pure-hoare-triples-for-pure" title="Link to this heading"></a></h3>
+<p>仕様は WP により*計算*しやすい一方で、事前・事後を明確に分けた Hoare 三つ組として提示する方が読み書きには自然です。また、三つ組仕様からは自然に単調な WP が導かれます。</p>
+<p>F* には純粋プログラムを Hoare 形式で記述・型検査するための効果略記 <code class="docutils literal notranslate"><span class="pre">Pure</span></code> があり、<code class="docutils literal notranslate"><span class="pre">prims.fst</span></code> で次のように定義されています：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">effect</span> Pure (a:Type) (req:Type0) (ens:a -&gt; Type0) =
+       PURE a (<span class="k">fun</span> post -&gt; req /\ (<span class="k">forall</span> x. ens x ==&gt; post x))
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Pure</span></code> のシグネチャは <code class="docutils literal notranslate"><span class="pre">Pure</span> <span class="pre">a</span> <span class="pre">req</span> <span class="pre">ens``（``req</span></code>：事前条件、<code class="docutils literal notranslate"><span class="pre">ens:a</span> <span class="pre">-&gt;</span> <span class="pre">Type0</span></code>：事後条件）です。<code class="docutils literal notranslate"><span class="pre">Pure</span></code> を使うと、本章冒頭の <code class="docutils literal notranslate"><span class="pre">factorial</span></code> をこの形式で書け、F* は <code class="docutils literal notranslate"><span class="pre">PURE</span> <span class="pre">a</span> <span class="pre">wp</span></code> を推論し、注釈した <code class="docutils literal notranslate"><span class="pre">Pure</span> <span class="pre">int</span> <span class="pre">req</span> <span class="pre">ens</span></code> がより強い事前・弱い事後であることを示します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">x:a</span> <span class="pre">-&gt;</span> <span class="pre">Pure</span> <span class="pre">b</span> <span class="pre">req</span> <span class="pre">ens</span></code> と <code class="docutils literal notranslate"><span class="pre">x:a{req}</span> <span class="pre">-&gt;</span> <span class="pre">Tot</span> <span class="pre">(y:b</span> <span class="pre">{</span> <span class="pre">ens</span> <span class="pre">y</span> <span class="pre">})</span></code> のどちらで仕様を書くべきか迷うかもしれません。両者は密接に関連しており、選択は多くの場合好みの問題です。本書でもここまで <code class="docutils literal notranslate"><span class="pre">Pure</span> <span class="pre">a</span> <span class="pre">req</span> <span class="pre">ens</span></code> は使ってきませんでしたが、前後条件が多い関数では、制約を篩型に詰め込むより <code class="docutils literal notranslate"><span class="pre">Pure</span></code> 記法の方が便利な場合があります。</p>
+</section>
+</section>
+<section id="ghost-and-div">
+<h2><code class="docutils literal notranslate"><span class="pre">GHOST</span></code> と <code class="docutils literal notranslate"><span class="pre">DIV</span></code><a class="headerlink" href="#ghost-and-div" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">PURE</span></code> が <code class="docutils literal notranslate"><span class="pre">Tot</span></code> の WP 付き精錬であるのと同様に、F* はさらに 2 つの WP 付きプリミティブ効果を提供します：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">GHOST</span> <span class="pre">(a:Type)</span> <span class="pre">(w:wp</span> <span class="pre">a)</span></code> は <code class="docutils literal notranslate"><span class="pre">GTot</span> <span class="pre">a</span></code> の精錬。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DIV</span> <span class="pre">(a:Type)</span> <span class="pre">(w:wp</span> <span class="pre">a)</span></code> は <code class="docutils literal notranslate"><span class="pre">Dv</span> <span class="pre">a</span></code> の精錬。</p></li>
+</ul>
+</div></blockquote>
+<p>つまり F* はゴースト計算に対して全域正当性の WP を <code class="docutils literal notranslate"><span class="pre">GHOST</span></code> で推論し、内部的に <code class="docutils literal notranslate"><span class="pre">GTot</span> <span class="pre">a</span></code> は <code class="docutils literal notranslate"><span class="pre">GHOST</span> <span class="pre">a</span> <span class="pre">(fun</span> <span class="pre">post</span> <span class="pre">-&gt;</span> <span class="pre">forall</span> <span class="pre">x.</span> <span class="pre">post</span> <span class="pre">x)</span></code> と同値です。</p>
+<p>同様に、停止しない可能性のある計算に対しては <code class="docutils literal notranslate"><span class="pre">DIV</span></code> を用い、<em>部分正当性</em> の WP を推論します。内部的に <code class="docutils literal notranslate"><span class="pre">Dv</span> <span class="pre">a</span></code> は <code class="docutils literal notranslate"><span class="pre">DIV</span> <span class="pre">a</span> <span class="pre">(fun</span> <span class="pre">post</span> <span class="pre">-&gt;</span> <span class="pre">forall</span> <span class="pre">x.</span> <span class="pre">post</span> <span class="pre">x)</span></code> と同値です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Tot</span></code> と <code class="docutils literal notranslate"><span class="pre">PURE</span></code> の関係と同様に、F* は <code class="docutils literal notranslate"><span class="pre">GTot</span></code> と <code class="docutils literal notranslate"><span class="pre">GHOST</span></code>、<code class="docutils literal notranslate"><span class="pre">Dv</span></code> と <code class="docutils literal notranslate"><span class="pre">DIV</span></code> を自動的に関連付けます。さらに効果順序 <code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">&lt;</span> <span class="pre">Dv</span></code>、<code class="docutils literal notranslate"><span class="pre">Tot</span> <span class="pre">&lt;</span> <span class="pre">GTot</span></code> は <code class="docutils literal notranslate"><span class="pre">PURE</span> <span class="pre">&lt;</span> <span class="pre">DIV</span></code>、<code class="docutils literal notranslate"><span class="pre">PURE</span> <span class="pre">&lt;</span> <span class="pre">GHOST</span></code> にも拡張されます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">prims.fst</span></code> には <code class="docutils literal notranslate"><span class="pre">GHOST</span></code> と <code class="docutils literal notranslate"><span class="pre">DIV</span></code> の Hoare 形式の略記もあります：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">effect</span> Ghost a req ens = GHOST a (<span class="k">fun</span> post -&gt; req /\ (<span class="k">forall</span> x. ens x /\ post x))
+<span class="k">effect</span> Div a req ens = DIV a (<span class="k">fun</span> post -&gt; req /\ (<span class="k">forall</span> x. ens x /\ post x))
+</pre></div>
+</div>
+<p>これらの Hoare 形式の略記は、WP ベースの元の形より使いやすいことが多いです。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Ghost</span></code> と <code class="docutils literal notranslate"><span class="pre">GTot</span></code>、<code class="docutils literal notranslate"><span class="pre">Div</span></code> と <code class="docutils literal notranslate"><span class="pre">Dv</span></code> の使い分けは <code class="docutils literal notranslate"><span class="pre">Pure</span></code> と <code class="docutils literal notranslate"><span class="pre">Tot</span></code> の関係と同様で、多くは好みの問題です。実際、多くの F* コードでは <code class="docutils literal notranslate"><span class="pre">Pure</span></code>/<code class="docutils literal notranslate"><span class="pre">Ghost</span></code>/<code class="docutils literal notranslate"><span class="pre">Div</span></code> の出現は多くありません。ただし重要な例外が 1 つあります：<code class="docutils literal notranslate"><span class="pre">Lemma</span></code> です。</p>
+</section>
+<section id="the-lemma-abbreviation">
+<h2><code class="docutils literal notranslate"><span class="pre">Lemma</span></code> 略記<a class="headerlink" href="#the-lemma-abbreviation" title="Link to this heading"></a></h2>
+<p><a class="reference internal" href="../part1/part1_lemmas.html#part1-lemma-syntax"><span class="std std-ref">前章</span></a> で糖衣構文として導入した <code class="docutils literal notranslate"><span class="pre">Lemma</span></code> の定義をいよいよ明かします。実は <code class="docutils literal notranslate"><span class="pre">Lemma</span></code> は <code class="docutils literal notranslate"><span class="pre">prims.fst</span></code> で次のように定義されています：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">effect</span> <span class="k">Lemma</span> (a: eqtype_u)
+             (pre: Type)
+             (post: (squash pre -&gt; Type))
+             (smt_pats: list pattern) =
+       Pure a pre (<span class="k">fun</span> r -&gt; post ())
+</pre></div>
+</div>
+<p>つまり <code class="docutils literal notranslate"><span class="pre">Lemma</span></code> は <code class="docutils literal notranslate"><span class="pre">Pure</span> <span class="pre">a</span> <span class="pre">req</span> <span class="pre">ens``（純粋計算の</span> <span class="pre">Hoare</span> <span class="pre">形式）のインスタンスです。よって</span> <span class="pre">``e</span> <span class="pre">:</span> <span class="pre">Lemma</span> <span class="pre">(requires</span> <span class="pre">pre)</span> <span class="pre">(ensures</span> <span class="pre">post)</span></code> と注釈すると、F* は <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">:</span> <span class="pre">PURE</span> <span class="pre">a</span> <span class="pre">wp</span></code> の仕様を推論し、他の PURE 計算と同様に、注釈した <code class="docutils literal notranslate"><span class="pre">Lemma</span></code> の WP が計算された最弱前提より強いかを検査します。</p>
+<p>もちろん <code class="docutils literal notranslate"><span class="pre">Lemma</span></code> には糖衣構文があり、<code class="docutils literal notranslate"><span class="pre">Lemma</span> <span class="pre">(requires</span> <span class="pre">pre)</span> <span class="pre">(ensures</span> <span class="pre">post)</span></code> は <code class="docutils literal notranslate"><span class="pre">Lemma</span> <span class="pre">unit</span> <span class="pre">pre</span> <span class="pre">(fun</span> <span class="pre">_</span> <span class="pre">-&gt;</span> <span class="pre">post)</span> <span class="pre">[]</span></code> に展開されます。最後の引数 <code class="docutils literal notranslate"><span class="pre">smt_pats</span></code> は SMT ソルバへの補題導入に用いられ、詳細は <a class="reference internal" href="../under_the_hood/uth_smt.html#uth-smt"><span class="std std-ref">後章</span></a> を参照してください。</p>
+<p>最後に <code class="docutils literal notranslate"><span class="pre">post</span></code> の型に注意してください。これは引数として <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">pre</span></code> を仮定します——これにより、<code class="docutils literal notranslate"><span class="pre">Lemma</span></code> の <code class="docutils literal notranslate"><span class="pre">ensures</span></code> 節は <code class="docutils literal notranslate"><span class="pre">requires</span></code> 節で述べたことを仮定できるのです。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part4_div.html" class="btn btn-neutral float-left" title="発散（非停止）" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../part5/part5.html" class="btn btn-neutral float-right" title="Meta-F* によるタクティクスとメタプログラミング" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

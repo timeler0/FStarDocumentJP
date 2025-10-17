@@ -1,0 +1,468 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>等式型 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="構成的連言と古典的連言（論理結合子）" href="part2_logical_connectives.html" />
+    <link rel="prev" title="Merkle 木" href="part2_merkle.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part2.html">帰納的型によるデータ・証明・計算の表現</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part2_inductive_type_families.html">帰納的型の定義</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_vectors.html">長さインデックス付きリスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_merkle.html">Merkle 木</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">等式型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#definitional-equality">定義的等式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#propositional-equality">命題的等式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#equality-reflection">等式反映（Equality Reflection）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#implicit-conversions-using-provable-equalities">可証等式による暗黙変換</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#undecidability-and-weak-normalization">決定不能性と弱正規化</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#functional-extensionality">関数の拡張性（Functional Extensionality）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exercise">練習問題</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#decidable-equality-and-equality-qualifiers">判定可能な等式と等式修飾子</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part2_logical_connectives.html">構成的連言と古典的連言（論理結合子）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_stlc.html">単純型付きラムダ計算（STLC）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_phoas.html">高階抽象構文（HOAS）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_well_founded.html">良基底関係と停止性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_par.html">計算効果の最初のモデル</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_universes.html">ユニバース（Universes）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+      <li class="breadcrumb-item active">等式型</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="equality-types">
+<span id="part2-equality"></span><h1>等式型<a class="headerlink" href="#equality-types" title="Link to this heading"></a></h1>
+<p><a class="reference internal" href="../part1/part1_equality.html#part1-equality"><span class="std std-ref">前の章</span></a> で見たように、F* には少なくとも 2 種類の等式があります。この章では、定義的等式、命題的等式、関数の拡張的等式、そして判定可能な等式を詳しく扱います。これらは技術的な話題ですが言語の中核機能であり、F* では添字付き帰納型 <code class="docutils literal notranslate"><span class="pre">equals</span> <span class="pre">#t</span> <span class="pre">x</span> <span class="pre">y``（``x:t</span></code> と <code class="docutils literal notranslate"><span class="pre">y:t</span></code> が等しいことを主張する命題）を本質的に用いて説明します。</p>
+<p>関数型プログラミングや依存型に十分慣れていない場合、最初の読書ではこの章を飛ばすか流し読みし、不明点が生じたときに参照として戻ってきても構いません。</p>
+<section id="definitional-equality">
+<h2>定義的等式<a class="headerlink" href="#definitional-equality" title="Link to this heading"></a></h2>
+<p>F*（や Coq、Lean、Agda など）のような型理論の大きな特徴は、集合論のような基礎付けと異なり、理論内部で <em>計算</em> が基本概念として扱われ、簡約で結び付くラムダ項を同一視する点にあります。例えば <span class="math notranslate nohighlight">\((\lambda x.x) 0\)</span> と <span class="math notranslate nohighlight">\(0\)</span> は理論内で区別できません。前者は 1 ステップの計算で後者に簡約されるからです。このように簡約で関係付けられる項を <em>定義的に等しい</em> と呼び、これは言語における最も原始的な等式概念です。定義的等式は合同律を満たし、任意の文脈 <span class="math notranslate nohighlight">\(T[]\)</span> において <span class="math notranslate nohighlight">\(n\)</span> と <span class="math notranslate nohighlight">\(m\)</span> が定義的に等しければ <span class="math notranslate nohighlight">\(T[n]\)</span> と <span class="math notranslate nohighlight">\(T[m]\)</span> も定義的に等しくなります。</p>
+<p>定義的に等しい項は同一視されるため、F* を含むすべての型理論では、<code class="docutils literal notranslate"><span class="pre">t</span></code> と <code class="docutils literal notranslate"><span class="pre">t'</span></code> が定義的に等しいかぎり <code class="docutils literal notranslate"><span class="pre">v:t</span></code> を暗黙に <code class="docutils literal notranslate"><span class="pre">v:t'</span></code> として扱うことが許されます。</p>
+<p>いくつかの例を見ていきましょう。まずは長さ付きベクトル型から再開します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> vec (a:Type) : nat -&gt; Type =
+  | Nil : vec a 0
+  | Cons : #n:nat -&gt; hd:a -&gt; tl:vec a n -&gt; vec a (n + 1)
+</pre></div>
+</div>
+<p>次の 2 つの例が示すように、<code class="docutils literal notranslate"><span class="pre">n</span></code> と <code class="docutils literal notranslate"><span class="pre">m</span></code> が定義的に等しければ、<code class="docutils literal notranslate"><span class="pre">v:vec</span> <span class="pre">a</span> <span class="pre">n</span></code> は同時に <code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">a</span> <span class="pre">m</span></code> の型も持ちます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> conv_vec_0 (#a:Type) (v:vec a ((<span class="k">fun</span> x -&gt; x) 0))
+  : vec a 0
+  = v
+
+<span class="k">let</span> conv_vec_1 (#a:Type) (v:vec a ((<span class="k">fun</span> x -&gt; x + 1) 0))
+  : vec a 1
+  = v
+</pre></div>
+</div>
+<p>最初の例では関数適用、すなわち <span class="math notranslate nohighlight">\(\beta\)</span>-簡約の 1 ステップで十分です。2 つ目の例では <span class="math notranslate nohighlight">\(\beta\)</span>-簡約に続いて整数演算の 1 ステップが必要です。実際には、定義展開や条件分岐、再帰（fixpoint）の簡約など、定義的等価性の判定にあたってはあらゆる計算ステップが許されます。以下のコードは、2 つの項が定義的に等しいかどうかを判断する際に、F* が <code class="docutils literal notranslate"><span class="pre">factorial</span></code> 関数を暗黙に簡約する様子を示しています。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> factorial (n:nat)
+  : nat
+  = <span class="k">if</span> n = 0 <span class="k">then</span> 1
+    <span class="k">else</span> n * factorial (n - 1)
+
+<span class="k">let</span> conv_vec_6 (#a:Type) (v:vec a (factorial 3))
+  : vec a 6
+  = v
+</pre></div>
+</div>
+<p>もちろん、<code class="docutils literal notranslate"><span class="pre">vec</span></code> 型やその添字に特別な性質があるわけではありません。定義的等式はあらゆる場面に適用され、以下のとおり一般に機能します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> conv_int (x : (<span class="k">fun</span> b -&gt; <span class="k">if</span> b <span class="k">then</span> int <span class="k">else</span> bool) <span class="k">true</span>)
+  : int
+  = x + 1
+</pre></div>
+</div>
+<p>ここでは <code class="docutils literal notranslate"><span class="pre">x</span></code> に <code class="docutils literal notranslate"><span class="pre">1</span></code> を加える際、F* は <span class="math notranslate nohighlight">\(\beta\)</span>-簡約と場合分けを行い、暗黙に <code class="docutils literal notranslate"><span class="pre">x</span></code> の型を <code class="docutils literal notranslate"><span class="pre">int</span></code> へ変換します。</p>
+</section>
+<section id="propositional-equality">
+<h2>命題的等式<a class="headerlink" href="#propositional-equality" title="Link to this heading"></a></h2>
+<p>定義的等式は言語にとってあまりに基本的であるため、項の内部で「2 つの項が定義的に等しい」と述べる手段はありません。すなわち、論理の内部で 2 つの項が簡約で関係付けられることを表明することはできません。理論内で等しさを表す最も近い手段は、<em>可証等式</em>、すなわち命題的等式という概念です。</p>
+<p>命題を型と見なす観点については <a class="reference internal" href="../part1/part1.html#part1"><span class="std std-ref">本書の冒頭</span></a> で触れました。すなわち、型 <code class="docutils literal notranslate"><span class="pre">t</span></code> は命題（定理の主張）であり、<code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">:</span> <span class="pre">t</span></code> は定理 <code class="docutils literal notranslate"><span class="pre">t</span></code> の証明です。では、等式という命題に対応する型は何で、等式の証明はどのように表現されるのでしょうか。</p>
+<p>以下は、<code class="docutils literal notranslate"><span class="pre">x:a</span></code> と <code class="docutils literal notranslate"><span class="pre">y:a</span></code> の等しさという命題を表す帰納的型 <code class="docutils literal notranslate"><span class="pre">equals</span> <span class="pre">#a</span> <span class="pre">x</span> <span class="pre">y</span></code> の定義です。唯一のコンストラクタ <code class="docutils literal notranslate"><span class="pre">Reflexivity</span></code> が等式の証明を与えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> equals (#a:Type) : a -&gt; a -&gt; Type =
+  | Reflexivity : #x:a -&gt; equals x x
+</pre></div>
+</div>
+<p>簡単な等式証明はいくつか容易に作れます。2 つ目の例ではベクトルの時と同様、<code class="docutils literal notranslate"><span class="pre">equals</span> <span class="pre">6</span> <span class="pre">6</span></code> が定義的に <code class="docutils literal notranslate"><span class="pre">equals</span> <span class="pre">(factorial</span> <span class="pre">3)</span> <span class="pre">6</span></code> と等しいため、F* は <code class="docutils literal notranslate"><span class="pre">Reflexivity</span> <span class="pre">#_</span> <span class="pre">#6</span></code> を型 <code class="docutils literal notranslate"><span class="pre">equals</span> <span class="pre">(factorial</span> <span class="pre">3)</span> <span class="pre">6</span></code> の値として受理します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> z_equals_z
+  : equals 0 0
+  = Reflexivity
+
+<span class="k">let</span> fact_3_eq_6
+  : equals (factorial 3) 6
+  = Reflexivity #<span class="k">_</span> #6
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">equals</span></code> のコンストラクタは <code class="docutils literal notranslate"><span class="pre">Reflexivity</span></code> ひとつだけですが、以下のコードが示すように <code class="docutils literal notranslate"><span class="pre">equals</span></code> は実際には同値関係であり、反射性に加えて対称性と推移性も満たします。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> reflexivity #a (x:a)
+  : equals x x
+  = Reflexivity
+
+<span class="k">let</span> symmetry #a (x y : a) (pf:equals x y)
+  : equals y x
+  = Reflexivity
+
+<span class="k">let</span> transitivity #a (x y z : a) (pf1:equals x y) (pf2:equals y z)
+  : equals x z
+  = Reflexivity
+</pre></div>
+</div>
+<p>これは一見不思議に思えるかもしれません。なぜ反射性だけから対称性と推移性が導けるのでしょうか。その答えは、F* が帰納的型定義をどのように解釈するかにあります。</p>
+<p>具体的には、パラメータ列 <span class="math notranslate nohighlight">\(\overline{p}\)</span> を持つ帰納的型 <span class="math notranslate nohighlight">\(T~\overline{p}\)</span> に対し、F* は次の公理を含みます。すなわち任意の値 <span class="math notranslate nohighlight">\(v: T~\overline{p}\)</span> は <span class="math notranslate nohighlight">\(T\)</span> のいずれかのコンストラクタ <span class="math notranslate nohighlight">\(D\)</span> の適用 <span class="math notranslate nohighlight">\(D~\overline{v} : T~\overline{p'}\)</span> の形であり、<span class="math notranslate nohighlight">\(\overline{p} = \overline{p'}\)</span> が成り立つ、というものです。</p>
+<p>等式証明については、これによりあらゆる等式証明が実は <code class="docutils literal notranslate"><span class="pre">Reflexivity</span></code> のインスタンスであると結論付けられます（下記参照）。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> uip_refl #a (x y:a) (pf:equals x y)
+  : equals pf (Reflexivity #a #x)
+  = Reflexivity
+</pre></div>
+</div>
+<p>上の主張をよく見てください。戻り値の型自体が「等式証明に関する等式」を述べています。<code class="docutils literal notranslate"><span class="pre">uip_refl</span></code> の全ての暗黙引数を明示した版を書き下してみましょう。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> uip_refl_explicit #a (x y:a) (pf:equals x y)
+  : equals #(equals x y) pf (Reflexivity #a #x)
+  = Reflexivity #(equals x y) #(Reflexivity #a #x)
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<p>実際には、<code class="docutils literal notranslate"><span class="pre">uip_refl</span></code> から「すべての等式証明は互いに等しい」というより強い主張も証明できます。この性質は <em>同一性証明の一意性*（UIP）として知られ、F</em> を拡張的型理論たらしめる中心要素です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> uip #a (x y:a) (pf0 pf1:equals x y)
+  : equals pf0 pf1
+  = Reflexivity
+</pre></div>
+</div>
+<p>全てのプログラムの依存グラフで最初に現れる F* のモジュール <code class="docutils literal notranslate"><span class="pre">Prims</span></code> は、ここで示したとおり <code class="docutils literal notranslate"><span class="pre">equals</span></code> 型を定義しています。これまでの例で用いてきた可証等式述語 <code class="docutils literal notranslate"><span class="pre">(==)</span></code> は、下記のように「スクワッシュ（squash）された等式証明」にほかなりません。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ( == ) #a (x y : a) = squash (equals x y)
+</pre></div>
+</div>
+<p>以降は、反射性の証明を強調したい場面を除き、主にスクワッシュされた等式を用います。</p>
+</section>
+<section id="equality-reflection">
+<h2>等式反映（Equality Reflection）<a class="headerlink" href="#equality-reflection" title="Link to this heading"></a></h2>
+<p>F* を <em>拡張的</em> 型理論たらしめ（Coq・Lean・Agda などの <em>内包的</em> 型理論と異なる）特徴が、等式反映です。内包的理論では定義的等式と可証等式を別物として扱いますが、F* では可証等式で等しい項は定義的にも等しいと見なします。すなわち、ある文脈で <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">==</span> <span class="pre">y</span></code> が導けるなら、<code class="docutils literal notranslate"><span class="pre">x</span></code> は定義的にも <code class="docutils literal notranslate"><span class="pre">y</span></code> と等しいのです。これは広範な影響を持ちます。</p>
+<section id="implicit-conversions-using-provable-equalities">
+<h3>可証等式による暗黙変換<a class="headerlink" href="#implicit-conversions-using-provable-equalities" title="Link to this heading"></a></h3>
+<p>章頭で述べたように、<code class="docutils literal notranslate"><span class="pre">v:vec</span> <span class="pre">a</span> <span class="pre">((fun</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">x)</span> <span class="pre">0)</span></code> は合同性と簡約により暗黙に <code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">a</span> <span class="pre">0</span></code> に変換できます。さらに以下の例が示すように、文脈内で <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">==</span> <span class="pre">b</span></code> が導けるなら、<code class="docutils literal notranslate"><span class="pre">v:a</span></code> は暗黙に型 <code class="docutils literal notranslate"><span class="pre">b</span></code> へ変換できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> pconv_vec_z (#a:Type) (#n:nat) (<span class="k">_</span>:(n == 0)) (v:vec a n)
+  : vec a 0
+  = v
+
+<span class="k">let</span> pconv_vec_nm (#a:Type) (#n #m:nat) (<span class="k">_</span>:(n == m)) (v:vec a n)
+  : vec a m
+  = v
+
+<span class="k">let</span> pconv_int (#a:Type) (<span class="k">_</span>:(a == int)) (x:a)
+  : int
+  = x + 1
+
+<span class="k">let</span> pconv_ab (#a #b:Type) (<span class="k">_</span>:(a == b)) (v:a)
+  : b
+  = v
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">==</span> <span class="pre">b</span></code> の証明が文字通り文脈に束縛されている必要はありません。下の例のように、仮定 <code class="docutils literal notranslate"><span class="pre">h</span></code> はプログラムの制御フローと組み合わされ、<code class="docutils literal notranslate"><span class="pre">then</span></code> 節では <code class="docutils literal notranslate"><span class="pre">aa</span> <span class="pre">:</span> <span class="pre">int</span></code>、<code class="docutils literal notranslate"><span class="pre">else</span></code> 節では <code class="docutils literal notranslate"><span class="pre">bb</span> <span class="pre">:</span> <span class="pre">int</span></code> を導くために利用されます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> pconv_der (#a #b:Type)
+              (x y:int)
+              (h:((x &gt; 0 ==&gt; a == int) /\
+                  (y &gt; 0 ==&gt; b == int) /\
+                  (x &gt; 0 \/ y &gt; 0)))
+              (aa:a)
+              (bb:b)
+  : int
+  = <span class="k">if</span> x &gt; 0 <span class="k">then</span> aa - 1 <span class="k">else</span> bb + 1
+</pre></div>
+</div>
+<p>実のところ、この等式証明の理解により、F* における場合分けの動作をより明確に説明できます。上のコードでは、<code class="docutils literal notranslate"><span class="pre">then</span></code> 節は <code class="docutils literal notranslate"><span class="pre">h_then:</span> <span class="pre">squash</span> <span class="pre">(equals</span> <span class="pre">(x</span> <span class="pre">&gt;</span> <span class="pre">0)</span> <span class="pre">true)</span></code> を含む文脈で型検査され、<code class="docutils literal notranslate"><span class="pre">else</span></code> 節は <code class="docutils literal notranslate"><span class="pre">h_else:</span> <span class="pre">squash</span> <span class="pre">(equals</span> <span class="pre">(x</span> <span class="pre">&gt;</span> <span class="pre">0)</span> <span class="pre">false)</span></code> を含む文脈で型検査されます。これらの制御フロー由来の仮定が、文脈の他の情報（特に仮定 <code class="docutils literal notranslate"><span class="pre">h</span></code>）と組み合わさることで、各分岐で <code class="docutils literal notranslate"><span class="pre">(a</span> <span class="pre">==</span> <span class="pre">int)</span></code> と <code class="docutils literal notranslate"><span class="pre">(b</span> <span class="pre">==</span> <span class="pre">int)</span></code> を導き、対応して <code class="docutils literal notranslate"><span class="pre">aa</span></code> と <code class="docutils literal notranslate"><span class="pre">bb</span></code> の型を変換できるのです。</p>
+</section>
+<section id="undecidability-and-weak-normalization">
+<h3>決定不能性と弱正規化<a class="headerlink" href="#undecidability-and-weak-normalization" title="Link to this heading"></a></h3>
+<p>可証等式に基づく暗黙変換は非常に便利で、ここまでのほとんど全ての例（リストの基本からベクトル、Merkle 木まで）で、意識せずに頼ってきました。これは F* に実用的・プログラミング指向の風味を与える重要な要素だと言えるでしょう。</p>
+<p>とはいえ前述のとおり、一般には与えられた文脈で <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">==</span> <span class="pre">b</span></code> が導けるかどうかは決定不能です。実務上は SMT ソルバを用いることで、F* が可証等式をしばしば見抜いて変換してくれますが、常にそうできるわけではありません。そのような場合に備え、標準ライブラリ（FStar.Pervasives）には <code class="docutils literal notranslate"><span class="pre">coerce_eq</span> <span class="pre">pf</span> <span class="pre">x</span></code> という原始操作があり、等式証明 <code class="docutils literal notranslate"><span class="pre">pf</span></code> を用いて <code class="docutils literal notranslate"><span class="pre">x</span></code> の型を明示的に変換できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> coerce_eq (#a #b:Type) (<span class="k">_</span>:squash (a == b)) (x:a) : b = x
+</pre></div>
+</div>
+<p>等式反映のもう一つの帰結は、強正規化の喪失です。内包的型理論は、評価順序に依らず全ての項が正規形に到達するという良い性質を持ちますが、F* にはそれがありません。評価順序によっては無限に簡約が続く項が存在し得るからです。ただし F* のメタ理論は、<code class="docutils literal notranslate"><span class="pre">Tot</span></code> 効果に属する閉項（自由変数を持たない項）は無限簡約しないこと、そしてその系として <code class="docutils literal notranslate"><span class="pre">False</span></code> の閉な証明は存在しないことを示しています。</p>
+<p>F* は開いた項の簡約で無限ループに陥らないよう様々なヒューリスティクスを備えていますが、工夫すれば簡約器を永久にループさせる例を作ることも可能です。したがって、（開いているかもしれない）項同士が同一の正規形を持つかの判定も、F* では決定不能です。</p>
+</section>
+</section>
+<section id="functional-extensionality">
+<span id="part2-funext"></span><h2>関数の拡張性（Functional Extensionality）<a class="headerlink" href="#functional-extensionality" title="Link to this heading"></a></h2>
+<p>関数の拡張性は、点ごとに等しい関数は可証的に等しいと主張する原理です。すなわち、関数 <span class="math notranslate nohighlight">\(f\)</span> と <span class="math notranslate nohighlight">\(g\)</span> に対し、<span class="math notranslate nohighlight">\(\forall x. f x == g x\)</span> ならば <span class="math notranslate nohighlight">\(f == g\)</span> を意味します。</p>
+<p>この原理は F* でも定理として証明できますが、関数リテラル、すなわち同等に <span class="math notranslate nohighlight">\(\eta\)</span> 展開された関数に限られます。言い換えると、以下は F* における定理です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> eta (#a:Type) (#b: a -&gt; Type) (f: (x:a -&gt; b x)) = <span class="k">fun</span> x -&gt; f x
+<span class="k">let</span> funext_on_eta (#a : Type) (#b: a -&gt; Type) (f g : (x:a -&gt; b x))
+                  (hyp : (x:a -&gt; <span class="k">Lemma</span> (f x == g x)))
+  : squash (eta f == eta g)
+  = <span class="k">_</span> <span class="k">by</span> (norm [delta_only [`%eta]];
+          pointwise (<span class="k">fun</span> <span class="k">_</span> -&gt;
+             try_with
+                     (<span class="k">fun</span> <span class="k">_</span> -&gt; mapply (quote hyp))
+                     (<span class="k">fun</span> <span class="k">_</span> -&gt; trefl()));
+           trefl())
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>注意：この定理の証明にはタクティクス（後の章で扱います）を用います。現時点で詳細を理解する必要はありません。おおまかには、目標の各部分項に降りて、点ごとの等しさという仮定 <code class="docutils literal notranslate"><span class="pre">hyp</span></code> を使って書き換えを試み、失敗した部分項はそのまま自明な書き換えを行う、という流れです。</p>
+</div>
+<p>残念ながら、関数の拡張性は全ての関数に適用できるわけではありません。すなわち、次の主張は F* では証明できず、公理として仮定しても健全ではありません。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> funext =
+  #a:Type -&gt;
+  #b:(a -&gt; Type) -&gt;
+  f:(x:a -&gt; b x) -&gt;
+  g:(x:a -&gt; b x) -&gt;
+  <span class="k">Lemma</span> (<span class="k">requires</span> (<span class="k">forall</span> (x:a). f x == g x))
+        (<span class="k">ensures</span> f == g)
+</pre></div>
+</div>
+<p>問題点は次の反例で示されます。ここでは <code class="docutils literal notranslate"><span class="pre">funext</span></code> が成り立つ文脈から <code class="docutils literal notranslate"><span class="pre">False</span></code> を導けてしまいます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> f (x:nat) : int = 0
+<span class="k">let</span> g (x:nat) : int = <span class="k">if</span> x = 0 <span class="k">then</span> 1 <span class="k">else</span> 0
+<span class="k">let</span> pos = x:nat{x &gt; 0}
+<span class="k">let</span> full_funext_false (ax:funext)
+  : False
+  = ax #pos f g;
+    <span class="k">assert</span> (f == g);
+    <span class="k">assert</span> (f 0 == g 0);
+    false_elim()
+</pre></div>
+</div>
+<p>証明は精密化部分型（refinement subtyping）との相互作用を突きます。<code class="docutils literal notranslate"><span class="pre">f</span></code> と <code class="docutils literal notranslate"><span class="pre">g</span></code> は自然数全域では明らかに点ごとに等しくありませんが、正の自然数の上では点ごとに等しいとします。ところが <code class="docutils literal notranslate"><span class="pre">ax</span> <span class="pre">#pos</span> <span class="pre">f</span> <span class="pre">g</span></code> から <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">==</span> <span class="pre">g</span></code> が得られ、特に <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">0</span> <span class="pre">==</span> <span class="pre">g</span> <span class="pre">0</span></code> も従いますが、これは偽です。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>問題の一因は、<code class="docutils literal notranslate"><span class="pre">ax:funext</span></code> が <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">(equals</span> <span class="pre">#(pos</span> <span class="pre">-&gt;</span> <span class="pre">int)</span> <span class="pre">f</span> <span class="pre">g)</span></code> を示すにもかかわらず、F* が SMT ソルバへ等式を（型なしの等式として）エンコードする際に、それを <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">(equals</span> <span class="pre">#(nat</span> <span class="pre">-&gt;</span> <span class="pre">int)</span> <span class="pre">f</span> <span class="pre">g)</span></code> として扱ってしまう点にあります。これが矛盾を招きます。</p>
+</div>
+<p>さらに、F* では <span class="math notranslate nohighlight">\(\eta\)</span> 同値な関数は可証的に等しいとは見なされません。もし見なされると、<code class="docutils literal notranslate"><span class="pre">funext_on_eta</span></code> と組み合わせることで <span class="math notranslate nohighlight">\(\eta\)</span> 同値の原理から <code class="docutils literal notranslate"><span class="pre">funext_false</span></code> と同様の矛盾が生じてしまうためです（下記参照）。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> eta_equiv =
+  #a:Type -&gt;
+  #b:(a -&gt; Type) -&gt;
+  f:(x:a -&gt; b x) -&gt;
+  <span class="k">Lemma</span> (f == eta f)
+
+<span class="k">let</span> eta_equiv_false (ax:eta_equiv)
+  : False
+  = funext_on_eta #pos f g (<span class="k">fun</span> x -&gt; ());
+    ax #pos f;
+    ax #pos g;
+    <span class="k">assert</span> (f == g);
+    <span class="k">assert</span> (f 0 == g 0);
+    false_elim()
+</pre></div>
+</div>
+<p>標準ライブラリのモジュール <code class="docutils literal notranslate"><span class="pre">FStar.FunctionalExtensionality</span></code> には、<span class="math notranslate nohighlight">\(\eta\)</span> 展開された関数に対する関数拡張性を扱うための解説とユーティリティが含まれています。</p>
+<p>関数拡張性に関する多くの洞察と議論を寄せてくださった Aseem Rastogi と Dominique Unruh に特に感謝します。</p>
+</section>
+<section id="exercise">
+<h2>練習問題<a class="headerlink" href="#exercise" title="Link to this heading"></a></h2>
+<p>ライプニッツの等式 <code class="docutils literal notranslate"><span class="pre">leq</span> <span class="pre">x</span> <span class="pre">y</span></code> は、任意の述語 <code class="docutils literal notranslate"><span class="pre">p:a</span> <span class="pre">-&gt;</span> <span class="pre">Type</span></code> について <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">x</span></code> ならば <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">y</span></code> が成り立つときに、<code class="docutils literal notranslate"><span class="pre">x:a</span></code> と <code class="docutils literal notranslate"><span class="pre">y:a</span></code> を関係付けます。つまり、どの述語でも <code class="docutils literal notranslate"><span class="pre">x</span></code> と <code class="docutils literal notranslate"><span class="pre">y</span></code> を区別できないならば、それらは等しいということです。</p>
+<p>ライプニッツの等式を定義し、それが同値関係であることを証明しなさい。</p>
+<p>さらに、上で定義した等式述語 <code class="docutils literal notranslate"><span class="pre">equals</span> <span class="pre">x</span> <span class="pre">y</span></code> とライプニッツの等式が、<code class="docutils literal notranslate"><span class="pre">leq</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">-&gt;</span> <span class="pre">equals</span> <span class="pre">x</span> <span class="pre">y</span></code> および <code class="docutils literal notranslate"><span class="pre">equals</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">-&gt;</span> <span class="pre">leq</span> <span class="pre">x</span> <span class="pre">y</span></code> の意味で同型であることを証明しなさい。</p>
+<p><a class="reference external" href="../code/exercises/Part2.Leibniz.fst">演習ファイル</a></p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>ヒント</strong></p>
+<p>ライプニッツの等式については、Agda による実装手順を説明した <a class="reference external" href="https://plfa.github.io/Equality/">こちら</a> の節が参考になります。</p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> lbz_eq (#a:Type) (x y:a) = p:(a -&gt; Type) -&gt; p x -&gt; p y
+
+<span class="c">// lbz_eq is an equivalence relation</span>
+<span class="k">let</span> lbz_eq_refl #a (x:a)
+  : lbz_eq x x
+  = <span class="k">fun</span> p px -&gt; px
+<span class="k">let</span> lbz_eq_trans #a (x y z:a) (pf1:lbz_eq x y) (pf2:lbz_eq y z)
+  : lbz_eq x z
+  = <span class="k">fun</span> p px -&gt; pf2 p (pf1 p px)
+<span class="k">let</span> lbz_eq_sym #a (x y:a) (pf:lbz_eq x y)
+  : lbz_eq y x
+  = <span class="k">fun</span> p -&gt; pf (<span class="k">fun</span> (z:a) -&gt; (p z -&gt; p x)) (<span class="k">fun</span> (px: p x) -&gt; px)
+
+<span class="c">// equals and lbz_eq are isomorphic</span>
+<span class="k">let</span> equals_lbz_eq (#a:Type) (x y:a) (pf:equals x y)
+  : lbz_eq x y
+  = <span class="k">fun</span> p px -&gt; px
+<span class="k">let</span> lbz_eq_equals (#a:Type) (x y:a) (pf:lbz_eq x y)
+  : equals x y
+  = pf (<span class="k">fun</span> (z:a) -&gt; equals x z) Reflexivity
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+</section>
+<section id="decidable-equality-and-equality-qualifiers">
+<span id="part2-equality-qualifiers"></span><h2>判定可能な等式と等式修飾子<a class="headerlink" href="#decidable-equality-and-equality-qualifiers" title="Link to this heading"></a></h2>
+<p>章の最後に、F* における 3 つ目の等式、すなわち多相的な <em>判定可能な等式</em> を扱います。そのシグネチャは F* のモジュール <code class="docutils literal notranslate"><span class="pre">Prims</span></code> から次のように与えられます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> ( = ) (#a:eqtype) (x y:a) : bool
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">eqtype``（すなわち</span> <span class="pre">``a:Type{hasEq</span> <span class="pre">a}</span></code>）に対しては、判定的等式 <code class="docutils literal notranslate"><span class="pre">(=)</span></code> と可証等式は一致します（下記参照）。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> dec_equals (#a:eqtype) (x y:a) (<span class="k">_</span>:squash (x = y))
+  : equals x y
+  = Reflexivity
+
+<span class="k">let</span> equals_dec (#a:eqtype) (x y:a) (<span class="k">_</span>:equals x y)
+  : squash (x = y)
+  = ()
+</pre></div>
+</div>
+<p>つまり <code class="docutils literal notranslate"><span class="pre">eqtype</span></code> のクラスに対しては、<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">y</span></code> は等しさを判定する真偽値を返します。判定可能な等式と <code class="docutils literal notranslate"><span class="pre">eqtype</span></code> については <a class="reference internal" href="../part1/part1_equality.html#part1-equality"><span class="std std-ref">前の章</span></a> で触れたとおり、<code class="docutils literal notranslate"><span class="pre">int</span></code> や <code class="docutils literal notranslate"><span class="pre">bool</span></code> などのいくつかの基本型は <code class="docutils literal notranslate"><span class="pre">hasEq</span></code> を満たし、したがって <code class="docutils literal notranslate"><span class="pre">eqtype</span></code> のインスタンスです。</p>
+<p>新しい帰納的型を導入するとき、F* はその型の値の表現に対する構造的等価性に基づいて、判定可能な等式をサポートするかどうかを判定しようとします。サポートされる場合、その型は <code class="docutils literal notranslate"><span class="pre">eqtype</span></code> と見なされ、<code class="docutils literal notranslate"><span class="pre">(</span> <span class="pre">=</span> <span class="pre">)</span></code> 演算子の使用は、選択したターゲット言語（OCaml、F#、C など）が提供する値の構造的比較へとコンパイルされます。</p>
+<p>型が判定可能な等式をサポートするかどうかを判断する基準は次のとおりです。</p>
+<p>パラメータ <span class="math notranslate nohighlight">\(\overline{p}\)</span> とインデックス <span class="math notranslate nohighlight">\(\overline{q}\)</span> を持つ帰納的型 <span class="math notranslate nohighlight">\(T\)</span> が与えられ、各コンストラクタ <span class="math notranslate nohighlight">\(D\)</span> が引数 <span class="math notranslate nohighlight">\(\overline{v:t_v}\)</span> を取るとします。</p>
+<ol class="arabic simple">
+<li><p>仮定 1：すべての型パラメータ <span class="math notranslate nohighlight">\(t \in \overline{p}\)</span> について <span class="math notranslate nohighlight">\(\mathsf{hasEq}~t\)</span> が成り立つ。</p></li>
+<li><p>仮定 2（再帰型の場合）：すべての <span class="math notranslate nohighlight">\(\overline{q}\)</span> について <span class="math notranslate nohighlight">\(\mathsf{hasEq}~(T~\overline{p}~\overline{q})\)</span> が成り立つ。</p></li>
+<li><p>判定：すべての引数 <span class="math notranslate nohighlight">\(\overline{v:t_v}\)</span> に対して <span class="math notranslate nohighlight">\(\mathsf{hasEq}~t_v\)</span> を証明する。</p></li>
+</ol>
+<p>ステップ 3 の証明がすべてのコンストラクタで成功すれば、F* は次の公理を導入します：<span class="math notranslate nohighlight">\(\forall~\overline{p}~\overline{q}. (\forall t \in \overline{p}. \mathsf{hasEq}~t) \Rightarrow \mathsf{hasEq}~(T~\overline{p}~\overline{q})\)</span>。</p>
+<p>いずれかのコンストラクタでステップ 3 が失敗した場合、F* はエラーを報告します。その際、ユーザーは型に次のいずれかの修飾子を付けることで対応できます。</p>
+<ol class="arabic">
+<li><p><code class="docutils literal notranslate"><span class="pre">noeq</span></code>：この修飾子は、その型が判定可能な等式をサポートしないと F* に指示します。例えばコンストラクタの一つが関数を含む場合などに用います（下記参照）。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> itree (a:Type) =
+  | End : itree a
+  | Node : hd:nat -&gt; tl:(nat -&gt; itree a) -&gt; itree a
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unopteq</span></code>：この修飾子は、型パラメータの一部が <code class="docutils literal notranslate"><span class="pre">eqtype</span></code> でない場合でも、与えられた具体的インスタンスが等式をサポートするかどうかを F* に個別判断させます。次のような状況で有用です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">unopteq</span>
+<span class="k">type</span> t (f: Type -&gt; Type) =
+  | T : f bool -&gt; t f
+
+<span class="k">let</span> <span class="k">_</span> = <span class="k">assert</span> (hasEq (t list))
+
+[@@expect_failure]
+<span class="k">let</span> <span class="k">_</span> = <span class="k">assert</span> (hasEq (<span class="k">fun</span> x -&gt; x -&gt; x))
+</pre></div>
+</div>
+</li>
+</ol>
+<p>帰納的型に対する等式修飾子の詳細は、<a class="reference external" href="https://github.com/FStarLang/FStar/wiki/Deriving-hasEq-predicate-for-inductive-types,-and-types-of-equalities-in-F*">この wiki ページ</a> を参照してください。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part2_merkle.html" class="btn btn-neutral float-left" title="Merkle 木" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part2_logical_connectives.html" class="btn btn-neutral float-right" title="構成的連言と古典的連言（論理結合子）" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

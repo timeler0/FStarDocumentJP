@@ -1,0 +1,201 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pulse: 並行分離論理における証明指向プログラミング &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="Codespaces でのセットアップ手順" href="pulse_getting_started.html" />
+    <link rel="prev" title="タクティクス概観" href="../part5/part5_meta.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pulse: 並行分離論理における証明指向プログラミング</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Pulse: 並行分離論理における証明指向プログラミング</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="pulse-proof-oriented-programming-in-concurrent-separation-logic">
+<span id="partpulse"></span><h1>Pulse: 並行分離論理における証明指向プログラミング<a class="headerlink" href="#pulse-proof-oriented-programming-in-concurrent-separation-logic" title="Link to this heading"></a></h1>
+<p>多くの F* プロジェクトでは、特殊化されたプログラミングおよび証明サポートを備えたドメイン固有言語（DSL）を構築します。例えば、<a class="reference external" href="https://github.com/project-everest/vale">Vale</a> は構造化アセンブリ言語のプログラム証明を、<a class="reference external" href="https://fstarlang.github.io/lowstar/html/">Low*</a> は C 風メモリモデルの副作用的プログラミングを、<a class="reference external" href="https://github.com/project-everest/everparse">EverParse</a> は低レベルのパーサ／シリアライザ記述用 DSL を提供します。近年 F* は、<em>Pulse</em> をショーケースとするような、F* に埋め込まれた DSL を構築するためのカスタム構文・型チェッカプラグイン・抽出サポートなどの新機能を獲得しました。</p>
+<p>Pulse は F* に埋め込まれた新しいプログラミング言語で、（高階性や依存型など）F* の多くの機能を受け継ぎつつ、可変状態と並行性を伴うプログラミングを、<a class="reference external" href="https://en.wikipedia.org/wiki/Separation_logic">並行分離論理</a> による仕様と証明とともに標準でサポートします。</p>
+<p>まずは Pulse の味見として、可変な整数参照をインクリメントする関数を示します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> incr (x:ref int)
+<span class="k">requires</span> pts_to x &#39;i
+<span class="k">ensures</span> pts_to x (&#39;i + 1)
+{
+    <span class="k">let</span> v = !x;
+    x := v + 1;
+}
+</pre></div>
+</div>
+<p>そして、2 つの参照を並行にインクリメントする関数がこちらです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> par_incr (x y:ref int)
+<span class="k">requires</span> pts_to x &#39;i ** pts_to y &#39;j
+<span class="k">ensures</span> pts_to x (&#39;i + 1) ** pts_to y (&#39;j + 1)
+{
+   par (<span class="k">fun</span> <span class="k">_</span> -&gt; incr x)
+       (<span class="k">fun</span> <span class="k">_</span> -&gt; incr y)
+}
+</pre></div>
+</div>
+<p>分離論理に馴染みがないかもしれませんが、これらの仕様は直感的に理解できるはずです。<code class="docutils literal notranslate"><span class="pre">incr</span></code> の型は、初期状態で「x が 'i を指している」なら、<code class="docutils literal notranslate"><span class="pre">incr</span></code> の返却時には「x が 'i + 1 を指している」と述べています。一方 <code class="docutils literal notranslate"><span class="pre">par_incr</span></code> は <code class="docutils literal notranslate"><span class="pre">par</span></code> コンビネータを用いて <code class="docutils literal notranslate"><span class="pre">x</span></code> と <code class="docutils literal notranslate"><span class="pre">y</span></code> の内容を並行にインクリメントします。</p>
+<p>並行分離論理は活発な研究分野であり、さまざまな論理が提案され、それぞれにトレードオフがあります。最先端は <a class="reference external" href="https://iris-project.org/">Iris</a> で、高階かつ非正則的（impredicative）な分離論理です。Pulse は Iris から着想を得て多くの点で類似していますが、F* の内部だけで形式化された PulseCore という論理に基づいています――形式化は <a class="reference external" href="https://github.com/FStarLang/pulse/tree/main/lib/pulse/core">こちら</a> にあります。Pulse の表面言語でのプログラムの証明は、PulseCore のプログラム論理での正しさの証明に対応します。ただし、Pulse を有効に使うために形式化の詳細を深く知る必要はありません。基礎から始めて、Pulse でプログラミングと証明を行うのに必要な並行分離論理の要点を説明します。また、Pulse は F* の拡張なので、F*、補題、依存型、篩型（refinement types）などについて学んだことはそのまま役立ちます。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>なぜ “Pulse” という名前なのでしょう？ それは、以前の論理 <a class="reference external" href="https://fstar-lang.org/papers/steel/">Steel</a> から発展したものであり、著者の一人とその娘がクラシックなレゲエバンド <a class="reference external" href="https://steelpulse.com/">Steel Pulse</a> の大ファンだからです。Steel よりも柔らかく、少し遊び心のある名前にしたかった――それで “Pulse” になりました。</p>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">目次:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../part5/part5_meta.html" class="btn btn-neutral float-left" title="タクティクス概観" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_getting_started.html" class="btn btn-neutral float-right" title="Codespaces でのセットアップ手順" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,735 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>構成的連言と古典的連言（論理結合子） &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="単純型付きラムダ計算（STLC）" href="part2_stlc.html" />
+    <link rel="prev" title="等式型" href="part2_equality.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part2.html">帰納的型によるデータ・証明・計算の表現</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part2_inductive_type_families.html">帰納的型の定義</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_vectors.html">長さインデックス付きリスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_merkle.html">Merkle 木</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_equality.html">等式型</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">構成的連言と古典的連言（論理結合子）</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#falsehood">偽（False）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#introduction">導入</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#elimination">除去</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#truth">真（True）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">導入</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">除去</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#conjunction">連言（AND）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">導入</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">除去</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#disjunction">選言（OR）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">導入</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">除去</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#implication">含意（Implication）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id7">導入</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">除去</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#negation">否定</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#introduction-exercise">導入（演習）</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#elimination-exercise">除去（演習）</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#universal-quantification">全称量化</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id9">導入</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">除去</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#existential-quantification">存在量化</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id11">導入</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12">除去</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exercise">練習問題</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part2_stlc.html">単純型付きラムダ計算（STLC）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_phoas.html">高階抽象構文（HOAS）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_well_founded.html">良基底関係と停止性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_par.html">計算効果の最初のモデル</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_universes.html">ユニバース（Universes）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+      <li class="breadcrumb-item active">構成的連言と古典的連言（論理結合子）</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="constructive-classical-connectives">
+<span id="part2-connectives"></span><h1>構成的連言と古典的連言（論理結合子）<a class="headerlink" href="#constructive-classical-connectives" title="Link to this heading"></a></h1>
+<p><a class="reference internal" href="../part1/part1_prop_assertions.html#part1-prop-connectives"><span class="std std-ref">前の章</span></a> では、命題論理の結合子 <span class="math notranslate nohighlight">\(\forall, \exists, \Rightarrow, \iff, \wedge, \vee, \neg\)</span> などを学びました。他の論理体系ではこれらは原始的記号ですが、F* のような型理論では、これらは帰納的型や関数型から構成される「定義された概念」です。本節では、これらの論理結合子を詳しく見て、その定義を示し、証明で扱うためのユーティリティを紹介します。</p>
+<p>各論理結合子には 2 つの側面があります。1 つは最も基本的な形で、帰納的型や矢印型として定義され、結合子に構成的解釈を与えるもの。もう 1 つは F* で一般的に用いられる <a href="#id1"><span class="problematic" id="id2">*</span></a>スクワッシュ*（証明無関係）版で、こちらは構成的というより古典的で、不完全な証明項を書き、SMT ソルバが不足部分を補って導出します。</p>
+<p>各結合子には <em>導入</em> 規則（その結合子の証明の作り方）と <em>除去</em> 規則（その証明を使って別の証明を作る方法）があります。全ての結合子に対する導入・除去の例は <a class="reference external" href="https://github.com/FStarLang/FStar/blob/master/tests/micro-benchmarks/ClassicalSugar.fst">ClassicalSugar.fst</a> にあります。</p>
+<p>これらの型はすべて、すべての F* プログラムで最初に読み込まれる <code class="docutils literal notranslate"><span class="pre">Prims</span></code> に定義されています。</p>
+<section id="falsehood">
+<h2>偽（False）<a class="headerlink" href="#falsehood" title="Link to this heading"></a></h2>
+<p>帰納的型 <code class="docutils literal notranslate"><span class="pre">empty</span></code> は、証明を一切持たない命題です。F* の論理的一貫性は、型 <code class="docutils literal notranslate"><span class="pre">empty</span></code> を持つ閉項が存在しないことに依存します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> empty =
+</pre></div>
+</div>
+<p>この定義は一見奇妙に思えるかもしれません。コンストラクタが <em>0 個</em> の帰納的型を定義しているからです。しかしこれは OCaml や F# と違い、F* では正当な定義です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">empty</span></code> のスクワッシュ版は <code class="docutils literal notranslate"><span class="pre">False</span></code> と呼ばれ、次のように定義されます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> False = squash empty
+</pre></div>
+</div>
+<section id="introduction">
+<h3>導入<a class="headerlink" href="#introduction" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">False</span></code> は証明を持たないため、導入規則は存在しません。</p>
+</section>
+<section id="elimination">
+<h3>除去<a class="headerlink" href="#elimination" title="Link to this heading"></a></h3>
+<p>（仮想的に）``False`` の証明があれば、任意の型の証明を構成できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> empty_elim (#a:Type) (x:empty) : a = <span class="k">match</span> x <span class="k">with</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">elim_false</span></code> の本体は分岐のない <code class="docutils literal notranslate"><span class="pre">match</span></code> 式で、<code class="docutils literal notranslate"><span class="pre">empty</span></code> 型の要素数 0 の全ケースに対するマッチとして十分です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">FStar.Pervasives.false_elim</span></code> は <code class="docutils literal notranslate"><span class="pre">False</span></code> に対する同様の除去規則を提供します。<code class="docutils literal notranslate"><span class="pre">x:False</span></code> がある文脈では再帰呼び出しの終了性検査は自明に通ります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> false_elim (#a:Type) (x:False) : a = false_elim x
+</pre></div>
+</div>
+</section>
+</section>
+<section id="truth">
+<h2>真（True）<a class="headerlink" href="#truth" title="Link to this heading"></a></h2>
+<p>帰納的型 <code class="docutils literal notranslate"><span class="pre">trivial</span></code> にはただ 1 つの証明 <code class="docutils literal notranslate"><span class="pre">T</span></code> だけがあります。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span> <span class="n">trivial</span> <span class="o">=</span> <span class="n">T</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">trivial</span></code> は唯一の要素 <code class="docutils literal notranslate"><span class="pre">()</span></code> を持つ <code class="docutils literal notranslate"><span class="pre">unit</span></code> 型と同型ですが、歴史的経緯から F* では自明な証明を <code class="docutils literal notranslate"><span class="pre">trivial</span></code> で表してきました。将来的には <code class="docutils literal notranslate"><span class="pre">unit</span></code> に置き換わる可能性があります。</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">trivial</span></code> のスクワッシュ版は <code class="docutils literal notranslate"><span class="pre">True</span></code> と書かれ、次のように定義されます。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">let</span> <span class="kc">True</span> <span class="o">=</span> <span class="n">squash</span> <span class="n">trivial</span>
+</pre></div>
+</div>
+<section id="id1">
+<h3>導入<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>構成的版とスクワッシュ版のいずれも導入は自明です。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">let</span> <span class="n">_</span> <span class="p">:</span> <span class="n">trivial</span> <span class="o">=</span> <span class="n">T</span>
+<span class="n">let</span> <span class="n">_</span> <span class="p">:</span> <span class="kc">True</span> <span class="o">=</span> <span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h3>除去<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">trivial</span></code> の証明は空虚で、他の証明を導出するのに使えないため、除去規則はありません。</p>
+</section>
+</section>
+<section id="conjunction">
+<h2>連言（AND）<a class="headerlink" href="#conjunction" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">p</span></code> かつ <code class="docutils literal notranslate"><span class="pre">q</span></code> の構成的証明は、<code class="docutils literal notranslate"><span class="pre">p</span></code> の証明と <code class="docutils literal notranslate"><span class="pre">q</span></code> の証明をそれぞれ含む対（ペア）です。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span> <span class="n">pair</span> <span class="p">(</span><span class="n">p</span> <span class="n">q</span><span class="p">:</span><span class="n">Type</span><span class="p">)</span> <span class="o">=</span> <span class="o">|</span> <span class="n">Pair</span> <span class="p">:</span> <span class="n">_1</span><span class="p">:</span><span class="n">p</span> <span class="o">-&gt;</span> <span class="n">_2</span><span class="p">:</span><span class="n">q</span> <span class="o">-&gt;</span> <span class="n">pair</span> <span class="n">p</span> <span class="n">q</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>この型は、以前 <a class="reference internal" href="../part1/part1_inductives.html#part1-tuples"><span class="std std-ref">こちら</span></a> で見たタプル型 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">&amp;</span> <span class="pre">q</span></code> と同型です。現在 F* では、証明用のペアとデータ用のペアを別型にしていますが、根本的な理由はありません。将来的には <code class="docutils literal notranslate"><span class="pre">pair</span></code> は通常のタプル型に置き換わる可能性があります。</p>
+</div>
+<p>連言のスクワッシュ版は <code class="docutils literal notranslate"><span class="pre">/\</span></code> と書かれ、次のように定義されます。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">let</span> <span class="p">(</span> <span class="o">/</span>\ <span class="p">)</span> <span class="p">(</span><span class="n">p</span> <span class="n">q</span><span class="p">:</span><span class="n">Type</span><span class="p">)</span> <span class="o">=</span> <span class="n">squash</span> <span class="p">(</span><span class="n">pair</span> <span class="n">p</span> <span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="id3">
+<h3>導入<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p>連言の導入は、単にペアを構成するだけです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> and_intro #p #q (pf_p:p) (pf_q:q)
+  : pair p q
+  = Pair pf_p pf_q
+</pre></div>
+</div>
+<p>スクワッシュ版の導入には 2 通りあります。1 つは SMT ソルバに任せ、<code class="docutils literal notranslate"><span class="pre">p</span></code> と <code class="docutils literal notranslate"><span class="pre">q</span></code> から <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">/\</span> <span class="pre">q</span></code> の証明を見つけてもらう方法で、通常はこれで十分です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> conj_intro #p #q (pf_p:squash p) (pf_q: squash q)
+  : <span class="k">Lemma</span> (p /\ q)
+  = ()
+</pre></div>
+</div>
+<p>あるいは、より細かな制御が必要なら、<code class="docutils literal notranslate"><span class="pre">FStar.Classical.Sugar</span></code> に定義された専用シンタックスで、各種の非自明な論理結合子を操作できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> conj_intro_sugar #p #q (pf_p:squash p) (pf_q: squash q)
+  : squash (p /\ q)
+  = <span class="k">introduce</span> p /\ q
+    <span class="k">with</span> pf_p
+    <span class="k">and</span>  pf_q
+</pre></div>
+</div>
+<p>糖衣構文を用いた連言の一般的な導入形は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">introduce</span> p /\ q <span class="c">//Term whose top-level connective is /\</span>
+<span class="k">with</span> proof_of_p  <span class="c">//proof_of_p : squash p</span>
+<span class="k">and</span>  proof_of_q  <span class="c">//proof_of_q : squash q</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h3>除去<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>連言の除去はペアの各成分への射影に対応する 2 通りの形をとります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> and_elim_1 #p #q (pf_pq:p &amp; q)
+  : p
+  = pf_pq._1
+
+<span class="k">let</span> and_elim_2 #p #q (pf_pq:p &amp; q)
+  : q
+  = pf_pq._2
+</pre></div>
+</div>
+<p>スクワッシュ版でも 2 つのスタイルがあり、1 つ目は SMT ソルバに任せる方法です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> conj_elim_1 #p #q (pf_pq:squash (p /\ q))
+  : squash p
+  = ()
+
+<span class="k">let</span> conj_elim_2 #p #q (pf_pq:squash (p /\ q))
+  : squash q
+  = ()
+</pre></div>
+</div>
+<p>もう 1 つは糖衣構文を用いる方法です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> conj_elim_sugar_1 #p #q (pf_pq:squash (p /\ q))
+  : squash p
+  = <span class="k">eliminate</span> p /\ q
+    <span class="k">returns</span> p
+    <span class="k">with</span> pf_p pf_q. pf_p
+
+<span class="k">let</span> conj_elim_sugar_2 #p #q (pf_pq:squash (p /\ q))
+  : squash p
+  = <span class="k">eliminate</span> p /\ q
+    <span class="k">returns</span> q
+    <span class="k">with</span> pf_p pf_q. pf_q
+</pre></div>
+</div>
+</section>
+</section>
+<section id="disjunction">
+<h2>選言（OR）<a class="headerlink" href="#disjunction" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">p</span></code> または <code class="docutils literal notranslate"><span class="pre">q</span></code> の構成的証明は、次の帰納的型で表されます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> sum (p q:Type) =
+  | Left : p -&gt; sum p q
+  | Right : q -&gt; sum p q
+</pre></div>
+</div>
+<p>コンストラクタ <code class="docutils literal notranslate"><span class="pre">Left</span></code> と <code class="docutils literal notranslate"><span class="pre">Right</span></code> は、<code class="docutils literal notranslate"><span class="pre">p</span></code> または <code class="docutils literal notranslate"><span class="pre">q</span></code> の証明を <code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">p</span> <span class="pre">q</span></code> の証明へと注入します。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>先ほどと同様に、これは <code class="docutils literal notranslate"><span class="pre">FStar.Pervasives</span></code> の <code class="docutils literal notranslate"><span class="pre">either</span> <span class="pre">p</span> <span class="pre">q</span></code> と同型です。</p>
+</div>
+<p>前述の古典的結合子 <code class="docutils literal notranslate"><span class="pre">\/</span></code> は、<code class="docutils literal notranslate"><span class="pre">sum</span></code> のスクワッシュ版にほかなりません。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ( \/ ) (p q: Type) = squash (sum p q)
+</pre></div>
+</div>
+<section id="id5">
+<h3>導入<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<p>他と同様、構成的な選言の導入は <code class="docutils literal notranslate"><span class="pre">Left</span></code> か <code class="docutils literal notranslate"><span class="pre">Right</span></code> のコンストラクタを使うだけです。</p>
+<p>スクワッシュ版 <code class="docutils literal notranslate"><span class="pre">\/</span></code> の導入は、以下のように SMT ソルバに任せることができます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> or_intro_left #p #q (pf_p:squash p)
+  : squash (p \/ q)
+  = ()
+
+<span class="k">let</span> or_intro_right #p #q (pf_q:squash q)
+  : squash (p \/ q)
+  = ()
+</pre></div>
+</div>
+<p>あるいは次の糖衣構文を使って、<code class="docutils literal notranslate"><span class="pre">Left</span></code> または <code class="docutils literal notranslate"><span class="pre">Right</span></code> のいずれかの側の証明を明示的に与えることもできます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> or_intro_sugar_left #p #q (pf_p:squash p)
+  : squash (p \/ q)
+  = <span class="k">introduce</span> p \/ q
+    <span class="k">with</span> Left pf_p
+
+<span class="k">let</span> or_intro_sugar_right #p #q (pf_q:squash q)
+  : squash (p \/ q)
+  = <span class="k">introduce</span> p \/ q
+    <span class="k">with</span> Right pf_q
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h3>除去<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<p>選言の除去には <a href="#id1"><span class="problematic" id="id2">*</span></a>動機*（<code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">p</span> <span class="pre">q</span></code> または <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">\/</span> <span class="pre">q</span></code> の証明から導きたい目標命題）が必要です。</p>
+<p>構成的スタイルでは、<code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">p</span> <span class="pre">q</span></code> の除去はケースに対するパターンマッチであり、適切な仮定を適用して目標の証明を構成します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> sum_elim #p #q #r (p_or_q: sum p q)
+                         (pr: p -&gt; r)
+                         (qr: q -&gt; r)
+  : r
+  = <span class="k">match</span> p_or_q <span class="k">with</span>
+    | Left p -&gt; pr p
+    | Right q -&gt; qr q
+</pre></div>
+</div>
+<p>スクワッシュ版でも同様ですが、場合分けは SMT による自動化か、糖衣構文による明示的な処理のどちらかで行えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> or_elim #p #q #r (pf_p:squash (p \/ q))
+                     (pf_pr:squash (p ==&gt; r))
+                     (pf_qr:squash (q ==&gt; r))
+  : squash r
+  = ()
+</pre></div>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> or_elim_sugar #p #q #r
+                  (pf_p:squash (p \/ q))
+                  (pf_pr:unit -&gt; <span class="k">Lemma</span> (<span class="k">requires</span> p) (<span class="k">ensures</span> r))
+                  (pf_qr:unit -&gt; <span class="k">Lemma</span> (<span class="k">requires</span> q) (<span class="k">ensures</span> r))
+  : squash r
+  = <span class="k">eliminate</span> p \/ q
+    <span class="k">returns</span> r
+    <span class="k">with</span> pf_p. pf_pr () <span class="c">//pf_p : squash p</span>
+    <span class="k">and</span>  pf_q. pf_qr () <span class="c">//pf_q : squash q</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="implication">
+<h2>含意（Implication）<a class="headerlink" href="#implication" title="Link to this heading"></a></h2>
+<p>選言の除去規則の 1 つでは、含意結合子 <code class="docutils literal notranslate"><span class="pre">==&gt;</span></code> を用います。その定義は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ( ==&gt; ) (p q : Type) = squash (p -&gt; q)
+</pre></div>
+</div>
+<p>つまり <code class="docutils literal notranslate"><span class="pre">==&gt;</span></code> は、非依存矢印型 <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code> のスクワッシュ版です。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">Prims</span></code> では、<code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">==&gt;</span> <span class="pre">q</span></code> は実際には <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">(p</span> <span class="pre">-&gt;</span> <span class="pre">GTot</span> <span class="pre">q)``（``p</span></code> から <code class="docutils literal notranslate"><span class="pre">q</span></code> への <strong>ゴースト</strong> 関数）として定義されています。効果を扱う際に詳しく学びます。</p>
+</div>
+<section id="id7">
+<h3>導入<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<p>構成的な矢印 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">-&gt;</span> <span class="pre">q</span></code> の導入は、適切な型の :math:<a href="#id1"><span class="problematic" id="id2">`</span></a>lambda`（関数）を作るだけです。</p>
+<p>いくつかの種類の矢印型を含意に変換できます。以下に示します。</p>
+<p>1 つの方法は、<code class="docutils literal notranslate"><span class="pre">FStar.Classical</span></code> ライブラリの関数を直接使うことです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> impl_intro_tot (#p #q: Type) (f: (p -&gt; q)) : (p ==&gt; q)
+</pre></div>
+</div>
+<p>とはいえ、この形は F* ではあまり使われません。代わりに、スクワッシュされた命題（Lemma）どうしの関数として扱い、必要に応じて含意に変換します。いくつかのスタイルを示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> implies_intro_1 #p #q (pq: squash p -&gt; squash q)
+  : squash (p ==&gt; q)
+  = <span class="k">introduce</span> p ==&gt; q
+    <span class="k">with</span> pf_p. pq pf_p
+
+<span class="k">let</span> implies_intro_2 #p #q (pq: unit -&gt; <span class="k">Lemma</span> (<span class="k">requires</span> p) (<span class="k">ensures</span> q))
+  : squash (p ==&gt; q)
+  = <span class="k">introduce</span> p ==&gt; q
+    <span class="k">with</span> pf_p. pq pf_p
+
+<span class="k">let</span> implies_intro_3 #p #q (pq: unit -&gt; <span class="k">Lemma</span> (<span class="k">requires</span> p) (<span class="k">ensures</span> q))
+  : <span class="k">Lemma</span> (p ==&gt; q)
+  = <span class="k">introduce</span> p ==&gt; q
+    <span class="k">with</span> pf_p. pq pf_p
+</pre></div>
+</div>
+<p>他の結合子と異なり、矢印型を含意へ完全自動で変換する SMT 連携はありません。もちろん上記の形は糖衣であり、そのデシュガリング（下記）は参考になるでしょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> implies_intro_1 (#p #q:Type) (pq: (squash p -&gt; squash q))
+  : squash (p ==&gt; q)
+  = FStar.Classical.Sugar.implies_intro
+           p
+           (<span class="k">fun</span> (<span class="k">_</span>: squash p) -&gt; q)
+           (<span class="k">fun</span> (pf_p: squash p) -&gt; pq pf_p)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">FStar.Squash</span></code> と <code class="docutils literal notranslate"><span class="pre">FStar.Classical</span></code> が基本部品を提供し、糖衣がそれらを扱いやすい形にまとめています。</p>
+</section>
+<section id="id8">
+<h3>除去<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<p>当然ながら、構成的含意 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">-&gt;</span> <span class="pre">q</span></code> の除去は単なる関数適用です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> arrow_elim #p #q (f:p -&gt; q) (x:p) : q = f x
+</pre></div>
+</div>
+<p>スクワッシュ版の除去規則は古典論理の <em>モーダス・ポネンス</em> で、通常 SMT によって高い精度で自動化されます（<code class="docutils literal notranslate"><span class="pre">implies_elim</span></code> 参照）。完全性のため糖衣構文も用意されていますが、実務ではあまり使われません。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> implies_elim #p #q (pq:squash (p ==&gt; q)) (pf_p: squash p)
+  : squash q
+  = ()
+
+<span class="k">let</span> implies_elim_sugar #p #q (pq:squash (p ==&gt; q)) (pf_p: squash p)
+  : squash q
+  = <span class="k">eliminate</span> p ==&gt; q
+    <span class="k">with</span> pf_p
+</pre></div>
+</div>
+</section>
+</section>
+<section id="negation">
+<h2>否定<a class="headerlink" href="#negation" title="Link to this heading"></a></h2>
+<p>否定は含意の特殊例です。</p>
+<p>構成的には <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">-&gt;</span> <span class="pre">empty</span></code> に対応します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Prims</span></code> では <code class="docutils literal notranslate"><span class="pre">~p</span></code> は <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">==&gt;</span> <span class="pre">False</span></code> と定義されます。</p>
+<p>否定は <code class="docutils literal notranslate"><span class="pre">False</span></code> への含意の略記にすぎないため、独自の導入・除去規則はありませんが、次の形は容易に導出できます。</p>
+<section id="introduction-exercise">
+<h3>導入（演習）<a class="headerlink" href="#introduction-exercise" title="Link to this heading"></a></h3>
+<p>次の否定の導入規則を証明しなさい。</p>
+<p><a class="reference external" href="../code/exercises/Part2.Connectives.Negation.fst">演習ファイル</a></p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> neg_intro #p (f:squash p -&gt; squash False)
+  : squash (~p)
+</pre></div>
+</div>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> neg_intro #p (f:squash p -&gt; squash False)
+  : squash (~p)
+  = <span class="k">introduce</span> p ==&gt; False
+    <span class="k">with</span> pf_p. f pf_p
+</pre></div>
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="elimination-exercise">
+<h3>除去（演習）<a class="headerlink" href="#elimination-exercise" title="Link to this heading"></a></h3>
+<p>SMT のみではなく糖衣構文を用いて、次の否定の除去規則を証明しなさい。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> neg_elim #p #q (f:squash (~p)) (x:unit -&gt; <span class="k">Lemma</span> p)
+  : squash (~q)
+</pre></div>
+</div>
+<p><a class="reference external" href="../code/exercises/Part2.Connectives.Negation.fst">演習ファイル</a></p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> neg_elim #p #q (f:squash (~p)) (lem:unit -&gt; <span class="k">Lemma</span> p)
+  : squash q
+  = <span class="k">eliminate</span> p ==&gt; False
+    <span class="k">with</span> lem()
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="universal-quantification">
+<h2>全称量化<a class="headerlink" href="#universal-quantification" title="Link to this heading"></a></h2>
+<p>含意が非依存矢印 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">-&gt;</span> <span class="pre">q</span></code> で表されるのに対し、全称量化は依存矢印 <code class="docutils literal notranslate"><span class="pre">x:t</span> <span class="pre">-&gt;</span> <span class="pre">q</span> <span class="pre">x</span></code> に対応します。その古典的表記は <code class="docutils literal notranslate"><span class="pre">forall</span> <span class="pre">(x:t).</span> <span class="pre">q</span> <span class="pre">x</span></code> で、次のように定義されます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ( <span class="k">forall</span> ) #t (q:t -&gt; Type) = squash (x:t -&gt; q x)
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">==&gt;</span></code> と同様、<code class="docutils literal notranslate"><span class="pre">Prims</span></code> では <a href="#id1"><span class="problematic" id="id2">``</span></a>x:t -&gt; GTot (q x)``（ゴースト矢印）を用います。違いはここでは重要ではありません。</p>
+</div>
+<section id="id9">
+<h3>導入<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<p>依存関数型 <code class="docutils literal notranslate"><span class="pre">x:t</span> <span class="pre">-&gt;</span> <span class="pre">p</span> <span class="pre">x</span></code> の導入も、非依存の場合と同様にラムダで行います。</p>
+<p>スクワッシュ版に対して、F* は複数のスタイルの糖衣構文を提供します。<code class="docutils literal notranslate"><span class="pre">introduce</span></code> 行で束縛した <code class="docutils literal notranslate"><span class="pre">forall</span></code> の各変数名は、<code class="docutils literal notranslate"><span class="pre">with</span></code> 行の証明項のスコープで利用できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> forall_intro_1 (#t:Type)
+                   (#q:t -&gt; Type)
+                   (f : (x:t -&gt; squash (q x)))
+  : squash (<span class="k">forall</span> (x:t). q x)
+  = <span class="k">introduce</span> <span class="k">forall</span> (x:t). q x
+    <span class="k">with</span> f x
+
+<span class="k">let</span> forall_intro_2 (#t:Type)
+                   (#q:t -&gt; Type)
+                   (f : (x:t -&gt; <span class="k">Lemma</span> (q x)))
+  : squash (<span class="k">forall</span> (x:t). q x)
+  = <span class="k">introduce</span> <span class="k">forall</span> (x:t). q x
+    <span class="k">with</span> f x
+
+<span class="k">let</span> forall_intro_3 (#t0:Type)
+                   (#t1:t0 -&gt; Type)
+                   (#q: (x0:t0 -&gt; x1:t1 x0 -&gt; Type))
+                   (f : (x0:t0 -&gt; x1:t1 x0 -&gt;  <span class="k">Lemma</span> (q x0 x1)))
+  : squash (<span class="k">forall</span> (x0:t0) (x1:t1 x0). q x0 x1)
+  = <span class="k">introduce</span> <span class="k">forall</span> (x0:t0) (x1:t1 x0). q x0 x1
+    <span class="k">with</span> f x0 x1
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">forall_intro_3</span></code> が示すように、この糖衣は 2 変数以上の <code class="docutils literal notranslate"><span class="pre">forall</span></code> にも使えます。</p>
+</section>
+<section id="id10">
+<h3>除去<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<p>依存関数の除去は、依存関数適用に対応します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> dep_arrow_elim #t #q (f:(x:t -&gt; q x)) (x:t) : q x = f x
+</pre></div>
+</div>
+<p>スクワッシュ版では、<code class="docutils literal notranslate"><span class="pre">forall</span></code> の除去は与えた項での量化子のインスタンス化に相当します。インスタンス化を要する証明の自動化はそれ自体大きな話題で、後の節で扱います。手がかりとしては <a class="reference external" href="https://github.com/FStarLang/FStar/wiki/Quantifiers-and-patterns">この wiki</a> が参考になります。</p>
+<p>多くの場合、全称量化の除去は SMT ソルバが自動で行います。例えば下では、量化された仮定 <code class="docutils literal notranslate"><span class="pre">f</span></code> を <code class="docutils literal notranslate"><span class="pre">a</span></code> で容易にインスタンス化しています。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> forall_elim_1 (#t:Type)
+                  (#q:t -&gt; Type)
+                  (f : squash (<span class="k">forall</span> (x:t). q x))
+                  (a:t)
+  : squash (q a)
+  = ()
+</pre></div>
+</div>
+<p>ただし F* には、量化子のインスタンス化を明示的に起動する糖衣構文もあります（下記）。<code class="docutils literal notranslate"><span class="pre">with</span></code> 行で与える項が、<code class="docutils literal notranslate"><span class="pre">eliminate</span></code> 行の各束縛変数に対するインスタンスになります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> forall_elim_2 (#t0:Type)
+                  (#t1:t0 -&gt; Type)
+                  (#q: (x0:t0 -&gt; x1:t1 x0 -&gt; Type))
+                  (f : squash (<span class="k">forall</span> x0 x1. q x0 x1))
+                  (v0: t0)
+                  (v1: t1 v0)
+  : squash (q v0 v1)
+  = <span class="k">eliminate</span> <span class="k">forall</span> x0 x1. q x0 x1
+    <span class="k">with</span> v0 v1
+</pre></div>
+</div>
+<p>そのデシュガリングは理解の助けになるでしょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>   FStar.Classical.Sugar.forall_elim
+           #(t1 v0)
+           #(<span class="k">fun</span> x1 -&gt; q v0 x1)
+           v1
+           (FStar.Classical.Sugar.forall_elim
+              #t0
+              #(<span class="k">fun</span> x0 -&gt; <span class="k">forall</span> (x1: t1 x0). q x0 x1)
+              v0
+              ())
+</pre></div>
+</div>
+</section>
+</section>
+<section id="existential-quantification">
+<span id="part2-connectives-exists"></span><h2>存在量化<a class="headerlink" href="#existential-quantification" title="Link to this heading"></a></h2>
+<p>最後に存在量化です。構成的には依存ペアで、連言を表すペアの依存版です。<code class="docutils literal notranslate"><span class="pre">Prims</span></code> には次の帰納的型が定義されています。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> dtuple2 (a:Type) (b: a -&gt; Type) =
+   | Mkdtuple2 : x:a -&gt; y:b x -&gt; dtuple2 a b
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">tuple2</span></code> と同様に、F* には <code class="docutils literal notranslate"><span class="pre">dtuple2</span></code> 用の専用シンタックスがあります。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dtuple2</span> <span class="pre">a</span> <span class="pre">(fun</span> <span class="pre">(x:a)</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">x)</span></code> の代わりに <code class="docutils literal notranslate"><span class="pre">x:a</span> <span class="pre">&amp;</span> <span class="pre">b</span> <span class="pre">x</span></code> と書けます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Mkdtuple2</span> <span class="pre">x</span> <span class="pre">y</span></code> の代わりに <code class="docutils literal notranslate"><span class="pre">(|</span> <span class="pre">x,</span> <span class="pre">y</span> <span class="pre">|)</span></code> と書けます。</p></li>
+</ul>
+</div></blockquote>
+<p>存在量化 <code class="docutils literal notranslate"><span class="pre">exists</span> <span class="pre">(x:t).</span> <span class="pre">p</span> <span class="pre">x</span></code> は、この依存ペアのスクワッシュ版です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ( <span class="k">exists</span> ) (#a:Type) (#b:a -&gt; Type) = squash (x:a &amp; b x)
+</pre></div>
+</div>
+<section id="id11">
+<h3>導入<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">x:a</span> <span class="pre">&amp;</span> <span class="pre">b</span> <span class="pre">x</span></code> の構成的証明の導入は、コンストラクタを使うだけです。具体例を以下に示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> dtuple2_intro (x:int) (y:int { y &gt; x })
+  : (a:int &amp; b:int{b &gt; a})
+  = (| x, y |)
+</pre></div>
+</div>
+<p>スクワッシュ版で <code class="docutils literal notranslate"><span class="pre">exists</span> <span class="pre">(x:t).</span> <span class="pre">p</span> <span class="pre">x</span></code> を SMT によって自動導入するには、<code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">a</span></code> が導けるような量化子のインスタンス <code class="docutils literal notranslate"><span class="pre">a</span></code> を見つける必要があります。これは全称量化で述べた量化子インスタンス化の双対の問題です。</p>
+<p>最初の例では SMT ソルバがインスタンスと証明を自動で見つけます。後の 2 つでは、どのインスタンスと証明を与えるかを利用者が選びます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> exists_intro_1 (#t:Type)
+                   (#q:t -&gt; Type)
+                   (a:t) (b:t)
+                   (f : squash (q a /\ q b))
+  : squash (<span class="k">exists</span> x. q x)
+  = () <span class="c">//instantiation found by SMT, it chose a or b, unclear/irrelevant which</span>
+
+<span class="k">let</span> exists_intro_2 (#t:Type)
+                   (#q:t -&gt; Type)
+                   (a:t) (b:t)
+                   (f : squash (q a))
+                   (g : squash (q b))
+  : squash (<span class="k">exists</span> x. q x)
+  = <span class="k">introduce</span> <span class="k">exists</span> x. q x
+    <span class="k">with</span> a <span class="c">//witness</span>
+    <span class="k">and</span> f  <span class="c">//proof term of q applied to witness</span>
+
+<span class="k">let</span> exists_intro_3 (#t:Type)
+                   (#q:t -&gt; Type)
+                   (a:t) (b:t)
+                   (f : squash (q a /\ q b))
+  : squash (<span class="k">exists</span> x. q x)
+  = <span class="k">introduce</span> <span class="k">exists</span> x. q x
+    <span class="k">with</span> a
+    <span class="k">and</span> f <span class="c">// f: squash (q a /\ q b) implicitly eliminated to squash (q a) by SMT</span>
+</pre></div>
+</div>
+</section>
+<section id="id12">
+<h3>除去<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<p>選言や連言と同様に、<code class="docutils literal notranslate"><span class="pre">dtuple2</span></code> や <code class="docutils literal notranslate"><span class="pre">exists</span></code> の除去には動機（量化子で束縛された変数を <em>含まない</em> 目標命題）が必要です。</p>
+<p>構成的証明では、単なるパターンマッチです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> dtuple2_elim (#t:Type) (#p:t -&gt; Type) (#q:Type)
+                 (pf: (x:t &amp; p x))
+                 (k : (x:t -&gt; p x -&gt; q))
+  : q
+  = <span class="k">let</span> (| x, pf_p |) = pf <span class="k">in</span>
+    k x pf_p
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">exists</span></code> に対しては、次の糖衣構文が除去原理を提供します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> exists_elim (#t:Type) (#p:t -&gt; Type) (#q:Type)
+                 (pf: squash (<span class="k">exists</span> (x:t). p x))
+                 (k : (x:t -&gt; squash (p x) -&gt; squash q))
+  : squash q
+  = <span class="k">eliminate</span> <span class="k">exists</span> (x:t). p x
+    <span class="k">returns</span> q
+    <span class="k">with</span> pf_p. k x pf_p
+
+<span class="k">let</span> exists_elim_alt (#t:Type) (#p:t -&gt; Type) (#q:Type)
+                    (pf: squash (<span class="k">exists</span> (x:t). p x))
+                    (k : (x:t -&gt; <span class="k">Lemma</span> (<span class="k">requires</span> p x)
+                                      (<span class="k">ensures</span> q)))
+  : <span class="k">Lemma</span> q
+  = <span class="k">eliminate</span> <span class="k">exists</span> (x:t). p x
+    <span class="k">returns</span> q
+    <span class="k">with</span> pf_p. k x
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">eliminate</span></code> 行の束縛子に対応する名前は <code class="docutils literal notranslate"><span class="pre">with</span></code> 行のスコープに入り、さらに存在式の本体に対応する証明項の名前が束縛されます。すなわち上の例では、証明項から <code class="docutils literal notranslate"><span class="pre">x:t</span></code> が暗黙に参照でき、同時に <code class="docutils literal notranslate"><span class="pre">pf_p:</span> <span class="pre">squash</span> <span class="pre">p</span></code> が与えられます。</p>
+</section>
+<section id="exercise">
+<h3>練習問題<a class="headerlink" href="#exercise" title="Link to this heading"></a></h3>
+<p><a class="reference internal" href="part2_merkle.html#part2-merkle-insert"><span class="std std-ref">以前の演習</span></a> では、Merkle 木に要素を挿入し、新しいルートハッシュと更新後の Merkle 木を返す関数を定義しました。その解のシグネチャは次のとおりでした。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> mtree&#39; (n:nat) =
+  | MTree : h:hash_t -&gt; mtree n h -&gt; mtree&#39; n
+
+<span class="k">val</span> update_mtree&#39;  (#h:hash_t)
+                   (rid:resource_id)
+                   (res:resource) 
+                   (tree:mtree (L.length rid) h)
+   : mtree&#39; (L.length rid)
+</pre></div>
+</div>
+<p>この解を修正し、代わりに依存ペアを返すようにしなさい。<code class="docutils literal notranslate"><span class="pre">dtuple2</span></code> は <code class="docutils literal notranslate"><span class="pre">Prims</span></code> に既に定義されているので、再定義する必要はありません。</p>
+<p><a class="reference external" href="../code/exercises/Part2.MerkleTreeUpdate.fst">演習ファイル</a></p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> update #h 
+               (rid:resource_id)
+               (res:resource) 
+               (tree:mtree (L.length rid) h)
+   : <span class="k">Tot</span> (h&#39;:<span class="k">_</span> &amp; mtree (L.length rid) h&#39;)
+         (<span class="k">decreases</span> rid)
+   = <span class="k">match</span> rid <span class="k">with</span>
+     | [] -&gt; (| <span class="k">_</span>, L res |)
+     | hd :: rid&#39; -&gt; 
+       <span class="k">if</span> hd
+       <span class="k">then</span> (
+         <span class="k">let</span> (| <span class="k">_</span>, t |) = update rid&#39; res (N?.left tree) <span class="k">in</span>
+         (| <span class="k">_</span>, N t (N?.right tree) |)
+       )
+       <span class="k">else</span> (
+         <span class="k">let</span> (| <span class="k">_</span>, t |) = update rid&#39; res (N?.right tree) <span class="k">in</span>
+         (| <span class="k">_</span>, N (N?.left tree) t|)
+       )
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part2_equality.html" class="btn btn-neutral float-left" title="等式型" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part2_stlc.html" class="btn btn-neutral float-right" title="単純型付きラムダ計算（STLC）" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

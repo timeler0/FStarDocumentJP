@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>存在量化 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="ユーザー定義述語" href="pulse_user_defined_predicates.html" />
+    <link rel="prev" title="可変参照" href="pulse_ch2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">存在量化</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#some-simple-examples">いくつかの簡単な例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manipulating-existentials">存在量化の操作</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#eliminating-existentials">存在量化の除去（消去）</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#introducing-existentials">存在量化の導入</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">存在量化</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="existential-quantification">
+<span id="pulse-existentials"></span><h1>存在量化<a class="headerlink" href="#existential-quantification" title="Link to this heading"></a></h1>
+<p>Pulse でよく使われる仕様記述スタイルのひとつに、存在量化の利用があります。本格的な例に入る前に、存在量化がどのように機能するかを簡単に見ておきましょう。</p>
+<p><a class="reference internal" href="pulse_ch1.html#pulse-basics"><span class="std std-ref">Pulse の導入</span></a> で述べたとおり、Pulse の分離論理の連結子の1つが存在量化です。構文は F* の存在量化に似ていますが、<code class="docutils literal notranslate"><span class="pre">exists</span></code> ではなく <code class="docutils literal notranslate"><span class="pre">exists*</span></code> と書き、その本体は以下の例のように <a href="#id1"><span class="problematic" id="id2">``</span></a>slprop``（分離論理命題）になります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">exists</span>* (v:nat). pts_to x v
+
+<span class="k">exists</span>* v. pts_to x v
+
+<span class="k">exists</span>* v1 v2. pts_to x v1 ** pts_to y v2
+
+...
+</pre></div>
+</div>
+<section id="some-simple-examples">
+<h2>いくつかの簡単な例<a class="headerlink" href="#some-simple-examples" title="Link to this heading"></a></h2>
+<p>前章の <code class="docutils literal notranslate"><span class="pre">assign</span></code> の例（下記再掲）を振り返ると、事前条件で論理変数 <code class="docutils literal notranslate"><span class="pre">'v</span></code> をわざわざ束縛しているのはなぜか、と思われたかもしれません。実際には他の述語で使っていないからです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> assign u#a (#a:Type u#a) (r:ref a) (v:a)
+<span class="k">requires</span> pts_to r &#39;v
+<span class="k">ensures</span> pts_to r v
+{
+    r := v;
+}
+</pre></div>
+</div>
+<p>実際、論理変数の引数を使わずに <code class="docutils literal notranslate"><span class="pre">assign</span></code> の仕様を書く別の方法が以下です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> assign (#a: Type0) (x:ref a) (v:a)
+<span class="k">requires</span>
+  <span class="k">exists</span>* w. pts_to x w
+<span class="k">ensures</span>
+  pts_to x v
+{
+  x := v
+}
+</pre></div>
+</div>
+<p>ここでは事前条件に存在量化を用い、<code class="docutils literal notranslate"><span class="pre">x</span></code> が任意の値 <code class="docutils literal notranslate"><span class="pre">w</span></code> を指している文脈であれば <code class="docutils literal notranslate"><span class="pre">assign</span></code> を呼び出せる、ということを表現しています。</p>
+<p>しかし通常は、関数の事後条件は呼び出し前の初期状態と呼び出し後の状態を*関係付け*ます。存在変数の有効範囲は、囲んでいる <code class="docutils literal notranslate"><span class="pre">slprop</span></code> のできるだけ右側に限られます。そのため、関数の事前条件で存在量化を使うのはあまり一般的ではありません。</p>
+<p>例として、次の <code class="docutils literal notranslate"><span class="pre">incr</span></code> の仕様はうまくいきません。存在量化で束縛した <code class="docutils literal notranslate"><span class="pre">w0</span></code> が事後条件のスコープに入らないためです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@expect_failure] 
+<span class="k">fn</span> incr #a (x:ref int)
+<span class="k">requires</span>
+  <span class="k">exists</span>* w0. pts_to x w
+<span class="k">ensures</span> 
+  pts_to x (w0 + 1) <span class="c">//w0 is not in scope here</span>
+{
+  <span class="k">let</span> w = !x
+  x := w + 1
+}
+</pre></div>
+</div>
+<p>一方で、存在量化は事後条件ではよく使われます。関数の振る舞いをあえて詳細化しすぎず、抽象化するためです。例えば下の <code class="docutils literal notranslate"><span class="pre">make_even</span></code> を見てください。この型は、<code class="docutils literal notranslate"><span class="pre">x</span></code> の内容を何らかの偶数 <code class="docutils literal notranslate"><span class="pre">w1</span></code> に設定することだけを述べ、<code class="docutils literal notranslate"><span class="pre">w1</span></code> の具体値は指定しません。また事後条件が <code class="docutils literal notranslate"><span class="pre">x</span></code> の初期値に依存しないため、事前条件にも存在量化を使っています。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> make_even (x:ref int)
+<span class="k">requires</span>
+  <span class="k">exists</span>* w0. pts_to x w0
+<span class="k">ensures</span>
+  <span class="k">exists</span>* w1. pts_to x w1 ** pure (w1 % 2 == 0)
+{
+  <span class="k">let</span> v = !x;
+  x := v + v;
+}
+</pre></div>
+</div>
+</section>
+<section id="manipulating-existentials">
+<h2>存在量化の操作<a class="headerlink" href="#manipulating-existentials" title="Link to this heading"></a></h2>
+<p><a class="reference internal" href="../part2/part2_logical_connectives.html#part2-connectives"><span class="std std-ref">古典的連結子の扱い</span></a> の章で、F* が存在量化を含む論理連結子の導入／除去のためのさまざまな構成子を提供していることを見ました。Pulse にも存在量化を明示的に扱う構成子があります。通常は Pulse の自動化が裏で導入・除去を行いますが、明示的操作が有用な場面もあります。以下でその最初の例を示します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> make_even_explicit (x:ref int)
+<span class="k">requires</span>
+  <span class="k">exists</span>* w0. pts_to x w0
+<span class="k">ensures</span>
+  <span class="k">exists</span>* w1. pts_to x w1 ** pure (w1 % 2 == 0)
+{
+  <span class="k">with</span> w0. <span class="k">assert</span> (pts_to x w0);
+  <span class="k">let</span> v = !x; <span class="c">// v:int; _:squash(v==w0); Ctxt=pts_to x v</span>
+  x := v + v; <span class="c">//                          ... pts_to x (v + v)</span>
+  <span class="k">introduce</span>
+  <span class="k">exists</span>* w1. pts_to x w1 ** pure (w1 % 2 == 0)
+  <span class="k">with</span> (v + v);
+}
+</pre></div>
+</div>
+<section id="eliminating-existentials">
+<h3>存在量化の除去（消去）<a class="headerlink" href="#eliminating-existentials" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">w0...wn.</span> <span class="pre">assert</span> <span class="pre">p;</span> <span class="pre">rest</span></code> という形は、存在量化の除去子としてよく使われます。文脈に <code class="docutils literal notranslate"><span class="pre">exists*</span> <span class="pre">x0...xn.</span> <span class="pre">p</span></code> があるとき、<code class="docutils literal notranslate"><span class="pre">with</span></code> は以降のスコープ <code class="docutils literal notranslate"><span class="pre">rest</span></code> で 存在量化の変数に対応する証人として <code class="docutils literal notranslate"><span class="pre">w0</span> <span class="pre">...</span> <span class="pre">wn</span></code> を束縛します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">w0.</span> <span class="pre">assert</span> <span class="pre">(pts_to</span> <span class="pre">x</span> <span class="pre">w0)</span></code> の直後に <code class="docutils literal notranslate"><span class="pre">show_proof_state</span></code> を呼ぶと、次のように表示されます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>- Current context:
+    pts_to x (reveal w0) **
+    emp
+- In typing environment:
+    [w0#2 : erased int,
+    x#1 : ref int]
+</pre></div>
+</div>
+<p>すなわち、スコープ内に <code class="docutils literal notranslate"><span class="pre">w0:erased</span> <span class="pre">int</span></code> があり、文脈には <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">(reveal</span> <span class="pre">w0)</span></code> が存在することがわかります。</p>
+<p><code class="docutils literal notranslate"><span class="pre">with</span></code> の別の例です。今度は複数の束縛変数を扱います。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> make_even_explicit_alt (x y:ref int)
+<span class="k">requires</span>
+  <span class="k">exists</span>* wx wy. pts_to x wx ** pts_to y wy ** pure (wx % 2 == wy % 2)
+<span class="k">ensures</span>
+  <span class="k">exists</span>* wx&#39; wy&#39;. pts_to x wx&#39; ** pts_to y wy&#39; ** pure (wx&#39; % 2 == 0)
+{
+  <span class="k">let</span> vx = !x; 
+  <span class="k">let</span> vy = !y;
+  x := vx + vy;
+  <span class="k">introduce</span> <span class="k">exists</span>* wx&#39; wy&#39;. pts_to x wx&#39; ** pts_to y wy&#39; ** pure (wx&#39; % 2 == 0)
+  <span class="k">with</span> (vx + vy) vy;
+}
+</pre></div>
+</div>
+<p>文脈に存在式がひとつだけある場合、<code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">x1..xn.</span> <span class="pre">_</span></code> と書いてその式を「開き」、証人をスコープに束縛できます。先頭行の直後で <code class="docutils literal notranslate"><span class="pre">show_proof_state</span></code> を呼ぶと次のように表示されます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>- Current context:
+    pts_to x (reveal wx) **
+    pts_to y (reveal wy) **
+    pure (eq2 (op_Modulus (reveal wx) 2) (op_Modulus (reveal wy) 2)) **
+    emp
+- In typing environment:
+    [<span class="k">_</span>#5 : squash (eq2 (op_Modulus (reveal wx) 2) (op_Modulus (reveal wy) 2)),
+    wy#4 : erased int,
+    wx#3 : erased int,
+    y#2 : ref int,
+    x#1 : ref int]
+</pre></div>
+</div>
+</section>
+<section id="introducing-existentials">
+<h3>存在量化の導入<a class="headerlink" href="#introducing-existentials" title="Link to this heading"></a></h3>
+<p>Pulse のチェッカは、存在量化の各変数に対して新しい単一化変数を導入し、ゴール側と文脈側の <code class="docutils literal notranslate"><span class="pre">slprop</span></code> の照合によってその解を探すことで、存在式を自動で導入します。</p>
+<p>ただし、上の 2 つの例のように、<code class="docutils literal notranslate"><span class="pre">introduce</span> <span class="pre">exists*</span></code> 構文を用いて存在式を明示的に導入することもできます。一般に次のように書けます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">introduce</span> <span class="k">exists</span>* x1 .. xn. p
+<span class="k">with</span> w1...wn
+</pre></div>
+</div>
+<p>ここで、存在量化された各変数 <code class="docutils literal notranslate"><span class="pre">x1..xn</span></code> に対する証人 <code class="docutils literal notranslate"><span class="pre">w1..wn</span></code> を明示的に与えます。</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_ch2.html" class="btn btn-neutral float-left" title="可変参照" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_user_defined_predicates.html" class="btn btn-neutral float-right" title="ユーザー定義述語" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,486 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Merkle 木 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="等式型" href="part2_equality.html" />
+    <link rel="prev" title="長さインデックス付きリスト" href="part2_vectors.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part2.html">帰納的型によるデータ・証明・計算の表現</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part2_inductive_type_families.html">帰納的型の定義</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_vectors.html">長さインデックス付きリスト</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Merkle 木</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setting">前提設定</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#intuitions">直観</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preliminaries">準備</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#defining-the-merkle-tree">Merkle 木の定義</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accessing-an-element-in-the-tree">木中の要素へのアクセス</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exercise">練習問題</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#the-prover">証明者（Prover）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-verifier">検証者（Verifier）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#correctness">正当性</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#security">安全性</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#part2-merkle-insert">練習問題</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#summary-and-further-reading">まとめと参考文献</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part2_equality.html">等式型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_logical_connectives.html">構成的連言と古典的連言（論理結合子）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_stlc.html">単純型付きラムダ計算（STLC）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_phoas.html">高階抽象構文（HOAS）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_well_founded.html">良基底関係と停止性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_par.html">計算効果の最初のモデル</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_universes.html">ユニバース（Universes）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+      <li class="breadcrumb-item active">Merkle 木</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="merkle-trees">
+<span id="part2-merkle"></span><h1>Merkle 木<a class="headerlink" href="#merkle-trees" title="Link to this heading"></a></h1>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Merkle_tree">Merkle 木</a> は 1970 年代後半に <a class="reference external" href="https://en.wikipedia.org/wiki/Ralph_Merkle">Ralph Merkle</a> によって設計された暗号的データ構造で、近年、その亜種が多くの <a class="reference external" href="https://en.wikipedia.org/wiki/Blockchain">ブロックチェーン・システム</a> の中核を成すに至り、重要性が劇的に高まっています。</p>
+<p>Merkle 木は暗号学的ハッシュを用いて、木に格納されたデータの真正性を効率よく証明できるようにします。特に、<span class="math notranslate nohighlight">\(2^n\)</span> 個のデータ項目を含む Merkle 木では、ある項目が木に含まれていることを示すのに必要なのは <span class="math notranslate nohighlight">\(n\)</span> 回のハッシュ計算だけです。</p>
+<p>本節では、とてもシンプルながら標準的な Merkle 木を構築し、その正当性と暗号学的安全性を証明します。そのために、いくつかのインデックス付き帰納的型を用います。この例を提供してくれた Aseem Rastogi に感謝します！</p>
+<section id="setting">
+<h2>前提設定<a class="headerlink" href="#setting" title="Link to this heading"></a></h2>
+<p>Merkle 木には多くの応用があります。以下のような簡単なシナリオを考えて、本稿の動機づけとしましょう。</p>
+<p>コンテンツ提供者（例えば New York Times のような存在）が、文書やマルチメディアファイルなどのデジタル成果物の大規模アーカイブを持っているとします。これらの成果物はユーザ間で流通しますが、受け取った成果物の真正性に疑義が生じることがあります。真正性を保証する 1 つの方法は、提供者が公開鍵暗号に基づくデジタル署名を用い、ユーザが受領時に署名を検証することです。しかし、用途によっては署名はかなり重い仕組みになり得ます。</p>
+<p>そこでコンテンツ提供者は、アーカイブを Merkle 木として組織化できます。葉に成果物そのものを置き、各内部ノードにはハッシュを格納します。こうすると、木の根に結び付いた 1 つのハッシュだけで、木中の <em>すべて</em> の成果物を認証できます。このルートハッシュだけを公開し、各成果物に対して根からその葉までの経路（パス）を添付しておけば、懐疑的なクライアントでも、少数（アーカイブ全体の大きさに対して対数個）のハッシュ計算で、与えられた成果物が本物かどうかを素早く検証できます（ルートハッシュを再計算し、公知の公開ルートハッシュと一致するかを確認します）。</p>
+</section>
+<section id="intuitions">
+<h2>直観<a class="headerlink" href="#intuitions" title="Link to this heading"></a></h2>
+<p>ここで扱う Merkle 木は、高さ <span class="math notranslate nohighlight">\(n\)</span> の完全二分木で、<span class="math notranslate nohighlight">\(2^n\)</span> 個のデータ項目を格納し、各ノードに対応するハッシュを保持します。Merkle 木の主眼は、各内部ノードが子ノードのハッシュをまとめた <em>ハッシュのハッシュ</em> を保持する点にあります。用いるハッシュ関数が、衝突耐性（同一ハッシュ値となる 2 つの異なる文字列を見つけるのが計算的に困難）という意味で暗号学的に安全であれば、根ノードに結び付けられたハッシュが木全体の内容を認証します。</p>
+<p>直観的には、Merkle 木は認証付きデータ構造です。すなわち、木内のデータ項目をどれか改ざんしても、同じルートハッシュを保つことは計算的に困難です。さらに、特定のデータ項目 <code class="docutils literal notranslate"><span class="pre">d</span></code> が木に含まれることを示すには、根から <code class="docutils literal notranslate"><span class="pre">d</span></code> を含む葉までの経路上のノードに対応するハッシュ列を提示すれば足ります。ハッシュを突き合わせれば、その主張された経路が正しいかを容易に確認できます。実際、もし提示された経路が <code class="docutils literal notranslate"><span class="pre">d</span></code> とは異なる <code class="docutils literal notranslate"><span class="pre">d'</span></code> の存在を示してしまうなら、基盤となるハッシュ関数に対する衝突を構成できることが証明できます――この性質が安全性の主たる証明になります。</p>
+</section>
+<section id="preliminaries">
+<h2>準備<a class="headerlink" href="#preliminaries" title="Link to this heading"></a></h2>
+<p>木に格納するリソースとハッシュは、文字列としてモデル化します。F* の標準ライブラリ <code class="docutils literal notranslate"><span class="pre">FStar.String</span></code> は文字列を扱うためのユーティリティを提供します。</p>
+<p>以下のコードでは、次のものを定義します。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">lstring</span> <span class="pre">n</span></code>：長さ <code class="docutils literal notranslate"><span class="pre">n</span></code> の文字列の型。<code class="docutils literal notranslate"><span class="pre">vec</span></code> と同様に <code class="docutils literal notranslate"><span class="pre">lstring</span></code> は長さでインデックス付けされた型ですが、<code class="docutils literal notranslate"><span class="pre">vector</span></code> と異なり、インデックス付き帰納的型ではなく絞り込み型で定義します。絞り込みによってインデックス付き型を定義するのは F* では一般的です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">concat</span></code>：文字列の連結ユーティリティで、結果の長さが入力の長さの和になることを型で表明します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hash_size</span></code> と <code class="docutils literal notranslate"><span class="pre">hash</span></code>：本開発におけるパラメータで、<code class="docutils literal notranslate"><span class="pre">hash</span></code> 関数の出力文字数を記述します。F* のキーワード <code class="docutils literal notranslate"><span class="pre">assume</span></code> は、与えられた型の記号の存在を仮定できます。<code class="docutils literal notranslate"><span class="pre">assume</span> <span class="pre">nonsense</span> <span class="pre">:</span> <span class="pre">False</span></code> のように書けば何でも自明に証明できてしまうため、取り扱いには注意が必要です。</p></li>
+<li><p>木に格納するリソースの型は <code class="docutils literal notranslate"><span class="pre">resource</span></code> とし、<code class="docutils literal notranslate"><span class="pre">string</span></code> の別名とします。</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">//Length-indexed strings</span>
+<span class="k">let</span> lstring (n:nat) = s:string{String.length s == n}
+
+<span class="c">//Concatenating strings sums their lengths</span>
+<span class="k">let</span> concat #n #m (s0:lstring n) (s1:lstring m)
+  : lstring (m + n)
+  = FStar.String.concat_length s0 s1;
+    s0 ^ s1
+
+<span class="c">//A parameter, length of the hash in characters, </span>
+<span class="c">//e.g., this would be 32, if a character is 1 byte</span>
+<span class="c">//and we&#39;re using SHA-256</span>
+<span class="k">assume</span>
+<span class="k">val</span> hash_size:nat
+
+<span class="c">//The type of a hashed value</span>
+<span class="k">let</span> hash_t = lstring hash_size
+
+<span class="c">//The hash function itself</span>
+<span class="k">assume</span>
+<span class="k">val</span> hash (m:string) : hash_t
+
+<span class="c">//The type of resources stored in the tree</span>
+<span class="k">let</span> resource = string
+</pre></div>
+</div>
+</section>
+<section id="defining-the-merkle-tree">
+<h2>Merkle 木の定義<a class="headerlink" href="#defining-the-merkle-tree" title="Link to this heading"></a></h2>
+<p>以下の帰納的型 <code class="docutils literal notranslate"><span class="pre">mtree</span></code> が Merkle 木を定義します。型は <em>2 つ</em> のインデックスを持ち、<code class="docutils literal notranslate"><span class="pre">mtree</span> <span class="pre">n</span> <span class="pre">h</span></code> は高さ <code class="docutils literal notranslate"><span class="pre">n</span></code> で、根ノードにハッシュ <code class="docutils literal notranslate"><span class="pre">h</span></code> が対応付く Merkle 木の型です。</p>
+<p>葉は高さ <code class="docutils literal notranslate"><span class="pre">0</span></code> の木で、<code class="docutils literal notranslate"><span class="pre">L</span> <span class="pre">res</span></code> により構成します。ここで、そのノードに対応付けるハッシュは葉に格納されたリソースのハッシュ <code class="docutils literal notranslate"><span class="pre">hash</span> <span class="pre">res</span></code> です。</p>
+<p>内部ノードは <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">left</span> <span class="pre">right</span></code> で構成し、<code class="docutils literal notranslate"><span class="pre">left</span></code> と <code class="docutils literal notranslate"><span class="pre">right</span></code> はともに同じ高さ <code class="docutils literal notranslate"><span class="pre">n</span></code> の木で、結果の高さは <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">+</span> <span class="pre">1</span></code> になります。重要なのは、<code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">left</span> <span class="pre">right</span></code> に対応付くハッシュが <code class="docutils literal notranslate"><span class="pre">hash</span> <span class="pre">(concat</span> <span class="pre">hl</span> <span class="pre">hr)</span></code>、すなわち左右部分木のハッシュを連結したもののハッシュである点です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> mtree: nat -&gt; hash_t -&gt; Type =
+  | L:
+     res:resource -&gt;
+     mtree 0 (hash res)
+       
+  | N:
+     #n:nat -&gt;
+     #hl:hash_t -&gt;
+     #hr:hash_t -&gt;
+     left:mtree n hl -&gt;
+     right:mtree n hr -&gt;
+     mtree (n + 1) (hash (concat hl hr))
+</pre></div>
+</div>
+<p>これまでのベクタの例のように、型のインデックスはその型の性質（例えば長さ）を抽象化・要約します。<code class="docutils literal notranslate"><span class="pre">mtree</span></code> でも同様で、第一インデックスは木の高さという要約、第二インデックスは暗号学的ハッシュとして木全体の内容を要約します。</p>
+</section>
+<section id="accessing-an-element-in-the-tree">
+<h2>木中の要素へのアクセス<a class="headerlink" href="#accessing-an-element-in-the-tree" title="Link to this heading"></a></h2>
+<p>リソース識別子 <code class="docutils literal notranslate"><span class="pre">resource_id</span></code> は、根からそのリソースを格納する葉までの木中の経路です。経路は、各ノードで左に降りるか右に降りるかを表すブール値のリストにすぎません。</p>
+<p>通常の二分木と同様、<code class="docutils literal notranslate"><span class="pre">resource_id</span></code> を指定すれば木中の要素に容易にアクセスできます。</p>
+<section id="exercise">
+<h3>練習問題<a class="headerlink" href="#exercise" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">rid</span> <span class="pre">:</span> <span class="pre">list</span> <span class="pre">bool</span></code> が与えられたときに <code class="docutils literal notranslate"><span class="pre">mtree</span></code> の要素にアクセスする関数を実装しなさい。減少条件（decreases）を含む型付けをどう設計するかが最も面白い部分です。関数本体は素直に書けます。</p>
+<p><a class="reference external" href="../code/exercises/Part2.MerkleTreeGet.fst">演習ファイル</a></p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> resource_id = list bool
+
+<span class="k">let</span> <span class="k">rec</span> get #h 
+            (ri:resource_id)
+            (tree:mtree (L.length ri) h)
+  : <span class="k">Tot</span> resource (<span class="k">decreases</span> ri)
+  = <span class="k">match</span> ri <span class="k">with</span>
+    | [] -&gt; L?.res tree
+    | b::ri&#39; -&gt;
+      <span class="k">if</span> b <span class="k">then</span>
+	get ri&#39; (N?.left tree)
+      <span class="k">else</span>
+	get ri&#39; (N?.right tree)
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="the-prover">
+<h2>証明者（Prover）<a class="headerlink" href="#the-prover" title="Link to this heading"></a></h2>
+<p>通常の <code class="docutils literal notranslate"><span class="pre">get</span></code> 関数と異なり、<code class="docutils literal notranslate"><span class="pre">get_with_evidence</span></code> を定義して、リソースとともにそのリソースが確かに木内に存在するという証拠も取り出せます。証拠にはリソース識別子と、根からその項目に至る経路上の兄弟ノードのハッシュが含まれます。</p>
+<p>まず、インデックス付き型 <code class="docutils literal notranslate"><span class="pre">resource_with_evidence</span> <span class="pre">n</span></code> を定義します。これは <code class="docutils literal notranslate"><span class="pre">res:resource</span></code> と、その <code class="docutils literal notranslate"><span class="pre">rid:resource_id</span></code>、<code class="docutils literal notranslate"><span class="pre">hashes:list</span> <span class="pre">hash_t</span></code> をまとめたもので、<code class="docutils literal notranslate"><span class="pre">rid</span></code> と <code class="docutils literal notranslate"><span class="pre">hashes</span></code> は同じ長さを持ちます（この長さが型のインデックスになります）。</p>
+<p>関数 <code class="docutils literal notranslate"><span class="pre">get_with_evidence</span></code> は <code class="docutils literal notranslate"><span class="pre">get</span></code> と似ていますが、子ノードへ降りて戻るたびに、反対側の子ノードのハッシュをハッシュ一覧に追加する点が異なります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> resource_with_evidence : nat -&gt; Type =
+  | RES:
+      res:resource -&gt;
+      ri:resource_id -&gt;
+      hashes:list hash_t { L.length ri == L.length hashes } -&gt;
+      resource_with_evidence (L.length ri)
+
+<span class="c">/// Retrieves data references by the path, together with the hashes</span>
+<span class="c">/// of the sibling nodes along that path</span>
+<span class="k">let</span> <span class="k">rec</span> get_with_evidence (#h:<span class="k">_</span>)
+                          (rid:resource_id)
+                          (tree:mtree (L.length rid) h)
+  : <span class="k">Tot</span> (resource_with_evidence (L.length rid))
+	(<span class="k">decreases</span> rid)
+  = <span class="k">match</span> rid <span class="k">with</span>
+    | [] -&gt;
+      RES (L?.res tree) [] []
+
+    | bit::rid&#39; -&gt;
+      <span class="k">let</span> N #<span class="k">_</span> #hl #hr left right = tree <span class="k">in</span>
+      <span class="k">let</span> p = get_with_evidence rid&#39; left <span class="k">in</span>
+      <span class="k">if</span> bit <span class="k">then</span>
+	<span class="k">let</span> p = get_with_evidence rid&#39; left <span class="k">in</span>
+	RES p.res rid (hr :: p.hashes)
+      <span class="k">else</span>
+	<span class="k">let</span> p = get_with_evidence rid&#39; right <span class="k">in</span>
+	RES p.res rid (hl :: p.hashes)
+</pre></div>
+</div>
+<p>暗号の文脈では、この関数はしばしば <em>証明者（prover）</em> と呼ばれます。<code class="docutils literal notranslate"><span class="pre">RES</span> <span class="pre">r</span> <span class="pre">ri</span> <span class="pre">hs</span></code> は、<code class="docutils literal notranslate"><span class="pre">ri</span></code> で指定される位置に <code class="docutils literal notranslate"><span class="pre">r</span></code> が木中に存在するという主張の証拠です。</p>
+<p>冒頭のシナリオに戻ると、提供者が配布する成果物は <code class="docutils literal notranslate"><span class="pre">resource_with_evidence</span> <span class="pre">n</span></code> 型の要素になり、クライアントはそれが本物であることを検証できるようになります（次項参照）。</p>
+</section>
+<section id="the-verifier">
+<h2>検証者（Verifier）<a class="headerlink" href="#the-verifier" title="Link to this heading"></a></h2>
+<p>次は、主張された証拠を検査する <em>検証者（verifier）</em> を作ります。以下の <code class="docutils literal notranslate"><span class="pre">verify</span></code> は <code class="docutils literal notranslate"><span class="pre">p:resource_with_evidence</span> <span class="pre">n</span></code> を受け取り、提示された証拠からルートハッシュを再計算し、それが与えられた Merkle 木のルートハッシュと一致するかを確認します。なお、検証のために木そのものは不要で、必要なのは Merkle 木の <em>ルートハッシュ</em> だけです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> verify #h #n (p:resource_with_evidence n) 
+                 (tree:mtree n h)
+  : bool
+  = compute_root_hash p = h
+</pre></div>
+</div>
+<p>主な処理は、下記の <code class="docutils literal notranslate"><span class="pre">compute_root_hash</span></code> が担います。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>最初の分岐では、リソース自体をそのままハッシュします。</p></li>
+<li><p>2 つ目の分岐では、経路の末尾側からハッシュを再計算し、進んだ方向に応じて左（または右）の兄弟ハッシュを前後どちらかに連結し、その結果をハッシュします。</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> tail #n (p:resource_with_evidence n { n &gt; 0 })
+  : resource_with_evidence (n - 1)
+  = RES p.res (L.tail p.ri) (L.tail p.hashes)
+
+<span class="k">let</span> <span class="k">rec</span> compute_root_hash (#n:nat)
+                          (p:resource_with_evidence n)
+  : hash_t
+  = <span class="k">let</span> RES d ri hashes = p <span class="k">in</span>
+    <span class="k">match</span> ri <span class="k">with</span>
+    | [] -&gt; hash p.res
+
+    | bit::ri&#39; -&gt;
+      <span class="k">let</span> h&#39; = compute_root_hash (tail p) <span class="k">in</span>
+      <span class="k">if</span> bit <span class="k">then</span>
+        hash (concat h&#39; (L.hd hashes))
+      <span class="k">else</span>
+        hash (concat (L.hd hashes) h&#39;)
+</pre></div>
+</div>
+<p>なぜこれが型的に正しいか確かめてみてください――必要なら <a class="reference internal" href="part2_vectors.html#part2-vectors"><span class="std std-ref">ベクタ</span></a> の説明に戻ってください。例えば、なぜ <code class="docutils literal notranslate"><span class="pre">hashes</span></code> の先頭要素にアクセスするために <code class="docutils literal notranslate"><span class="pre">L.hd</span></code> を呼んでも安全なのでしょうか？</p>
+</section>
+<section id="correctness">
+<h2>正当性<a class="headerlink" href="#correctness" title="Link to this heading"></a></h2>
+<p>ここで主たる正当性定理、すなわち <code class="docutils literal notranslate"><span class="pre">get_with_evidence</span></code> が検証可能な証拠付きのリソースを返すことを証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">// Correctness theorem: </span>
+<span class="c">//</span>
+<span class="c">// Using get_with_evidence&#39;s with compute_root_hash correctly</span>
+<span class="c">// reconstructs the root hash</span>
+<span class="k">let</span> <span class="k">rec</span> correctness (#h:hash_t)
+                    (rid:resource_id)
+                    (tree:mtree (L.length rid) h)
+  : <span class="k">Lemma</span> (<span class="k">ensures</span> (verify (get_with_evidence rid tree) tree))
+          (<span class="k">decreases</span> rid)
+  = <span class="k">match</span> rid <span class="k">with</span>
+    | [] -&gt; ()
+    | bit::rid&#39; -&gt;
+      <span class="k">let</span> N left right = tree <span class="k">in</span>
+      <span class="k">if</span> bit <span class="k">then</span>
+	correctness rid&#39; left
+      <span class="k">else</span>
+	correctness rid&#39; right
+</pre></div>
+</div>
+<p>証明は木の高さ、すなわち同値にリソース ID の長さに関する単純な帰納法です。</p>
+<p>言い換えれば、正直な証明者が構成した証拠は検証者に受理されます。</p>
+</section>
+<section id="security">
+<h2>安全性<a class="headerlink" href="#security" title="Link to this heading"></a></h2>
+<p>この構成に関する主たる安全性定理は次のとおりです。検証者が <code class="docutils literal notranslate"><span class="pre">RES</span> <span class="pre">r</span> <span class="pre">rid</span> <span class="pre">hs</span></code> という形の証拠を受け入れてしまうとしても、Merkle 木の <code class="docutils literal notranslate"><span class="pre">rid</span></code> に対応するリソースが <code class="docutils literal notranslate"><span class="pre">r</span></code> で <em>ない</em> のなら、基盤の暗号学的ハッシュに対する衝突を容易に構成できます。ハッシュは衝突耐性を備えるべきものなので、誤った証拠を検証者に受け入れさせることは、基盤のハッシュに対する衝突を見つけるのと少なくとも同程度に困難だと結論づけられます。</p>
+<p>まず <code class="docutils literal notranslate"><span class="pre">hash_collision</span></code> の型、すなわち同じハッシュ値になる互いに異なる 2 つの文字列の組を定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> hash_collision =
+  | Collision :
+      s1:string -&gt;
+      s2:string {hash s1 = hash s2 /\ not (s1 = s2)} -&gt;
+      hash_collision
+</pre></div>
+</div>
+<p>以下の <code class="docutils literal notranslate"><span class="pre">security</span></code> 定理は、<code class="docutils literal notranslate"><span class="pre">tree</span></code> と <code class="docutils literal notranslate"><span class="pre">p:resource_with_evidence</span> <span class="pre">n</span></code> を取り、<code class="docutils literal notranslate"><span class="pre">p</span></code> の絞り込みが「検証者は証拠（<code class="docutils literal notranslate"><span class="pre">verify</span> <span class="pre">p</span> <span class="pre">tree</span></code>）を受け入れるが、<code class="docutils literal notranslate"><span class="pre">p.ri</span></code> に対応するリソースは <code class="docutils literal notranslate"><span class="pre">p.res</span></code> ではない」と述べる状況を仮定します。このとき、木の高さに関する帰納法により、ハッシュ衝突を返す関数を構成できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(* </span>
+<span class="c"> * If [verify] can be tricked into accepting the evidence of [p] when</span>
+<span class="c"> * [p.res] is not actually present in the tree at [p.ri], then</span>
+<span class="c"> * we can exhibit a hash collision</span>
+<span class="c"> *)</span>
+<span class="k">let</span> <span class="k">rec</span> security (#n:nat) (#h:hash_t)
+                 (tree:mtree n h)
+                 (p:resource_with_evidence n {
+                   verify p tree /\
+                   not (get p.ri tree = p.res)
+                 })
+  : hash_collision
+  = <span class="k">match</span> p.ri <span class="k">with</span>
+    | [] -&gt; Collision p.res (L?.res tree)
+    | bit::rid&#39; -&gt;
+      <span class="k">let</span> N #<span class="k">_</span> #h1 #h2 left right = tree <span class="k">in</span>
+      <span class="k">let</span> h&#39; = compute_root_hash (tail p) <span class="k">in</span>
+      <span class="k">let</span> hd :: <span class="k">_</span> = p.hashes <span class="k">in</span>
+      <span class="k">if</span> bit <span class="k">then</span>
+	<span class="k">if</span> h&#39; = h1 <span class="k">then</span>
+	  security left (tail p)
+	<span class="k">else</span> (
+          String.concat_injective h1 h&#39; h2 hd;
+          Collision (concat h1 h2) (concat h&#39; hd)
+        )
+      <span class="k">else</span>
+	<span class="k">if</span> h&#39; = h2 <span class="k">then</span>
+	  security right (tail p)
+	<span class="k">else</span> (
+          String.concat_injective h1 hd h2 h&#39;;
+	  Collision (concat h1 h2) (concat hd h&#39;)
+        )
+</pre></div>
+</div>
+<p>場合分けを詳しく見ていきます。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>基底の場合では、異なるリソースから直接ハッシュ衝突を構成するのは容易です。</p></li>
+<li><p>それ以外では、提示された証拠の末尾側から現在ノードのハッシュを再計算し、左右の部分木の 2 つのケースは対称になります。</p>
+<ul>
+<li><p>再計算したハッシュがノードのハッシュと一致するなら、左または右の部分木に対する帰納法の仮定だけで衝突を生成できます。</p></li>
+<li><p>そうでなければ、ライブラリの補題 <code class="docutils literal notranslate"><span class="pre">String.concat_injective``（同じ長さの</span> <span class="pre">2</span> <span class="pre">組の文字列の連結が等しいのは、各構成要素が等しい場合に限る）に依存して、ハッシュ衝突を構成できます。``h'</span> <span class="pre">&lt;&gt;</span> <span class="pre">h1``（対称的には</span> <span class="pre">``h'</span> <span class="pre">&lt;&gt;</span> <span class="pre">h2</span></code>）が分かっているので、連結結果は等しくないと示せますが、仮定ではそれらのハッシュは等しいため、衝突が得られます。</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="part2-merkle-insert">
+<span id="id1"></span><h2>練習問題<a class="headerlink" href="#part2-merkle-insert" title="Link to this heading"></a></h2>
+<p>与えられた <code class="docutils literal notranslate"><span class="pre">rid:resource_id</span></code> の位置に新しいリソース <code class="docutils literal notranslate"><span class="pre">res:resource</span></code> を書き込んで <code class="docutils literal notranslate"><span class="pre">mtree</span></code> を更新する関数を実装しなさい。更新後の木は新しいルートハッシュを持つので、更新後の木とともに新しいハッシュも返す必要があります。</p>
+<p><a class="reference external" href="../code/exercises/Part2.MerkleTreeUpdate_V0.fst">演習ファイル</a></p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>ヒント</strong></p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">update</span></code> 関数の型の一例は次のようになります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> mtree&#39; (n:nat) =
+  | MTree : h:hash_t -&gt; mtree n h -&gt; mtree&#39; n
+
+<span class="k">val</span> update_mtree&#39;  (#h:hash_t)
+                   (rid:resource_id)
+                   (res:resource) 
+                   (tree:mtree (L.length rid) h)
+   : mtree&#39; (L.length rid)
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> update_mtree&#39; #h 
+                      (rid:resource_id)
+                      (res:resource) 
+                      (tree:mtree (L.length rid) h)
+   : <span class="k">Tot</span> (mtree&#39; (L.length rid))
+         (<span class="k">decreases</span> rid)
+   = <span class="k">match</span> rid <span class="k">with</span>
+     | [] -&gt; MTree <span class="k">_</span> (L res)
+     | hd :: rid&#39; -&gt; 
+       <span class="k">if</span> hd
+       <span class="k">then</span> (
+         <span class="k">let</span> MTree <span class="k">_</span> t = update_mtree&#39; rid&#39; res (N?.left tree) <span class="k">in</span>
+         MTree <span class="k">_</span> (N t (N?.right tree))
+       )
+       <span class="k">else</span> (
+         <span class="k">let</span> MTree <span class="k">_</span> t = update_mtree&#39; rid&#39; res (N?.right tree) <span class="k">in</span>
+         MTree <span class="k">_</span> (N (N?.left tree) t)
+       )
+</pre></div>
+</div>
+<p>この解の興味深い点は、ノードのハッシュを明示的に構成しないことです。<code class="docutils literal notranslate"><span class="pre">_</span></code> を用いるだけで、ハッシュ関数の呼び出しは F* に推論させています。</p>
+</div>
+</section>
+<hr class="docutils" />
+<section id="summary-and-further-reading">
+<h2>まとめと参考文献<a class="headerlink" href="#summary-and-further-reading" title="Link to this heading"></a></h2>
+<p>まとめると、我々は正当性と暗号学的安全性の証明付きで、シンプルながら強力な認証付きデータ構造を構築しました。</p>
+<p>実用上の Merkle 木は、ここで示した最も基本的なものよりはるかに洗練されています。例えば、インクリメンタルな更新をサポートしたり、スパース木を含む様々なワークロード向けの最適化を備えたり、高性能な可変データ構造で実装されたりします。</p>
+<p>F* で実装された様々な Merkle 木のバリエーションについては、次の論文を参照してください。</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://project-everest.github.io/assets/evercrypt.pdf">EverCrypt 第 VII(B) 節</a> は、高速なインクリメンタル更新を備えた高性能な Merkle 木を記述しています。</p></li>
+<li><p><a class="reference external" href="https://dl.acm.org/doi/10.1145/3448016.3457312">FastVer</a> は、スパース Merkle 木を含むハイブリッドな認証付きデータ構造の設計と活用を、検証可能なキー・バリュー・ストアなどの応用において論じています。</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part2_vectors.html" class="btn btn-neutral float-left" title="長さインデックス付きリスト" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part2_equality.html" class="btn btn-neutral float-right" title="等式型" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

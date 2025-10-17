@@ -1,0 +1,343 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ユーザー定義述語 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="条件分岐" href="pulse_conditionals.html" />
+    <link rel="prev" title="存在量化" href="pulse_existentials.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ユーザー定義述語</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fold-and-unfold-with-diagonal-pairs">対角ペアでの Fold と Unfold</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mutable-points">可変ポイント</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rewriting">書き換え（Rewriting）</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">ユーザー定義述語</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="user-defined-predicates">
+<span id="pulse-definedvprops"></span><h1>ユーザー定義述語<a class="headerlink" href="#user-defined-predicates" title="Link to this heading"></a></h1>
+<p>Pulse ライブラリが提供する slprop の述語や連接子に加えて、ユーザーが独自の <code class="docutils literal notranslate"><span class="pre">slprops</span></code> を定義することはとても一般的です。ここではいくつかの簡単な例を示します。以降の章ではユーザー定義述語を多用します。たとえば <a class="reference internal" href="pulse_ghost.html#pulse-recursive-predicates"><span class="std std-ref">再帰的に定義された述語</span></a> を参照してください。</p>
+<section id="fold-and-unfold-with-diagonal-pairs">
+<h2>対角ペアでの Fold と Unfold<a class="headerlink" href="#fold-and-unfold-with-diagonal-pairs" title="Link to this heading"></a></h2>
+<p>ユーザー定義抽象の単純な例を以下に示します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> pts_to_diag 
+        (#a: Type0)
+        (r:ref (a &amp; a))
+        (v:a)
+: slprop
+= pts_to r (v, v)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">pts_to_diag</span> <span class="pre">r</span> <span class="pre">v</span></code> は F* で定義された <code class="docutils literal notranslate"><span class="pre">slprop</span></code> で、要素が等しいペアへの参照を表します。</p>
+<p>この抽象を Pulse プログラムで利用できますが、述語の fold／unfold を明示的に行う必要があります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> double (r:ref (int &amp; int))
+<span class="k">requires</span> pts_to_diag r &#39;v
+<span class="k">ensures</span> pts_to_diag r (2 * &#39;v)
+{
+  <span class="k">unfold</span> (pts_to_diag r &#39;v);
+  <span class="k">let</span> v = !r;
+  <span class="k">let</span> v2 = fst v + snd v;
+  r := (v2, v2);
+  <span class="k">fold</span> (pts_to_diag r v2);
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">unfold</span> <span class="pre">p</span></code> は、現在のコンテキストである項 <code class="docutils literal notranslate"><span class="pre">q</span></code> により <code class="docutils literal notranslate"><span class="pre">p</span></code> が証明可能かを確認し、<code class="docutils literal notranslate"><span class="pre">p</span></code> の先頭シンボルを展開した項でその <code class="docutils literal notranslate"><span class="pre">q</span></code> を置換してコンテキストを書き換えます。<code class="docutils literal notranslate"><span class="pre">unfold</span></code> の直後に <code class="docutils literal notranslate"><span class="pre">show_proof_state</span></code> を行うと、コンテキストに <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">r</span> <span class="pre">(reveal</span> <span class="pre">'v,</span> <span class="pre">reveal</span> <span class="pre">'v)</span></code> が現れ、<code class="docutils literal notranslate"><span class="pre">pts_to_diag</span></code> の抽象が露出したことが分かります。</p>
+<p>関数の終わりでは <code class="docutils literal notranslate"><span class="pre">fold</span> <span class="pre">p</span></code> を使います。これは、コンテキストで <code class="docutils literal notranslate"><span class="pre">p</span></code> の展開形がある項 <code class="docutils literal notranslate"><span class="pre">q</span></code> により証明可能であることを確認し、その <code class="docutils literal notranslate"><span class="pre">q</span></code> を <code class="docutils literal notranslate"><span class="pre">p</span></code> に置き換えます。</p>
+<p>現状、Pulse における <code class="docutils literal notranslate"><span class="pre">fold</span></code>／<code class="docutils literal notranslate"><span class="pre">unfold</span></code> はとても手作業的です。再帰述語を含む一般の場合において自動化は難しいものの、ここでのような一般的なケースは自動化が容易です。現在、そのサポートの追加を検討しています。</p>
+<p>すでに初歩的なサポートはあり、Pulse が fold／unfold すべき slprop の引数を推測できる場合があります。例えば以下のコードでは、すべての引数を与えず、展開／折り畳むべき述語名だけを指定しています。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> double_alt (r:ref (int &amp; int))
+<span class="k">requires</span> pts_to_diag r &#39;v
+<span class="k">ensures</span> pts_to_diag r (2 * &#39;v)
+{
+  <span class="k">unfold</span> pts_to_diag;
+  <span class="k">let</span> v = !r;
+  <span class="k">let</span> v2 = fst v + snd v;
+  r := (v2, v2);
+  <span class="k">fold</span> pts_to_diag;
+}
+</pre></div>
+</div>
+</section>
+<section id="mutable-points">
+<h2>可変ポイント<a class="headerlink" href="#mutable-points" title="Link to this heading"></a></h2>
+<p>2 つ目の、より実用的な例として、ユーザー定義抽象を用いて単純な可変データ構造――2 つの可変整数フィールドからなる 2 次元点――を定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">noeq</span>
+<span class="k">type</span> point = {
+    x:ref int;
+    y:ref int;
+}
+
+<span class="k">let</span> is_point (p:point) (xy: int &amp; int) =
+    pts_to p.x (fst xy) **
+    pts_to p.y (snd xy)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">point</span></code> は 2 つの参照を含む F* のレコードに過ぎません。さらに、<code class="docutils literal notranslate"><span class="pre">point</span></code> 用の <code class="docutils literal notranslate"><span class="pre">slprop</span></code> （いわゆる“表現述語”）として <code class="docutils literal notranslate"><span class="pre">is_point</span></code> を定義します。<code class="docutils literal notranslate"><span class="pre">is_point</span> <span class="pre">p</span> <span class="pre">xy</span></code> は、純粋な数学的ペア <code class="docutils literal notranslate"><span class="pre">xy</span></code> を <code class="docutils literal notranslate"><span class="pre">p</span></code> が表現していることを述べます。</p>
+<p>点をオフセット <code class="docutils literal notranslate"><span class="pre">dx,</span> <span class="pre">dy</span></code> だけ平行移動させる関数 <code class="docutils literal notranslate"><span class="pre">move</span></code> を定義できます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> move (p:point) (dx:int) (dy:int)
+<span class="k">requires</span> is_point p &#39;xy
+<span class="k">ensures</span> is_point p (fst &#39;xy + dx, snd &#39;xy + dy)
+{
+  <span class="k">unfold</span> is_point;
+  <span class="k">let</span> x = !p.x;
+  <span class="k">let</span> y = !p.y;
+  p.x := x + dx;
+  p.y := y + dy;
+  <span class="k">fold</span> (is_point p (x + dx, y + dy));
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">move</span></code> の実装自体は単純ですが、前と同様に、まず <code class="docutils literal notranslate"><span class="pre">is_point</span></code> を <code class="docutils literal notranslate"><span class="pre">unfold</span></code> し、返る前に再度 fold し直す必要があります。</p>
+<p>残念ながら、fold 時に <code class="docutils literal notranslate"><span class="pre">is_point</span></code> のインスタンスを Pulse が推論できない場合があります。fold 前に <code class="docutils literal notranslate"><span class="pre">show_proof_state</span></code> を行うと、その理由が分かります。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>コンテキストには <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">p.x</span> <span class="pre">(x</span> <span class="pre">+</span> <span class="pre">dx)</span> <span class="pre">**</span> <span class="pre">pts_to</span> <span class="pre">p.y</span> <span class="pre">(y</span> <span class="pre">+</span> <span class="pre">dy)</span></code> があります。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fold</span> <span class="pre">(is_point</span> <span class="pre">p</span> <span class="pre">?w)</span></code> を成功させるには、未解決の証人 <code class="docutils literal notranslate"><span class="pre">?w</span></code> について <code class="docutils literal notranslate"><span class="pre">fst</span> <span class="pre">?w</span> <span class="pre">==</span> <span class="pre">(x</span> <span class="pre">+</span> <span class="pre">dx)</span></code> かつ <code class="docutils literal notranslate"><span class="pre">snd</span> <span class="pre">?w</span> <span class="pre">==</span> <span class="pre">(y</span> <span class="pre">+</span> <span class="pre">dy)</span></code> を満たす解を F* の型推論が見つける必要があります。これは <code class="docutils literal notranslate"><span class="pre">?w</span> <span class="pre">:=</span> <span class="pre">(x</span> <span class="pre">+</span> <span class="pre">dx,</span> <span class="pre">y</span> <span class="pre">+</span> <span class="pre">dy)</span></code> というペアの η 展開に相当しますが、F* の型推論はペアのそのような規則をサポートしていません。</p></li>
+</ul>
+</div></blockquote>
+<p>したがって、証明を完了するには <code class="docutils literal notranslate"><span class="pre">is_point</span> <span class="pre">p</span> <span class="pre">(x</span> <span class="pre">+</span> <span class="pre">dx,</span> <span class="pre">y</span> <span class="pre">+</span> <span class="pre">dy)</span></code> という完全なインスタンスを明示する必要があります。</p>
+<p>このパターンは、ペアやレコードなど複合値でインデックス付けされた表現述語でよく遭遇します。頻出するため、以下のように fold を行うヘルパ関数を定義しておくと便利です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> fold_is_point (p:point)
+<span class="k">requires</span> pts_to p.x &#39;x ** pts_to p.y &#39;y
+<span class="k">ensures</span> is_point p (reveal &#39;x, reveal &#39;y)
+{
+  <span class="k">fold</span> (is_point p (reveal &#39;x, reveal &#39;y))
+}
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>このヘルパ関数には <code class="docutils literal notranslate"><span class="pre">ghost</span></code> を付けています。<code class="docutils literal notranslate"><span class="pre">ghost</span></code> 関数については後の章で詳しく扱います。</p>
+</div>
+<p>これにより、以下のように型推論がよりうまく働くようになります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> move_alt (p:point) (dx:int) (dy:int)
+<span class="k">requires</span> is_point p &#39;xy
+<span class="k">ensures</span> is_point p (fst &#39;xy + dx, snd &#39;xy + dy)
+{
+  <span class="k">unfold</span> is_point;
+  <span class="k">let</span> x = !p.x;
+  <span class="k">let</span> y = !p.y;
+  p.x := x + dx;
+  p.y := y + dy;
+  fold_is_point p;
+}
+</pre></div>
+</div>
+</section>
+<section id="rewriting">
+<span id="pulse-rewriting"></span><h2>書き換え（Rewriting）<a class="headerlink" href="#rewriting" title="Link to this heading"></a></h2>
+<p>定義済み述語を扱う際には、<code class="docutils literal notranslate"><span class="pre">fold</span></code>／<code class="docutils literal notranslate"><span class="pre">unfold</span></code> に加えて <code class="docutils literal notranslate"><span class="pre">rewrite</span></code> もよく使います。一般形は次のとおりです。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">x1</span> <span class="o">...</span> <span class="n">xn</span><span class="o">.</span> <span class="n">rewrite</span> <span class="n">p</span> <span class="k">as</span> <span class="n">q</span><span class="p">;</span>
+<span class="n">rest</span>
+</pre></div>
+</div>
+<p>振る舞いは、<code class="docutils literal notranslate"><span class="pre">x1</span> <span class="pre">...</span> <span class="pre">xn</span></code> を <code class="docutils literal notranslate"><span class="pre">v1</span> <span class="pre">...</span> <span class="pre">vn</span></code> に具体化する置換 <code class="docutils literal notranslate"><span class="pre">subst</span></code> を見つけ、そのもとでコンテキストの <code class="docutils literal notranslate"><span class="pre">c</span></code> が <code class="docutils literal notranslate"><span class="pre">subst(p)</span></code> を支持している状況で、<code class="docutils literal notranslate"><span class="pre">subst(p)</span> <span class="pre">==</span> <span class="pre">subst(q)</span></code> を示し、コンテキスト中の <code class="docutils literal notranslate"><span class="pre">c</span></code> を <code class="docutils literal notranslate"><span class="pre">subst(q)</span></code> に置換して <code class="docutils literal notranslate"><span class="pre">subst(rest)</span></code> の検査を続ける、というものです。</p>
+<p>以下のプログラムでその動作を示します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> create_and_move ()
+<span class="k">requires</span> emp
+<span class="k">ensures</span> emp
+{
+    <span class="k">let</span> <span class="k">mut</span> x = 0;
+    <span class="k">let</span> <span class="k">mut</span> y = 0;
+    <span class="k">let</span> p = { x; y };
+    <span class="c">//pts_to x 0 ** pts_to y 0</span>
+    <span class="k">with</span> _v. <span class="k">rewrite</span> pts_to x _v as pts_to p.x _v;
+    <span class="k">with</span> _v. <span class="k">rewrite</span> pts_to y _v as pts_to p.y _v;
+    <span class="c">//pts_to p.x 0 ** pts_to p.y 0</span>
+    fold_is_point p;
+    move p 1 1;
+    <span class="k">assert</span> (is_point p (1, 1));
+    <span class="k">unfold</span> is_point;
+    <span class="c">//pts_to p.x (fst (1, 1)) ** pts_to p.y (snd (1, 1))</span>
+    <span class="k">with</span> _v. <span class="k">rewrite</span> pts_to p.x _v as pts_to x _v;
+    <span class="k">with</span> _v. <span class="k">rewrite</span> pts_to p.y _v as pts_to y _v;
+    <span class="c">//pts_to x (fst (1, 1)) ** pts_to y (snd (1, 1))</span>
+}
+</pre></div>
+</div>
+<p>2 つの参照を確保して構造体 <code class="docutils literal notranslate"><span class="pre">p</span></code> に入れます。<code class="docutils literal notranslate"><span class="pre">fold_is_point</span></code> を呼ぶには <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">p.x</span> <span class="pre">_</span></code> と <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">p.y</span> <span class="pre">_</span></code> が必要ですが、コンテキストにあるのは <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">_</span></code> と <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">y</span> <span class="pre">_</span></code> だけです。ここで <code class="docutils literal notranslate"><span class="pre">rewrite</span></code> が必要な形にコンテキストを書き換えます。</p>
+<p>関数末尾では、<code class="docutils literal notranslate"><span class="pre">y</span></code> と <code class="docutils literal notranslate"><span class="pre">x</span></code> のスコープを抜ける際に回収できるよう、<code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">_</span></code> と <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">y</span> <span class="pre">_</span></code> を再び成立させなければなりません。逆方向の <code class="docutils literal notranslate"><span class="pre">rewrite</span></code> によりそれを実現します。</p>
+<p>これはかなり冗長です。<code class="docutils literal notranslate"><span class="pre">fold</span></code>／<code class="docutils literal notranslate"><span class="pre">unfold</span></code> と同様、一般の場合の完全自動化は難しいものの、よくあるケースは簡単で、Pulse チェッカにその支援を追加していく予定です。</p>
+<p>当面の間、Pulse は一般的な書き換えを楽にするための短縮記法を提供しています。</p>
+<p><code class="docutils literal notranslate"><span class="pre">rewrite</span> <span class="pre">each</span></code> コマンドの最も一般的な形は次のとおりです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> x1 ... xn. <span class="k">rewrite</span> <span class="k">each</span> e1 as e1&#39;, ..., en as en&#39; <span class="k">in</span> goal
+</pre></div>
+</div>
+<p>これは次と同等です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> x1 ... xn. <span class="k">assert</span> goal;
+<span class="k">rewrite</span> <span class="k">each</span> e1 as e1&#39;, ..., en as en&#39; <span class="k">in</span> goal
+</pre></div>
+</div>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">rewrite</span> <span class="k">each</span> e1 as e1&#39;, ..., en as en&#39; <span class="k">in</span> goal
+</pre></div>
+</div>
+<p>は次と同等です</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">rewrite</span> goal as goal&#39;
+</pre></div>
+</div>
+<p>ここで <code class="docutils literal notranslate"><span class="pre">goal'</span></code> は、<code class="docutils literal notranslate"><span class="pre">goal</span></code> 中のすべての <code class="docutils literal notranslate"><span class="pre">ei</span></code> を並行に <code class="docutils literal notranslate"><span class="pre">ei'</span></code> へ書き換えて得られます。</p>
+<p>最後に、次のようにも書けます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">rewrite</span> <span class="k">each</span> e1 as e1&#39;, ..., en as en&#39;
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">goal</span></code> を省略した場合、その <code class="docutils literal notranslate"><span class="pre">goal</span></code> は現在の <code class="docutils literal notranslate"><span class="pre">slprop</span></code> コンテキスト全体であると見なされます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">rewrite</span> <span class="pre">each</span> <span class="pre">...</span></code> を用いると、コードをいくらか短くできます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> create_and_move_alt ()
+<span class="k">requires</span> emp
+<span class="k">ensures</span> emp
+{
+    <span class="k">let</span> <span class="k">mut</span> x = 0;
+    <span class="k">let</span> <span class="k">mut</span> y = 0;
+    <span class="k">let</span> p = { x; y };
+    <span class="k">rewrite</span> <span class="k">each</span> x as p.x, y as p.y;
+    fold_is_point p;
+    move p 1 1;
+    <span class="k">assert</span> (is_point p (1, 1));
+    <span class="k">unfold</span> is_point;
+    <span class="k">rewrite</span> <span class="k">each</span> p.x as x, p.y as y;
+}
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_existentials.html" class="btn btn-neutral float-left" title="存在量化" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_conditionals.html" class="btn btn-neutral float-right" title="条件分岐" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,453 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ループと再帰 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="可変配列" href="pulse_arrays.html" />
+    <link rel="prev" title="条件分岐" href="pulse_conditionals.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ループと再帰</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#while-loops-general-form">while ループの一般形</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#countdown">カウントダウン</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#partial-correctness">部分正当性</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multiply-by-repeated-addition">加算の繰り返しによる乗算</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#summing-the-first-n-numbers">最初の <code class="docutils literal notranslate"><span class="pre">N</span></code> 個の数の総和</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#recursion">再帰</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">ループと再帰</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="loops-recursion">
+<span id="pulse-loops"></span><h1>ループと再帰<a class="headerlink" href="#loops-recursion" title="Link to this heading"></a></h1>
+<p>この章では、<code class="docutils literal notranslate"><span class="pre">while</span></code> をはじめとするさまざまなループ構文の動作と、再帰関数を Pulse でどのように扱うかを見ていきます。</p>
+<p>既定では、Pulse のロジックは部分正当性を対象としています。これは、プログラムが無限にループしてもよいことを意味します。プログラムが事後条件 <code class="docutils literal notranslate"><span class="pre">p</span></code> を満たす <code class="docutils literal notranslate"><span class="pre">v:t</span></code> を返すと言うとき、それは「実行が無限ループする可能性はあるが、もし返るならそのときの状態は必ず <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">v</span></code> を満たす」という意味です。</p>
+<section id="while-loops-general-form">
+<h2>while ループの一般形<a class="headerlink" href="#while-loops-general-form" title="Link to this heading"></a></h2>
+<p>while ループの形は次のとおりです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> ( guard )
+<span class="k">invariant</span> (b:bool). p
+{ body }
+</pre></div>
+</div>
+<p>ここで</p>
+<blockquote>
+<div><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">guard</span></code> は <code class="docutils literal notranslate"><span class="pre">b:bool</span></code> を返す Pulse プログラムです。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">body</span></code> は <code class="docutils literal notranslate"><span class="pre">unit</span></code> を返す Pulse プログラムです。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">invariant</span> <span class="pre">(b:bool).</span> <span class="pre">p</span></code> は次を満たす不変条件です。</p>
+<ul>
+<li><p>ループ突入前および各 <code class="docutils literal notranslate"><span class="pre">body</span></code> の事後条件として <code class="docutils literal notranslate"><span class="pre">exists*</span> <span class="pre">b.</span> <span class="pre">p</span></code> が証明可能でなければなりません。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exists*</span> <span class="pre">b.</span> <span class="pre">p</span></code> はガードの事前条件、<code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">b</span></code> はその事後条件です。すなわち <code class="docutils literal notranslate"><span class="pre">guard</span></code> は次を満たす必要があります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">requires</span> <span class="k">exists</span>* b. p
+<span class="k">returns</span> b:bool
+<span class="k">ensures</span> p
+</pre></div>
+</div>
+</li>
+<li><p>ループ全体の事後条件は <code class="docutils literal notranslate"><span class="pre">invariant</span> <span class="pre">false</span></code> です。</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<p>この不変条件は、3 つの異なるプログラム位置での主張をまとめて表すものだと理解できます。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">b==true</span></code> のとき、不変条件はループ本体の開始時点の状態を表します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">b==false</span></code> のとき、不変条件はループ終了時点の状態を表します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">b</span></code> が未確定のとき、不変条件はガードが（再）実行される直前、すなわちループ入口と本体末尾での状態の性質を表します。</p></li>
+</ul>
+</div></blockquote>
+<p>ループを記述する不変条件を考えるには注意深い思考が必要になることが多いです。以降の章で多くの例を見ていきますが、ここでは簡単なループから始めます。</p>
+<section id="countdown">
+<h3>カウントダウン<a class="headerlink" href="#countdown" title="Link to this heading"></a></h3>
+<p>最初のループ付き Pulse プログラムです。<code class="docutils literal notranslate"><span class="pre">count_down</span></code> は参照を <code class="docutils literal notranslate"><span class="pre">0</span></code> になるまで繰り返し減算します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> count_down (x:ref nat)
+<span class="k">requires</span> R.pts_to x &#39;v
+<span class="k">ensures</span>  R.pts_to x 0
+{
+    <span class="k">let</span> <span class="k">mut</span> keep_going = <span class="k">true</span>;
+    <span class="k">while</span> (
+        !keep_going
+    )
+    <span class="k">invariant</span>
+      <span class="k">exists</span>* (b:bool) (v:nat).
+        pts_to keep_going b **
+        pts_to x v **
+        pure (not b  ==&gt; v == 0)
+    {
+        <span class="k">let</span> n = !x;
+        <span class="k">if</span> (n = 0) 
+        {
+            keep_going := <span class="k">false</span>;
+        } 
+        <span class="k">else</span>
+        {
+            x := n - 1;
+        }
+    }
+}
+</pre></div>
+</div>
+<p>Pulse の while ループは他言語より少し一般的です。<code class="docutils literal notranslate"><span class="pre">guard</span></code> は単にローカル変数を読むだけでなく、任意の Pulse プログラムにできます。例えば次の版では、<code class="docutils literal notranslate"><span class="pre">guard</span></code> がすべての処理を行い、ループ本体は空、補助変数 <code class="docutils literal notranslate"><span class="pre">keep_going</span></code> も不要です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> count_down3 (x:ref nat)
+<span class="k">requires</span> R.pts_to x &#39;v
+<span class="k">ensures</span>  R.pts_to x 0
+{
+    <span class="k">while</span> (
+        <span class="k">let</span> n = !x;
+        <span class="k">if</span> (n = 0)
+        {
+            <span class="k">false</span>
+        } 
+        <span class="k">else</span>
+        {
+            x := n - 1;
+            <span class="k">true</span>
+        }
+    )
+    <span class="k">invariant</span>
+      <span class="k">exists</span>* (v:nat). pts_to x v
+    { () }
+}
+</pre></div>
+</div>
+</section>
+<section id="partial-correctness">
+<h3>部分正当性<a class="headerlink" href="#partial-correctness" title="Link to this heading"></a></h3>
+<p>部分正当性の解釈により、次のような無限ループする変種も受理されます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> count_down_loopy (x:ref nat)
+<span class="k">requires</span> R.pts_to x &#39;v
+<span class="k">ensures</span>  R.pts_to x 0
+{
+    <span class="k">while</span> (
+        <span class="k">let</span> n = !x;
+        <span class="k">if</span> (n = 0)
+        {
+            <span class="k">false</span>
+        }
+        <span class="k">else</span>
+        {
+            x := n + 1;
+            <span class="k">true</span>
+        }
+    )
+    <span class="k">invariant</span> <span class="k">exists</span>* v. R.pts_to x v
+    { () }
+}
+</pre></div>
+</div>
+<p>このプログラムは <code class="docutils literal notranslate"><span class="pre">x</span></code> を減らす代わりに増やしますが、常に無限ループするため、以前と同じ不変条件を満たします。</p>
+<p>ただし Pulse には、<code class="docutils literal notranslate"><span class="pre">ghost</span></code> と <code class="docutils literal notranslate"><span class="pre">atomic</span></code> 計算のロジックなど、必ず停止する部分があります。将来的には、汎用の逐次プログラム（並行なし）向けにも停止性を保証する Pulse ロジックの版を提供する予定です。</p>
+</section>
+<section id="multiply-by-repeated-addition">
+<h3>加算の繰り返しによる乗算<a class="headerlink" href="#multiply-by-repeated-addition" title="Link to this heading"></a></h3>
+<p>次のループプログラムは、自然数 <code class="docutils literal notranslate"><span class="pre">x,</span> <span class="pre">y</span></code> に対して、加算を <code class="docutils literal notranslate"><span class="pre">x</span></code> 回繰り返して積を求めます。この題材には歴史があります。Alan Turing の 1949 年の論文 <a class="reference external" href="https://turingarchive.kings.cam.ac.uk/checking-large-routine">&quot;Checking a Large Routine&quot;</a> は、コンピュータプログラムの正しさ証明に関する最初の論文としてしばしば引用されます。Turing が扱ったのも、この加算の繰り返しによる乗算でした。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> multiply_by_repeated_addition (x y:nat)
+    <span class="k">requires</span> emp
+    <span class="k">returns</span> z:nat
+    <span class="k">ensures</span> pure (z == x * y)
+{
+    <span class="k">let</span> <span class="k">mut</span> ctr : nat = 0;
+    <span class="k">let</span> <span class="k">mut</span> acc : nat = 0;
+    <span class="k">while</span> ( (!ctr &lt; x) )
+    <span class="k">invariant</span> 
+    <span class="k">exists</span>* (c a : nat).
+        R.pts_to ctr c **
+        R.pts_to acc a **
+        pure (c &lt;= x /\
+              a == (c * y))
+    {
+        <span class="k">let</span> a = !acc;
+        acc := a + y;
+        <span class="k">let</span> c = !ctr;
+        ctr := c + 1;
+    };
+    !acc
+}
+</pre></div>
+</div>
+<p>いくつかの注目点：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>カウンタ <code class="docutils literal notranslate"><span class="pre">ctr</span></code> とアキュムレータ <code class="docutils literal notranslate"><span class="pre">acc</span></code> はともに <code class="docutils literal notranslate"><span class="pre">nat</span></code> と宣言されており、精密型付けにより両者が常に <code class="docutils literal notranslate"><span class="pre">0</span></code> 以上であるという不変条件が暗黙に与えられます。これは、Pulse が F* の依存型システムの上に分離ロジックを重ねて提供していることを示します。</p></li>
+<li><p>不変条件は、(1) カウンタは <code class="docutils literal notranslate"><span class="pre">x</span></code> を超えない、(2) アキュムレータは常にカウンタと <code class="docutils literal notranslate"><span class="pre">y</span></code> の積である、(3) カウンタが <code class="docutils literal notranslate"><span class="pre">x</span></code> より小さい間ループを続ける、という内容です。</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="summing-the-first-n-numbers">
+<h3>最初の <code class="docutils literal notranslate"><span class="pre">N</span></code> 個の数の総和<a class="headerlink" href="#summing-the-first-n-numbers" title="Link to this heading"></a></h3>
+<p>次の例は、最初の <code class="docutils literal notranslate"><span class="pre">n</span></code> 個の自然数の合計を計算する Pulse プログラムです。純粋な F* の仕様や補題と併せて Pulse プログラムを開発する流れを示します。</p>
+<p>まず、単純な再帰関数 <code class="docutils literal notranslate"><span class="pre">sum</span></code> の F* による仕様と、この和に関するよく知られた恒等式を示す補題から始めます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> sum (n:nat)
+: nat
+= <span class="k">if</span> n = 0 <span class="k">then</span> 0 <span class="k">else</span> n + sum (n - 1)
+
+#push-options &quot;--z3rlimit 20&quot;
+<span class="k">noextract</span>
+<span class="k">let</span> <span class="k">rec</span> sum_lemma (n:nat)
+: <span class="k">Lemma</span> (sum n == n * (n + 1) / 2)
+= <span class="k">if</span> n = 0 <span class="k">then</span> ()
+  <span class="k">else</span> sum_lemma (n - 1)
+#pop-options
+</pre></div>
+</div>
+<p>次に、反復版の <code class="docutils literal notranslate"><span class="pre">sum</span></code> である <code class="docutils literal notranslate"><span class="pre">isum</span></code> を実装し、<code class="docutils literal notranslate"><span class="pre">sum_lemma</span></code> で示した恒等式を満たすことを証明します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--z3cliopt &#39;smt.arith.nl=<span class="k">false</span>&#39;&quot;
+<span class="k">noextract</span>
+
+<span class="k">fn</span> isum (n:nat)
+<span class="k">requires</span> emp
+<span class="k">returns</span> z:nat
+<span class="k">ensures</span> pure ((n * (n + 1) / 2) == z)
+{
+    <span class="k">let</span> <span class="k">mut</span> acc : nat = 0;
+    <span class="k">let</span> <span class="k">mut</span> ctr : nat = 0;
+    <span class="k">while</span> ( (!ctr &lt; n ) )
+    <span class="k">invariant</span> 
+    <span class="k">exists</span>* (c a : nat).
+        R.pts_to ctr c **
+        R.pts_to acc a **
+        pure (c &lt;= n /\
+              a == sum c)
+    {
+        <span class="k">let</span> a = !acc;
+        <span class="k">let</span> c = !ctr;
+        ctr := c + 1;
+        acc := a + c + 1;
+    };
+    sum_lemma n; <span class="c">//call an F* lemma inside Pulse</span>
+    !acc;
+}
+#pop-options
+</pre></div>
+</div>
+<p>このプログラムは <code class="docutils literal notranslate"><span class="pre">multiply_by_repeated_addition</span></code> によく似ていますが、いくつか違いがあります。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>不変条件は、アキュムレータの現在値が最初の <code class="docutils literal notranslate"><span class="pre">c</span></code> 個の総和であることを述べています。つまり、非線形算術の性質に頼ることなく（Z3 の非線形算術はプラグマで無効化しています）、このループが <code class="docutils literal notranslate"><span class="pre">sum</span></code> の再帰実装を精密化していることを示します。</p></li>
+<li><p>最後に、目的の恒等式の証明は、Pulse から既に証明済みの F* の <code class="docutils literal notranslate"><span class="pre">sum_lemma</span></code> を呼び出すだけで完了します。</p></li>
+</ul>
+</div></blockquote>
+<p>このプログラム自体は少し作為的ですが、まず純粋な F* 関数の精密化として Pulse プログラムを示し、次にその純粋関数に対する数学的推論を用いて Pulse 側の性質を結論づけられる、という流れを示せたはずです。</p>
+</section>
+</section>
+<section id="recursion">
+<h2>再帰<a class="headerlink" href="#recursion" title="Link to this heading"></a></h2>
+<p>Pulse は一般再帰、すなわち停止しない可能性のある再帰関数もサポートします。以下は簡単な例で、後ほどさらに例を見ます。</p>
+<p>まず、n 番目のフィボナッチ数を計算する標準的な F* の（相互）再帰定義から始めます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> fib (n:nat) : nat =
+  <span class="k">if</span> n &lt;= 1 <span class="k">then</span> 1
+  <span class="k">else</span> fib (n - 1) + fib (n - 2)
+</pre></div>
+</div>
+<p>これを Pulse でも <code class="docutils literal notranslate"><span class="pre">fib_rec</span></code> として実装できます。直近 2 つのフィボナッチ数の値を保持するため、アウトパラメータを用います。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="k">rec</span> fib_rec (n:pos) (out:ref (nat &amp; nat))
+<span class="k">requires</span>
+    pts_to out &#39;v
+<span class="k">ensures</span>
+    <span class="k">exists</span>* v.
+        pts_to out v **
+        pure (
+          fst v == fib (n - 1) /\
+          snd v == fib n 
+        )
+{
+  <span class="k">if</span> (n = 1)
+  {
+    <span class="c">//type inference in Pulse doesn&#39;t work well here:</span>
+    <span class="c">//it picks (1, 1) to have type (int &amp; int)</span>
+    <span class="c">//so we have to annotate</span>
+    out := ((1 &lt;: nat), (1 &lt;: nat)); 
+  }
+  <span class="k">else</span>
+  {
+    fib_rec (n - 1) out;
+    <span class="k">let</span> v = !out;
+    out := (snd v, fst v + snd v);
+  }
+}
+</pre></div>
+</div>
+<p>ここでの注意点：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Pulse での再帰定義は <code class="docutils literal notranslate"><span class="pre">fn</span> <span class="pre">rec</span></code> で導入します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fib</span></code> の直近 2 値を容易にメモ化できるよう、引数 <code class="docutils literal notranslate"><span class="pre">n</span></code> は <code class="docutils literal notranslate"><span class="pre">0</span></code> を含めず正の数であることを仮定します。</p></li>
+<li><p>コメントでも触れますが、<code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">1)</span></code> を自然数の組として正しく型付けするには追加の型注釈が必要です。</p></li>
+</ul>
+</div></blockquote>
+<p>もちろん、以下のように while ループで反復実装することも可能です。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> fib_loop (k:pos)
+  <span class="k">requires</span> emp
+  <span class="k">returns</span> r:nat
+  <span class="k">ensures</span> pure (r == fib k)
+{
+  <span class="k">let</span> <span class="k">mut</span> i : nat = 1;
+  <span class="k">let</span> <span class="k">mut</span> j : nat = 1;
+  <span class="k">let</span> <span class="k">mut</span> ctr : nat = 1;
+  <span class="k">while</span> ((!ctr &lt; k))
+  <span class="k">invariant</span>
+    <span class="k">exists</span>* (vi vj vctr : nat).
+        R.pts_to i vi **
+        R.pts_to j vj **
+        R.pts_to ctr vctr **
+        pure (
+            1 &lt;= vctr /\
+            vctr &lt;= k /\
+            vi == fib (vctr - 1) /\
+            vj == fib vctr) 
+  {
+      <span class="k">let</span> vi = !i;
+      <span class="k">let</span> vj = !j;
+      <span class="k">let</span> c = !ctr;
+      ctr := c + 1;
+      i := vj;
+      j := vi + vj;
+  };
+  !j
+}
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_conditionals.html" class="btn btn-neutral float-left" title="条件分岐" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_arrays.html" class="btn btn-neutral float-right" title="可変配列" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

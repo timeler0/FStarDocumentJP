@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>含意と全称量化 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="連結リスト" href="pulse_linked_list.html" />
+    <link rel="prev" title="高階関数" href="pulse_higher_order.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">含意と全称量化</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trades-or-separating-ghost-implication">Trade（分離ゴースト含意）</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#share-and-gather">Share と Gather</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#universal-quantification">全称量化</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#share-and-gather-again">Share と Gather（再び）</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#trades-and-ghost-steps">Trade とゴーストステップ</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">含意と全称量化</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="implication-and-universal-quantification">
+<span id="pulse-implication-and-forall"></span><h1>含意と全称量化<a class="headerlink" href="#implication-and-universal-quantification" title="Link to this heading"></a></h1>
+<p>この章では分離論理の連結子 <code class="docutils literal notranslate"><span class="pre">&#64;==&gt;</span></code> と <code class="docutils literal notranslate"><span class="pre">forall*</span></code> を紹介します。まずはごく簡単な例で使い方を示し、次章の連結リストではこれらの連結子のより本格的な用例を見ていきます。</p>
+<section id="trades-or-separating-ghost-implication">
+<h2>Trade（分離ゴースト含意）<a class="headerlink" href="#trades-or-separating-ghost-implication" title="Link to this heading"></a></h2>
+<p>ライブラリ <code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">I</span> <span class="pre">=</span> <span class="pre">Pulse.Lib.Trade.Util</span></code> は <em>trade</em> 演算子 <code class="docutils literal notranslate"><span class="pre">(&#64;==&gt;)</span></code> と その補助関数群を提供します。文献では <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">--*</span> <span class="pre">q</span></code> を “magic wand” と呼びますが、<code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">&#64;==&gt;</span> <span class="pre">q</span></code> はこれに近く、いくつかの技術的差異があります（後述）。ここでは「<code class="docutils literal notranslate"><span class="pre">p</span></code> を <code class="docutils literal notranslate"><span class="pre">q</span></code> にトレードする」と読みます。<code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">&#64;==&gt;</span> <span class="pre">q</span></code> の直観的意味は次のとおりです。</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">&#64;==&gt;</span> <span class="pre">q</span></code> は「<code class="docutils literal notranslate"><span class="pre">p</span></code> を持っていればそれを <em>交換</em> して <code class="docutils literal notranslate"><span class="pre">q</span></code> を得られる」ことを表します。すなわち <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">**</span> <span class="pre">(p</span> <span class="pre">&#64;==&gt;</span> <span class="pre">q)</span></code> から <code class="docutils literal notranslate"><span class="pre">q</span></code> を導けます。この推論は以下の型を持つゴースト関数 <code class="docutils literal notranslate"><span class="pre">I.elim</span></code> によって実行されます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> I.elim (p q:slprop)
+<span class="k">requires</span> p ** (p @==&gt; q)
+<span class="k">ensures</span> q
+</pre></div>
+</div>
+</div></blockquote>
+<p>重要なのは、<code class="docutils literal notranslate"><span class="pre">p</span></code> を資源に対する許可だと考えると、<code class="docutils literal notranslate"><span class="pre">I.elim</span></code> により <code class="docutils literal notranslate"><span class="pre">p</span></code> の許可を <em>手放し</em>、その見返りとして <code class="docutils literal notranslate"><span class="pre">q</span></code> を得る点です。さらにこの際、含意自体の権利も消費されます。つまり <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">&#64;==&gt;</span> <span class="pre">q</span></code> によるトレードは一度きりです。</p>
+<p>では最初に <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">&#64;==&gt;</span> <span class="pre">q</span></code> はどう作るのでしょうか。導入規則は次のとおりです。</p>
+<blockquote>
+<div><div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> I.intro (p q r:slprop)
+           (elim: unit -&gt; stt_ghost unit emp_inames (r ** p) (<span class="k">fun</span> <span class="k">_</span> -&gt; q))
+<span class="k">requires</span> r
+<span class="k">ensures</span> p @==&gt; q
+</pre></div>
+</div>
+</div></blockquote>
+<p>すなわち <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">&#64;==&gt;</span> <span class="pre">q</span></code> を導入するには、ゴースト関数で <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">**</span> <span class="pre">p</span></code> を <code class="docutils literal notranslate"><span class="pre">q</span></code> に変換できるような補助の許可 <code class="docutils literal notranslate"><span class="pre">r</span></code> を保持していることを示します。</p>
+<section id="share-and-gather">
+<h3>Share と Gather<a class="headerlink" href="#share-and-gather" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">&#64;==&gt;</span> <span class="pre">q</span></code> の動作を示す小さな例を見てみましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> regain_half (#a: Type0) (x:GR.ref a) (v:a) =
+  pts_to x #0.5R v @==&gt; pts_to x v
+</pre></div>
+</div>
+<p>述語 <code class="docutils literal notranslate"><span class="pre">regain_half</span></code> は、半分の許可 <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">#one_half</span> <span class="pre">v</span></code> を全許可 <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">v</span></code> にトレードできることを表します。一見直感に反しますが、<code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">&#64;==&gt;</span> <span class="pre">q</span></code> 自体が内部に権利を保持している点が肝心です。具体的には <code class="docutils literal notranslate"><span class="pre">regain_half</span> <span class="pre">x</span> <span class="pre">v</span></code> は内部に <code class="docutils literal notranslate"><span class="pre">exists*</span> <span class="pre">u.</span> <span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">#one_half</span> <span class="pre">u</span></code> を持ち、文脈がもう半分を提示すれば、除去子がそれらを合成して全許可を返せます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">regain_half</span></code> の導入方法を見てみましょう。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span> 
+<span class="k">fn</span> intro_regain_half (x:GR.ref int)
+<span class="k">requires</span> pts_to x &#39;v
+<span class="k">ensures</span> pts_to x #0.5R &#39;v ** regain_half x &#39;v
+{
+  GR.share x;
+  intro (pts_to x #0.5R &#39;v @==&gt; pts_to x &#39;v) #(pts_to x #0.5R &#39;v) <span class="k">fn</span> <span class="k">_</span>
+  {
+    GR.gather x;
+  };
+  <span class="k">fold</span> regain_half;
+}
+</pre></div>
+</div>
+<p>仕様は、<code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">'v</span></code> から始めれば、それを <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">#one_half</span> <span class="pre">v</span></code> と <code class="docutils literal notranslate"><span class="pre">regain_half</span> <span class="pre">x</span> <span class="pre">'v</span></code> に分割できると述べています。通常の分割では二つの半許可に分けますが、ここでは片方をゴースト関数に包み、必要時に再結合（gather）できるようにしています。</p>
+<p>実装では、<code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">#one_half</span> <span class="pre">'v</span> <span class="pre">&#64;==&gt;</span> <span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">'v</span></code> の除去に相当する補助ゴースト関数を定義します（中身は <code class="docutils literal notranslate"><span class="pre">gather</span></code>）。その後 <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">'v</span></code> を半分に分け、除去子を渡して <code class="docutils literal notranslate"><span class="pre">I.intro</span></code> を呼び、<code class="docutils literal notranslate"><span class="pre">regain_half</span></code> に畳み込みます。要するに <code class="docutils literal notranslate"><span class="pre">regain_half</span></code> は、補助ゴースト関数 <code class="docutils literal notranslate"><span class="pre">aux</span></code> と <code class="docutils literal notranslate"><span class="pre">x</span></code> の半許可をひとかたまりの <code class="docutils literal notranslate"><span class="pre">slprop</span></code> にしただけです。</p>
+<p>後で <code class="docutils literal notranslate"><span class="pre">regain_half</span></code> を使いたいときは、その除去子を呼びます――実質的には必要な許可を渡して <code class="docutils literal notranslate"><span class="pre">aux</span></code> を呼ぶのと同じです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> use_regain_half (x:GR.ref int)
+<span class="k">requires</span> pts_to x #0.5R &#39;v ** regain_half x &#39;v
+<span class="k">ensures</span> pts_to x &#39;v
+{
+  <span class="k">unfold</span> regain_half;
+  I.elim <span class="k">_</span> <span class="k">_</span>;
+}
+</pre></div>
+</div>
+<p>ここまで来ると、「最初から <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">#one_half</span> <span class="pre">'v</span></code> と <code class="docutils literal notranslate"><span class="pre">gather</span></code> で良いのでは？」と思うかもしれません。この単純な例では確かに <code class="docutils literal notranslate"><span class="pre">(&#64;==&gt;)</span></code> の利得は大きくありません。</p>
+</section>
+</section>
+<section id="universal-quantification">
+<h2>全称量化<a class="headerlink" href="#universal-quantification" title="Link to this heading"></a></h2>
+<p>改めて <code class="docutils literal notranslate"><span class="pre">regain_half</span></code> を見直します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> regain_half (#a: Type0) (x:GR.ref a) (v:a) =
+  pts_to x #0.5R v @==&gt; pts_to x v
+</pre></div>
+</div>
+<p>この述語は汎用性に欠けます。除去には、導入時と <em>同じ</em> <code class="docutils literal notranslate"><span class="pre">v</span></code> に対する <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">#one_half</span> <span class="pre">v</span></code> を持っていることを呼び出し側が示さねばなりません。</p>
+<p>やや一般化して次のようにもできます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> regain_half #a (x:GR.ref a) (v:a) =
+  (<span class="k">exists</span>* u. pts_to x #one_half u) @==&gt; pts_to x v
+</pre></div>
+</div>
+<p>改善ではありますが、存在量化された <code class="docutils literal notranslate"><span class="pre">u</span></code> と <code class="docutils literal notranslate"><span class="pre">v</span></code> の関係が表せず、まだ不十分です。必要なのは全称量化です。</p>
+<p>正しい形は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> regain_half_q (#a: Type0) (x:GR.ref a) =
+  <span class="k">forall</span>* u. pts_to x #0.5R u @==&gt; pts_to x u 
+</pre></div>
+</div>
+<p>これは、文脈がどの <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">#one_half</span> <span class="pre">u</span></code> を持っていても、<em>同じ証人</em> <code class="docutils literal notranslate"><span class="pre">u</span></code> のまま全許可に戻せる、という主張になります。</p>
+<p><code class="docutils literal notranslate"><span class="pre">forall*</span></code> とその操作用ユーティリティは <code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Forall.Util</span></code> にあります。導入・除去の形は <code class="docutils literal notranslate"><span class="pre">&#64;==&gt;</span></code> とよく似ています。</p>
+<blockquote>
+<div><div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> FA.elim (#a:Type) (#p:a-&gt;slprop) (v:a)
+<span class="k">requires</span> (<span class="k">forall</span>* x. p x)
+<span class="k">ensures</span> p v
+</pre></div>
+</div>
+</div></blockquote>
+<p>除去子は全称変数 <code class="docutils literal notranslate"><span class="pre">x</span></code> を <code class="docutils literal notranslate"><span class="pre">v</span></code> に <em>一回だけ</em> インスタンス化することを許します。</p>
+<blockquote>
+<div><div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> FA.intro (#a:Type) (#p:a-&gt;slprop)
+     (v:slprop)
+     (f_elim : (x:a -&gt; stt_ghost unit emp_inames v (<span class="k">fun</span> <span class="k">_</span> -&gt; p x)))
+<span class="k">requires</span> v
+<span class="k">ensures</span> (<span class="k">forall</span>* x. p x)
+</pre></div>
+</div>
+</div></blockquote>
+<p>導入には、<code class="docutils literal notranslate"><span class="pre">v</span></code> を保持しており、任意の <code class="docutils literal notranslate"><span class="pre">x</span></code> に対してゴースト関数で <code class="docutils literal notranslate"><span class="pre">v</span></code> から <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">x</span></code> を生み出せることの証明が要ります。</p>
+<p>全称量化と trade を組み合わせるのは一般的なので、ライブラリには次のような合成版も用意されています。</p>
+<blockquote>
+<div><div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> elim_forall_imp (#a:Type0) (p q: a -&gt; slprop) (x:a)
+<span class="k">requires</span> (<span class="k">forall</span>* x. p x @==&gt; q x) ** p x
+<span class="k">ensures</span> q x
+</pre></div>
+</div>
+</div></blockquote>
+<p>および</p>
+<blockquote>
+<div><div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> intro_forall_imp (#a:Type0) (p q: a -&gt; slprop) (r:slprop)
+         (elim: (u:a -&gt; stt_ghost unit emp_inames
+                          (r ** p u)
+                          (<span class="k">fun</span> <span class="k">_</span> -&gt; q u)))
+<span class="k">requires</span> r
+<span class="k">ensures</span> <span class="k">forall</span>* x. p x @==&gt; q x
+</pre></div>
+</div>
+</div></blockquote>
+<section id="share-and-gather-again">
+<h3>Share と Gather（再び）<a class="headerlink" href="#share-and-gather-again" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">regain_half_q</span></code> の導入は次のとおりです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span> 
+<span class="k">fn</span> intro_regain_half_q (x:GR.ref int)
+<span class="k">requires</span> pts_to x &#39;v
+<span class="k">ensures</span> pts_to x #0.5R &#39;v ** regain_half_q x
+{
+  GR.share x;
+  intro (<span class="k">forall</span>* u. pts_to x #0.5R u @==&gt; pts_to x u)
+      #(pts_to x #0.5R &#39;v) <span class="k">fn</span> <span class="k">_</span> u {
+    gather x;
+  };
+  <span class="k">fold</span> regain_half_q;
+}
+</pre></div>
+</div>
+<p>これで利用時には、任意の <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">#one_half</span> <span class="pre">u``（の半許可）を、同じ</span> <span class="pre">``u</span></code> の全許可にトレードできます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> use_regain_half_q (x:GR.ref int)
+<span class="k">requires</span> pts_to x #0.5R &#39;u ** regain_half_q x
+<span class="k">ensures</span> pts_to x &#39;u
+{
+  <span class="k">unfold</span> regain_half_q;
+  FA.elim #<span class="k">_</span> #(<span class="k">fun</span> u -&gt; pts_to x #0.5R u @==&gt; pts_to x u) &#39;u;
+  I.elim <span class="k">_</span> <span class="k">_</span>;
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">FA.elim</span></code> の除去子は少々冗長で、量化子の項を再度明示する必要があります。現在の Pulse における F* のユニファの使い方では、高階単一化の一部にうまく解が見つからないことがあるためです。これは今後改善予定です。</p>
+</section>
+</section>
+<section id="trades-and-ghost-steps">
+<h2>Trade とゴーストステップ<a class="headerlink" href="#trades-and-ghost-steps" title="Link to this heading"></a></h2>
+<p>最後に、ゴースト状態を変更しうるステップも含め、任意のゴースト計算を trade に包めることを示します。一般には、<code class="docutils literal notranslate"><span class="pre">&#64;==&gt;</span></code> は “wand” というより Iris 用語でいう <em>view shift</em> に近い振る舞いになります。</p>
+<p>述語 <code class="docutils literal notranslate"><span class="pre">can_update</span></code> は、<code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">#one_half</span> <span class="pre">u</span></code> の半許可を、<em>別の値</em> <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">x</span> <span class="pre">v</span></code> の全許可へとトレードできることを表します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> can_update (x:GR.ref int) = 
+  <span class="k">forall</span>* u v. pts_to x #0.5R u @==&gt;
+               pts_to x v
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">make_can_update</span></code> では、ゴースト状態の更新関数を二変数の量化 <code class="docutils literal notranslate"><span class="pre">forall*</span> <span class="pre">u</span> <span class="pre">v.</span> <span class="pre">...</span></code> にパッケージします。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> make_can_update (x:GR.ref int)
+<span class="k">requires</span> pts_to x &#39;w
+<span class="k">ensures</span> pts_to x #0.5R &#39;w ** can_update x
+{
+  share x;
+  intro (<span class="k">forall</span>* u v. pts_to x #0.5R u @==&gt; pts_to x v)
+      #(pts_to x #0.5R &#39;w) <span class="k">fn</span> <span class="k">_</span> u v {
+    gather x;
+    x := v;
+  };
+  <span class="k">fold</span> (can_update x);
+}
+</pre></div>
+</div>
+<p>以下の <code class="docutils literal notranslate"><span class="pre">update</span></code> では、それを具体化して参照 <code class="docutils literal notranslate"><span class="pre">x</span></code> を <code class="docutils literal notranslate"><span class="pre">'u</span></code> から <code class="docutils literal notranslate"><span class="pre">k</span></code> に更新し、さらに呼び出し側が再利用できるよう <code class="docutils literal notranslate"><span class="pre">can_update</span></code> 述語も返します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> update (x:GR.ref int) (k:int)
+<span class="k">requires</span> pts_to x #0.5R &#39;u ** can_update x
+<span class="k">ensures</span> pts_to x #0.5R k ** can_update x
+{
+  <span class="k">unfold</span> can_update;
+  FA.elim #<span class="k">_</span> #(<span class="k">fun</span> u -&gt; <span class="k">forall</span>* v. pts_to x #0.5R u @==&gt; pts_to x v) &#39;u;
+  FA.elim #<span class="k">_</span> #(<span class="k">fun</span> v -&gt; pts_to x #0.5R &#39;u @==&gt; pts_to x v) k;
+  I.elim <span class="k">_</span> <span class="k">_</span>;
+  make_can_update x;
+}
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_higher_order.html" class="btn btn-neutral float-left" title="高階関数" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_linked_list.html" class="btn btn-neutral float-right" title="連結リスト" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,403 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>可変配列 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="ゴースト計算" href="pulse_ghost.html" />
+    <link rel="prev" title="ループと再帰" href="pulse_loops.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">可変配列</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#array-t"><code class="docutils literal notranslate"><span class="pre">array</span> <span class="pre">t</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#compare">比較</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#copy">コピー</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#stack-allocated-arrays">スタック確保配列</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#heap-allocated-arrays">ヒープ確保配列</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ghost.html">ゴースト計算</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">可変配列</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="mutable-arrays">
+<span id="pulse-arrays"></span><h1>可変配列<a class="headerlink" href="#mutable-arrays" title="Link to this heading"></a></h1>
+<p>この章では Pulse における可変配列を学びます。配列は同一型の値が連続して並ぶ集合です。<code class="docutils literal notranslate"><span class="pre">ref</span></code> と同様に、Pulse の配列は現在の関数のスタックフレーム上、またはヒープ上に確保できます——スタック確保された配列は（関数の復帰時などに）自動的に回収されますが、ヒープ確保された配列はプログラマが明示的に管理します。</p>
+<p>Pulse には 2 種類の配列型があります。基本的な配列型である <code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Array.array</span> <span class="pre">t</span></code> と、ヒープ確保用の <code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Vec.vec</span> <span class="pre">t</span></code> です。コード再利用のため、スタック配列／ヒープ配列の両方に対して動作する関数は <code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Array.array</span> <span class="pre">t</span></code> を用いて記述できます——<code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Vec</span></code> ライブラリが <code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">t</span></code> と <code class="docutils literal notranslate"><span class="pre">array</span> <span class="pre">t</span></code> の相互変換（コアーション）を提供します。</p>
+<section id="array-t">
+<h2><code class="docutils literal notranslate"><span class="pre">array</span> <span class="pre">t</span></code><a class="headerlink" href="#array-t" title="Link to this heading"></a></h2>
+<p>配列を読み出す次の例を使って、<code class="docutils literal notranslate"><span class="pre">array</span> <span class="pre">t</span></code> の基本を説明します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> read_i
+  (#[@@@ Rust_generics_bounds [&quot;Copy&quot;]] t:Type0)
+  (arr:array t)
+  (#p:perm)
+  (#s:erased (Seq.seq t))
+  (i:SZ.t { SZ.v i &lt; Seq.length s })
+  <span class="k">requires</span> pts_to arr #p s
+  <span class="k">returns</span> x:t
+  <span class="k">ensures</span> pts_to arr #p s ** pure (x == Seq.index s (SZ.v i))
+{
+  arr.(i)
+}
+</pre></div>
+</div>
+<p>ライブラリは <code class="docutils literal notranslate"><span class="pre">pts_to</span> <span class="pre">arr</span> <span class="pre">#p</span> <span class="pre">s</span></code> という points-to 述語を提供します。これは現在のメモリにおいて <code class="docutils literal notranslate"><span class="pre">arr</span></code> の内容が（関数型）列 <code class="docutils literal notranslate"><span class="pre">s:FStar.Seq.seq</span> <span class="pre">t</span></code> と同一であることを表します。参照に対する <code class="docutils literal notranslate"><span class="pre">pts_to</span></code> と同様、暗黙の分数パーミッション <code class="docutils literal notranslate"><span class="pre">p</span></code> を添字に取り、共有の読み取り専用アクセスと、排他的読み書きアクセスを区別します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">read_i</span></code> の引数中の <code class="docutils literal notranslate"><span class="pre">`s</span></code> は仕様専用のため消去（erasure）されます。</p>
+<p>配列の読み書きは C の <code class="docutils literal notranslate"><span class="pre">size_t</span></code> を F* で表した <code class="docutils literal notranslate"><span class="pre">FStar.SizeT.t</span></code> 型のインデックスで行います <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>。インデックスが配列境界内であることは、<code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">SZ</span> <span class="pre">=</span> <span class="pre">FStar.SizeT</span></code> として <code class="docutils literal notranslate"><span class="pre">SZ.v</span> <span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">Seq.length</span> <span class="pre">s</span></code> の絞り込みで保証します。関数は配列の <code class="docutils literal notranslate"><span class="pre">i</span></code> 番目の要素を返し、事後条件の slprop <code class="docutils literal notranslate"><span class="pre">pure</span> <span class="pre">(x</span> <span class="pre">==</span> <span class="pre">Seq.index</span> <span class="pre">s</span> <span class="pre">(SZ.v</span> <span class="pre">i))</span></code> でそれを述べます。本体では配列読取演算子 <code class="docutils literal notranslate"><span class="pre">arr.(i)</span></code> を用います。</p>
+<p>別の例として、配列の <code class="docutils literal notranslate"><span class="pre">i</span></code> 番目の要素への書き込みを見てみましょう。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> write_i (#t:Type0) (arr:array t) (#s:erased (Seq.seq t)) (x:t) (i:SZ.t { SZ.v i &lt; Seq.length s })
+  <span class="k">requires</span> pts_to arr s
+  <span class="k">ensures</span> pts_to arr (Seq.upd s (SZ.v i) x)
+{
+  arr.(i) &lt;- x
+}
+</pre></div>
+</div>
+<p>この関数は配列書込演算子 <code class="docutils literal notranslate"><span class="pre">arr(i)</span> <span class="pre">&lt;-</span> <span class="pre">x</span></code> を使い、復帰時の状態で配列内容が、インデックス <code class="docutils literal notranslate"><span class="pre">i</span></code> を更新した列 <code class="docutils literal notranslate"><span class="pre">s</span></code> と同一であることを事後条件で主張します。</p>
+<p>読み取りは任意のパーミッションで可能ですが、書き込みには <code class="docutils literal notranslate"><span class="pre">1.0R``（排他的権限）が必要です。例えば、``1.0R</span></code> なしの <code class="docutils literal notranslate"><span class="pre">write_i</span></code> 実装は次のように却下されます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@ expect_failure]
+
+<span class="k">fn</span> write_ip #t (arr:array t) (#p:perm) (#s:erased <span class="k">_</span>) (x:t) (i:SZ.t { SZ.v i &lt; Seq.length s })
+  <span class="k">requires</span> pts_to arr #p s
+  <span class="k">ensures</span> pts_to arr #p (Seq.upd s (SZ.v i) x)
+{
+  arr.(i) &lt;- x
+}
+</pre></div>
+</div>
+<p>ライブラリには参照の場合と同様に、配列のパーミッションを分割・合成する <code class="docutils literal notranslate"><span class="pre">share</span></code> と <code class="docutils literal notranslate"><span class="pre">gather</span></code> が用意されています。</p>
+<p>ここからは、条件分岐・ループ・存在量化・不変条件など、これまでに見た Pulse の構成要素を用いて配列を扱う例をいくつか見ていきます。</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>C の <code class="docutils literal notranslate"><span class="pre">size_t</span></code> は少なくとも 16 ビット幅の符号なし整数型で、その上限はプラットフォーム依存です。<code class="docutils literal notranslate"><span class="pre">FStar.SizeT.size_t</span></code> はこの型をモデル化し、前述の <a class="reference internal" href="../part3/part3_interfaces.html#machine-integers"><span class="std std-ref">有界整数型</span></a> 同様、C ではプリミティブな <code class="docutils literal notranslate"><span class="pre">size_t</span></code> に抽出されます。</p>
+</aside>
+</aside>
+<section id="compare">
+<h3>比較<a class="headerlink" href="#compare" title="Link to this heading"></a></h3>
+<p>2 つの配列が等しいかどうかを比較する関数を実装してみましょう。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> compare
+  (#[@@@ Rust_generics_bounds [&quot;PartialEq&quot;; &quot;Copy&quot;]] t:eqtype)
+  #p1 #p2
+  (a1 a2:A.array t)
+  (l:SZ.t) 
+  <span class="k">requires</span> (
+    A.pts_to a1 #p1 &#39;s1 **
+    A.pts_to a2 #p2 &#39;s2 **
+    pure (Seq.length &#39;s1 == Seq.length &#39;s2 /\ Seq.length &#39;s2 == SZ.v l)
+  )
+  <span class="k">returns</span> res:bool
+  <span class="k">ensures</span> (
+    A.pts_to a1 #p1 &#39;s1 **
+    A.pts_to a2 #p2 &#39;s2 **
+    pure (res &lt;==&gt; Seq.equal &#39;s1 &#39;s2)
+  )
+</pre></div>
+</div>
+<p>この関数は 2 つの配列 <code class="docutils literal notranslate"><span class="pre">a1</span></code> と <code class="docutils literal notranslate"><span class="pre">a2</span></code> を受け取り、真偽値を返します。事後条件 <code class="docutils literal notranslate"><span class="pre">pure</span> <span class="pre">(res</span> <span class="pre">&lt;==&gt;</span> <span class="pre">Seq.equal</span> <span class="pre">'s1</span> <span class="pre">'s2)</span></code> は、両配列の列表現が等しい場合に限り結果が真になることを示します。配列は読み取りのみなので、各配列のパーミッション <code class="docutils literal notranslate"><span class="pre">p1</span></code> と <code class="docutils literal notranslate"><span class="pre">p2</span></code> に関して関数は多相です。型引数 <code class="docutils literal notranslate"><span class="pre">t</span></code> は <a class="reference internal" href="../part1/part1_equality.html#part1-equality"><span class="std std-ref">eqtype</span></a> で、<code class="docutils literal notranslate"><span class="pre">t</span></code> の値が決定可能な等値判定を持つことを要求します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">compare</span></code> の実装方法の一つは、可変カウンタで 2 つの配列を走査する <code class="docutils literal notranslate"><span class="pre">while</span></code> ループを用い、対応する要素が等しいか逐次チェックすることです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>{
+  <span class="k">let</span> <span class="k">mut</span> i = 0sz;
+  <span class="k">while</span> (
+    <span class="k">let</span> vi = !i;
+    <span class="k">if</span> (vi &lt;^ l) {
+      (a1.(vi) = a2.(vi))
+    } <span class="k">else</span> {
+      <span class="k">false</span>
+    }
+  )
+  <span class="k">invariant</span>
+  <span class="k">exists</span>* (vi:<span class="k">_</span>{SZ.v vi &lt;= SZ.v l}). ( 
+    R.pts_to i vi **
+    A.pts_to a1 #p1 &#39;s1 **
+    A.pts_to a2 #p2 &#39;s2 **
+    pure (
+      (<span class="k">forall</span> (i:nat). i &lt; SZ.v vi ==&gt; Seq.index &#39;s1 i == Seq.index &#39;s2 i)
+    )
+  )
+  {
+    i := !i +^ 1sz
+  };
+  (!i = l);
+}
+</pre></div>
+</div>
+<p>ループ不変条件は次を述べます。(a) カウンタの現在値未満の範囲で配列が要素ごとに等しいこと、(b) 真偽値 <code class="docutils literal notranslate"><span class="pre">b</span></code> は、現在のカウンタ値が配列長未満で、かつその位置の要素が等しい場合に限り真であること。(a) は <code class="docutils literal notranslate"><span class="pre">compare</span></code> の最終的な事後条件の証明に役立ち、(b) はループ本体でカウンタを増やした後も不変条件を保つために必要です。</p>
+</section>
+<section id="copy">
+<h3>コピー<a class="headerlink" href="#copy" title="Link to this heading"></a></h3>
+<p>次の例として、配列 <code class="docutils literal notranslate"><span class="pre">a2</span></code> の内容を <code class="docutils literal notranslate"><span class="pre">a1</span></code> にコピーする <code class="docutils literal notranslate"><span class="pre">copy</span></code> 関数を実装しましょう。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> copy
+  (#[@@@ Rust_generics_bounds [&quot;Copy&quot;]] t:Type0)
+  (a1 a2:A.array t)
+  (l:SZ.t)
+  (#p2:perm)
+  <span class="k">requires</span> (
+    A.pts_to a1 &#39;s1 **
+    A.pts_to a2 #p2 &#39;s2 **
+    pure (Seq.length &#39;s1 == Seq.length &#39;s2 /\ Seq.length &#39;s2 == SZ.v l)
+  )
+  <span class="k">ensures</span> (
+    (<span class="k">exists</span>* s1. A.pts_to a1 s1 ** pure (Seq.equal s1 &#39;s2)) **
+    A.pts_to a2 #p2 &#39;s2
+  )
+{
+  <span class="k">let</span> <span class="k">mut</span> i = 0sz;
+  <span class="k">while</span> (
+    (!i &lt;^ l)
+  )
+  <span class="k">invariant</span>
+  <span class="k">exists</span>* vi s1. ( 
+    R.pts_to i vi **
+    A.pts_to a1 s1 **
+    A.pts_to a2 #p2 &#39;s2 **
+    pure (
+      Seq.length s1 == Seq.length &#39;s2 /\
+      SZ.v vi &lt;= SZ.v l /\
+      (<span class="k">forall</span> (i:nat). i &lt; SZ.v vi ==&gt; Seq.index s1 i == Seq.index &#39;s2 i)
+    )
+  )
+  {
+    <span class="k">let</span> vi = !i;
+    a1.(vi) &lt;- a2.(vi);
+    i := vi +^ 1sz
+  }
+}
+</pre></div>
+</div>
+<p>ループ不変条件は <code class="docutils literal notranslate"><span class="pre">a1</span></code> の内容を存在的に抽象化し、現在のカウンタ位置までの内容が 2 配列で等しいことを保ちます。残りのコードは素直で、ループ条件でカウンタが配列長未満であることを確認し、ループ本体で 1 要素ずつコピーします。</p>
+<p><code class="docutils literal notranslate"><span class="pre">copy</span></code> の事後条件はやや回りくどいことに気づくでしょう。より良いシグネチャとして、<code class="docutils literal notranslate"><span class="pre">a1</span></code> の内容が直接 <code class="docutils literal notranslate"><span class="pre">'s2</span></code> と同一だと述べる次の形が考えられます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> copy2
+  (#[@@@ Rust_generics_bounds [&quot;Copy&quot;]] t:Type0)
+  (a1 a2:A.array t)
+  (l:SZ.t)
+  (#p2:perm)
+  <span class="k">requires</span> (
+    A.pts_to a1 &#39;s1 **
+    A.pts_to a2 #p2 &#39;s2 **
+    pure (Seq.length &#39;s1 == Seq.length &#39;s2 /\ Seq.length &#39;s2 == SZ.v l)
+  )
+  <span class="k">ensures</span> (
+    A.pts_to a1 &#39;s2 **
+    A.pts_to a2 #p2 &#39;s2
+  )
+</pre></div>
+</div>
+<p>このシグネチャでも実装可能ですが、<code class="docutils literal notranslate"><span class="pre">while</span></code> ループの後で事後条件をこの形に整えるための書き換えを一手入れる必要があります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>  <span class="c">// after the loop</span>
+  <span class="k">with</span> v1 s1. <span class="k">_</span>; <span class="c">//bind existentially bound witnesses from the invariant</span>
+  Seq.lemma_eq_elim s1 &#39;s2; <span class="c">//call an F* lemma to prove that s1 == &#39;s2</span>
+  ()
+</pre></div>
+</div>
+<p><a class="reference internal" href="pulse_user_defined_predicates.html#pulse-rewriting"><span class="std std-ref">前の章</span></a> で見たように、述語を書き換える明示的な方法を使うこともできます。</p>
+</section>
+</section>
+<section id="stack-allocated-arrays">
+<h2>スタック確保配列<a class="headerlink" href="#stack-allocated-arrays" title="Link to this heading"></a></h2>
+<p>スタック配列は <code class="docutils literal notranslate"><span class="pre">[|</span> <span class="pre">v;</span> <span class="pre">n</span> <span class="pre">|]</span></code> という式で確保できます。サイズ <code class="docutils literal notranslate"><span class="pre">n</span></code> の配列を確保し、全要素を <code class="docutils literal notranslate"><span class="pre">v</span></code> で初期化します。<code class="docutils literal notranslate"><span class="pre">n</span></code> はコンパイル時定数でなければなりません。生成された配列が長さ <code class="docutils literal notranslate"><span class="pre">n</span></code> の <code class="docutils literal notranslate"><span class="pre">v</span></code> の列を指すことが事後条件として与えられます。次の例では、2 つの配列をスタックに確保し、上の <code class="docutils literal notranslate"><span class="pre">compare</span></code> 関数で比較します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> compare_stack_arrays ()
+  <span class="k">requires</span> emp
+  <span class="k">ensures</span> emp
+{
+  <span class="c">// |- emp</span>
+  <span class="k">let</span> <span class="k">mut</span> a1 = [| 0; 2sz |];
+  <span class="c">// a1:array int |- pts_to a1 (Seq.create 0 (SZ.v 2))</span>
+  <span class="k">let</span> <span class="k">mut</span> a2 = [| 0; 2sz |];
+  <span class="c">// a1 a2:array int |- pts_to a1 (Seq.create 0 (SZ.v 2)) ** pts_to a2 (Seq.create 0 (SZ.v 2))</span>
+  <span class="k">let</span> b = compare a1 a2 2sz;
+  <span class="k">assert</span> (pure b)
+}
+</pre></div>
+</div>
+<p>スタック参照と同様、スタック配列は明示的な解放や drop は不要で、関数の復帰時に自動で回収されます。そのため、関数の戻り値として返すことはできません。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@ expect_failure]
+
+<span class="k">fn</span> ret_stack_array ()
+  <span class="k">requires</span> emp
+  <span class="k">returns</span> a:array int
+  <span class="k">ensures</span> pts_to a (Seq.create 2 0)
+{
+  <span class="k">let</span> <span class="k">mut</span> a1 = [| 0; 2sz |];
+  a1  <span class="c">// cannot prove pts_to a (Seq.create 0 2) in the context emp</span>
+}
+</pre></div>
+</div>
+</section>
+<section id="heap-allocated-arrays">
+<h2>ヒープ確保配列<a class="headerlink" href="#heap-allocated-arrays" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Vec</span></code> ライブラリはヒープ確保配列用の型 <code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">t</span></code> を提供します。関係性で言えば、<code class="docutils literal notranslate"><span class="pre">vec</span></code> と <code class="docutils literal notranslate"><span class="pre">array</span></code> は、<code class="docutils literal notranslate"><span class="pre">box</span></code> と <code class="docutils literal notranslate"><span class="pre">ref</span></code> の関係に対応します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">array</span></code> と同様、<code class="docutils literal notranslate"><span class="pre">vec</span></code> にも分数パーミッション対応の <code class="docutils literal notranslate"><span class="pre">pts_to</span></code> 述語、パーミッション分割／合成の <code class="docutils literal notranslate"><span class="pre">share</span></code>／<code class="docutils literal notranslate"><span class="pre">gather</span></code>、および読み書き関数が備わります。ただし <code class="docutils literal notranslate"><span class="pre">array</span></code> と異なり、<code class="docutils literal notranslate"><span class="pre">Vec</span></code> ライブラリは確保と解放の関数も提供します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> V = Pulse.Lib.Vec
+
+ 
+<span class="k">fn</span> heap_arrays ()
+  <span class="k">requires</span> emp
+  <span class="k">returns</span> a:V.vec int
+  <span class="k">ensures</span> V.pts_to a (Seq.create 2 0)
+{
+  <span class="k">let</span> a1 = V.alloc 0 2sz;
+  <span class="k">let</span> a2 = V.alloc 0 2sz;
+  V.free a1;
+  a2  <span class="c">// returning vec is ok</span>
+}
+</pre></div>
+</div>
+<p>ヒープ参照の場合と同様に、ヒープ配列はコアーション <code class="docutils literal notranslate"><span class="pre">vec_to_array</span></code> により <code class="docutils literal notranslate"><span class="pre">array</span></code> へ変換できます。この変換を使う際には、多くの場合 <code class="docutils literal notranslate"><span class="pre">Vec.pts_to</span></code> と <code class="docutils literal notranslate"><span class="pre">Array.pts_to</span></code> の相互変換が必要になります。そのための補題として <code class="docutils literal notranslate"><span class="pre">to_array_pts_to</span></code> と <code class="docutils literal notranslate"><span class="pre">to_vec_pts_to</span></code> が用意されています。</p>
+<p>次の例はこのパターンを示します。先ほど作成した <code class="docutils literal notranslate"><span class="pre">copy2</span></code> 関数を用いて、スタック配列の内容をヒープ配列へコピーします。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> copy_app ([@@@ Rust_mut_binder] v:V.vec int)
+  <span class="k">requires</span> <span class="k">exists</span>* s. V.pts_to v s ** pure (Seq.length s == 2)
+  <span class="k">ensures</span> V.pts_to v (Seq.create 2 0)
+{
+  <span class="k">let</span> <span class="k">mut</span> a = [| 0; 2sz |];
+  <span class="c">// v, s |- V.pts_to v s ** ...</span>
+  V.to_array_pts_to v;
+  <span class="c">// v, s |- pts_to (vec_to_array v) s ** ...</span>
+  copy2 (V.vec_to_array v) a 2sz;
+  <span class="c">// v, s |- pts_to (vec_to_array v) (Seq.create 2 0) ** ...</span>
+  V.to_vec_pts_to v
+  <span class="c">// v, s |- V.pts_to v (Seq.create 2 0) ** ...</span>
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">v</span></code> に関するアサーションが <code class="docutils literal notranslate"><span class="pre">V.pts_to</span></code> から配列用の <code class="docutils literal notranslate"><span class="pre">pts_to</span></code> へ、そしてまた戻る点に注意してください。これは、配列アルゴリズムやルーチンを <code class="docutils literal notranslate"><span class="pre">array</span> <span class="pre">t</span></code> で実装しておけば、スタック配列とヒープ配列の双方で再利用できることを意味します。</p>
+<p>最後に、<code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">a</span></code> という名前は Rust の <code class="docutils literal notranslate"><span class="pre">std::Vec</span></code> を想起させますが、現時点では自動リサイズは未対応です。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_loops.html" class="btn btn-neutral float-left" title="ループと再帰" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_ghost.html" class="btn btn-neutral float-right" title="ゴースト計算" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

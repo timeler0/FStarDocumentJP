@@ -1,0 +1,218 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>帰納的型によるデータ・証明・計算の表現 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="帰納的型の定義" href="part2_inductive_type_families.html" />
+    <link rel="prev" title="まとめ" href="../part1/part1_wrap.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">帰納的型によるデータ・証明・計算の表現</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="part2_inductive_type_families.html">帰納的型の定義</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_vectors.html">長さインデックス付きリスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_merkle.html">Merkle 木</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_equality.html">等式型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_logical_connectives.html">構成的連言と古典的連言（論理結合子）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_stlc.html">単純型付きラムダ計算（STLC）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_phoas.html">高階抽象構文（HOAS）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_well_founded.html">良基底関係と停止性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_par.html">計算効果の最初のモデル</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_universes.html">ユニバース（Universes）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">帰納的型によるデータ・証明・計算の表現</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="representing-data-proofs-and-computations-with-inductive-types">
+<span id="part2"></span><h1>帰納的型によるデータ・証明・計算の表現<a class="headerlink" href="#representing-data-proofs-and-computations-with-inductive-types" title="Link to this heading"></a></h1>
+<p>これまでに F* における <a class="reference internal" href="../part1/part1_inductives.html#part1-ch3"><span class="std std-ref">新しいデータ型の定義</span></a> を学びました。たとえば、次は要素の型 <code class="docutils literal notranslate"><span class="pre">a</span></code> をパラメータにもつリスト型です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> list a =
+  | Nil  : list a
+  | Cons : hd:a -&gt; tl:list a -&gt; list a
+</pre></div>
+</div>
+<p>これらの型に対してパターンマッチと再帰を使って基本的な関数を定義できることも見ました。例えば、次はリストの長さを計算する関数です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> length #a (l:list a)
+  : nat
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; 0
+    | <span class="k">_</span> :: tl -&gt; 1 + length tl
+</pre></div>
+</div>
+<p>関数 <code class="docutils literal notranslate"><span class="pre">length</span></code> は <code class="docutils literal notranslate"><span class="pre">list</span></code> 型そのものとは別に、<code class="docutils literal notranslate"><span class="pre">list</span></code> の性質（長さ）を定義しています。しかし場合によっては、型の性質を型の定義と一緒に与えると便利です。例えば、リストの定義と同時に長さも持たせ、すべてのリストが構造的に長さの概念を備えるようにするのが自然なことがあります。次のようにします。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> vec (a:Type) : nat -&gt; Type =
+  | Nil : vec a 0
+  | Cons : #n:nat -&gt; hd:a -&gt; tl:vec a n -&gt; vec a (n + 1)
+</pre></div>
+</div>
+<p>ここにあるのが最初のインデックス付き型 <code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">a</span> <span class="pre">n</span></code> です。この定義は <code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">a</span> <span class="pre">:</span> <span class="pre">nat</span> <span class="pre">-&gt;</span> <span class="pre">Type</span></code> が型族を与える、と理解できます。すなわち <code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">a</span> <span class="pre">0</span></code>、<code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">a</span> <span class="pre">1</span></code>、… の各型で、どれも <code class="docutils literal notranslate"><span class="pre">a</span></code> 型の要素からなるリストを表しますが、<em>インデックス</em> <code class="docutils literal notranslate"><span class="pre">n</span></code> がリストの長さを表します。この <code class="docutils literal notranslate"><span class="pre">vec</span></code> の定義では、<code class="docutils literal notranslate"><span class="pre">length</span></code> 関数は冗長になります。<code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">:</span> <span class="pre">vec</span> <span class="pre">a</span> <span class="pre">n</span></code> があれば、再計算せずとも <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">v</span></code> は <code class="docutils literal notranslate"><span class="pre">n</span></code> だと分かるからです。</p>
+<p>型の性質を述べるためにインデックスで型定義を拡張するこのスタイルは、以前学んだ <a class="reference internal" href="../part1/part1_lemmas.html#part1-intrinsic-extrinsic"><span class="std std-ref">内在的証明と外在的証明</span></a> を想起させます。すべてのリストに対して単一の <code class="docutils literal notranslate"><span class="pre">list</span> <span class="pre">a</span></code> を定義し、その長さを別（外在的）に <code class="docutils literal notranslate"><span class="pre">length</span></code> で計算する代わりに、<code class="docutils literal notranslate"><span class="pre">vec</span></code> ではリストの型そのものを内在的に拡張し、<code class="docutils literal notranslate"><span class="pre">vec</span></code> の型を見るだけで長さが分かるようにしています。</p>
+<p>このような長さ付きの <code class="docutils literal notranslate"><span class="pre">vec</span></code> 型は、依存型プログラミングの入門でよく登場するので既に見たことがあるかもしれません。しかし、インデックス付き型の力はそれだけではありません。この節では、インデックス付き帰納的型を次の三つの観点から学びます。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>データの表現：帰納的型により、リスト・ベクタ・木など様々なデータ型を構築できます。ケーススタディとして <a class="reference internal" href="part2_vectors.html#part2-vectors"><span class="std std-ref">ベクタ</span></a> と、暗号学的証明を備えた二分木構造である <a class="reference internal" href="part2_merkle.html#part2-merkle"><span class="std std-ref">Merkle 木</span></a> を扱います。</p></li>
+<li><p>証明の表現：F* の核となる論理は、いくつかの単純な帰納的型定義の上に成り立っています。以前に見た論理結合子（<a class="reference internal" href="part2_logical_connectives.html#part2-connectives"><span class="std std-ref">命題論理の結合子</span></a> や <a class="reference internal" href="part2_equality.html#part2-equality"><span class="std std-ref">等式</span></a>）を再訪し、それらが F* の原始概念ではなく、帰納的型に基づくいくつかの基本構成から定義されることを示します。言語の他の中核概念、例えば <a class="reference internal" href="../part1/part1_termination.html#part1-termination"><span class="std std-ref">停止性の扱い</span></a> も、<a class="reference internal" href="part2_well_founded.html#part2-well-founded-recursion"><span class="std std-ref">良基底再帰のモデル化</span></a> としての帰納的型の観点から理解できます。</p></li>
+<li><p>計算の表現：帰納的型定義により、他のプログラミング言語や計算モデルを F* に埋め込むことができます。ここでも二つのケーススタディを行います。</p>
+<ul>
+<li><p><a class="reference internal" href="part2_stlc.html#part2-stlc"><span class="std std-ref">単純型付きラムダ計算の深い埋め込み</span></a> を、いくつかの簡約戦略とともに開発し、構文的型健全性を証明します。この例では、言語の構文を表す帰納的型、型体系を記述する関係、操作的意味論を記述する別の関係と、複数の帰納的型の活用を示します。</p></li>
+<li><p>また、<a class="reference internal" href="part2_phoas.html#part2-phoas"><span class="std std-ref">高階抽象構文</span></a> を用いて型付きラムダ項を表現する方法を示します。これは、関数をフィールドに持つ帰納的型の使い方を示す簡潔なスタイルです。</p></li>
+<li><p>最後に、<a class="reference internal" href="part2_par.html#part2-par"><span class="std std-ref">構造化並行性をもつ命令的言語の浅い埋め込み</span></a> を扱います。計算を無限分岐する帰納的定義木として表し、計算効果をモナドでモデル化する方法を導入し、高階での帰納的型の活用を示します。</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<p>このセクションは第 1 部よりやや高度です。F* の中核的な論理に関する技術的内容と、その概念が働く様子を示すケーススタディが交互に現れます。順に読み進めてもよいのですが、関心に応じて次の読み方のほうが取り組みやすいかもしれません。</p>
+<p>依存型には馴染みがあるが F* は初めてで、ざっと概観したい場合は、次の順序がよいでしょう。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>長さ付きリスト &lt;Part2_vectors&gt;`（F* 独自の記法）</p></li>
+<li><p><a class="reference internal" href="part2_equality.html#part2-equality"><span class="std std-ref">等式</span></a></p></li>
+<li><p><a class="reference internal" href="part2_logical_connectives.html#part2-connectives"><span class="std std-ref">論理結合子</span></a></p></li>
+<li><p>興味に応じて、いずれかのケーススタディ。</p></li>
+</ul>
+</div></blockquote>
+<p>依存型に不慣れで、例題を通して F* の使い方を学びたい場合は、次の順序がおすすめです。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>帰納的型の定義 &lt;Part2_inductives&gt;`（基本概念）</p></li>
+<li><p>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>長さ付きリスト &lt;Part2_vectors&gt;`（最も単純な設定での F* 独自記法）</p></li>
+<li><p>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>Merkle 木 &lt;Part2_merkle&gt;`（暗号的安全性への応用もある、より興味深い例）</p></li>
+<li><p>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>論理結合子 &lt;Part2_connectives&gt;`（F* の論理結合子を扱うためのユーティリティ）</p></li>
+<li><p>興味に応じていずれかのケーススタディ（中でも <a class="reference internal" href="part2_stlc.html#part2-stlc"><span class="std std-ref">単純型付きラムダ計算</span></a> が比較的取り組みやすいでしょう）。</p></li>
+</ul>
+</div></blockquote>
+<p>いずれの道筋を選んでも、このセクションの終わりまでには、いくつかの演習を通じて、自分でデータ構造や帰納的定義の関係を定義できる程度に帰納的型に慣れ、あわせて F* の型理論の中核部分について実用的な知識を身につけることを目標とします。</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">目次：</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="part2_inductive_type_families.html">帰納的型の定義</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part2_vectors.html">長さインデックス付きリスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part2_merkle.html">Merkle 木</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part2_equality.html">等式型</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part2_logical_connectives.html">構成的連言と古典的連言（論理結合子）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part2_stlc.html">単純型付きラムダ計算（STLC）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part2_phoas.html">高階抽象構文（HOAS）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part2_well_founded.html">良基底関係と停止性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part2_par.html">計算効果の最初のモデル</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part2_universes.html">ユニバース（Universes）</a></li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../part1/part1_wrap.html" class="btn btn-neutral float-left" title="まとめ" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part2_inductive_type_families.html" class="btn btn-neutral float-right" title="帰納的型の定義" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

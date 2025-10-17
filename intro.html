@@ -1,0 +1,345 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>イントロダクション &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=24463673" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c033477b"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=4755f45a"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="検索" href="search.html" />
+    <link rel="next" title="全域関数によるプログラミングと証明" href="part1/part1.html" />
+    <link rel="prev" title="本書の構成" href="structure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="structure.html">本書の構成</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">イントロダクション</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-capsule-summary-of-f">F* の概要</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dsls-embedded-in-f">F* に埋め込まれた DSL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#f-is-a-dependently-typed-language">F* は依存型言語です</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#f-supports-user-defined-effectful-programming">F* はユーザ定義の効果的プログラミングをサポートします</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#f-proofs-use-smt-solving-symbolic-computation-and-tactics">F* の証明は SMT・記号計算・タクティクスを活用します</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#f-programs-compile-to-ocaml-and-f-c-and-wasm">F* のプログラムは OCaml/F#/C/Wasm にコンパイルできます</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#to-f-or-not-to-f">F* を使うべきか？</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-bit-of-f-history">F* の小史</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">イントロダクション</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="introduction">
+<h1>イントロダクション<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
+<section id="a-capsule-summary-of-f">
+<h2>F* の概要<a class="headerlink" href="#a-capsule-summary-of-f" title="Link to this heading"></a></h2>
+<p>F* は複数の役割を担うことを目指した依存型プログラミング言語です。</p>
+<ul class="simple">
+<li><p>ML 系言語の系譜にある、効果を伴う高階関数型プログラミングを推奨する汎用プログラミング言語。</p></li>
+<li><p>F* のプログラムを実行のために OCaml や F#、さらには C や Wasm にまで変換するコンパイラ。</p></li>
+<li><p>プログラムの性質を記述し、証明するための証明支援系。</p></li>
+<li><p>SMT ソルバーを活用してプログラム証明を半自動化するプログラム検証エンジン。</p></li>
+<li><p>F* のプログラムや証明自動化手続きをプログラム的に構築できるメタプログラミング系。</p></li>
+</ul>
+<p>これらの目標のために、F* の設計は以下のいくつかの重要要素を中心に据えています。いまはすべてを理解できなくても大丈夫。読み進めながら学んでいきましょう。</p>
+<ul class="simple">
+<li><p>完全関数と完全な依存型を備えたコア言語（拡張的な型変換、添字付き帰納的型とパターンマッチ、意味的停止性検査を伴う再帰関数、依存篩型と部分型、予言的階層に基づく多相性を含む）。</p></li>
+<li><p>ユーザ定義の添字付き効果の体系。一般再帰や発散の素朴な概念を含み、状態・例外・並行・代数効果など多様な計算効果をモデル化・カプセル化し、静的に推論できます。</p></li>
+<li><p>F* の論理の古典的断片を SMT ソルバーの一階論理へ組み込みでエンコードし、多くの証明を自動化。</p></li>
+<li><p>F* 自身の構文と証明状態を反映し、Meta-F* プログラムから構文や目標を操作でき、タクティクスによる対話的証明を可能にする仕組み。</p></li>
+</ul>
+<section id="dsls-embedded-in-f">
+<h3>F* に埋め込まれた DSL<a class="headerlink" href="#dsls-embedded-in-f" title="Link to this heading"></a></h3>
+<p>実際には、F* のエコシステムは単一言語というより、複数のドメイン特化言語（DSL）の集合です。異なる抽象度や特定用途の言語を F* に埋め込み、その言語向けの推論・自動化・コンパイル基盤を備える、という使い方が一般的です。例として次があります。</p>
+<ul class="simple">
+<li><p>Low*：C ライクなメモリモデル（スタック/ヒープの明示的管理）に対する逐次プログラミング用の浅い埋め込み DSL。暗黙動的フレームに基づく部分正当性の Hoare 論理と、C へ変換して既存の C コンパイラでビルドするための専用バックエンド（KaRaMeL）を備えます。</p></li>
+<li><p>EverParse：Low* 上に重ねた浅い埋め込みのパーサ/シリアライザ合成 DSL。低レベルなバイナリ形式向け。</p></li>
+<li><p>Vale：ユーザ定義アセンブリ言語での構造化プログラミング向け深い埋め込み DSL。全正当性の Hoare 論理と、各種アセンブラ互換の構文で検証済みコードを出力するプリンタを備えます。</p></li>
+<li><p>Steel：F* の効果として並行性を浅く埋め込み、拡張可能な並行セパレーション論理（部分正当性）を核に、Meta-F* タクティクス・高階単一化・SMT を組み合わせた自動化を提供。</p></li>
+<li><p>Pulse：Steel の後継。独自の構文と型検査器を持つ DSL で、可変状態と並行性のための小さくも表現力の高いコア論理 PulseCore により証明を提供。PulseCore は F* の純関数とゴースト関数だけで完全に形式化されています。</p></li>
+</ul>
+<p id="intro-vec">F* の雰囲気をつかむため、いくつか例を見てみましょう。現時点で細部まで理解する必要はありません。F* で何が可能かの感触を得てください。</p>
+</section>
+<section id="f-is-a-dependently-typed-language">
+<h3>F* は依存型言語です<a class="headerlink" href="#f-is-a-dependently-typed-language" title="Link to this heading"></a></h3>
+<p>依存型プログラミングでは、型を用いてプログラムの性質や不変量をより精密に表現できます。古典的な例として、型 <code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">a</span> <span class="pre">n</span></code> は <code class="docutils literal notranslate"><span class="pre">a</span></code> 型要素からなる <code class="docutils literal notranslate"><span class="pre">n</span></code> 次元ベクトル、すなわち <code class="docutils literal notranslate"><span class="pre">a</span></code> の値を <code class="docutils literal notranslate"><span class="pre">n</span></code> 個持つリストを表します。他の依存型言語同様、F* も帰納的に定義された型をサポートします。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> vec (a:Type) : nat -&gt; Type =
+  | Nil : vec a 0
+  | Cons : #n:nat -&gt; hd:a -&gt; tl:vec a n -&gt; vec a (n + 1)
+</pre></div>
+</div>
+<p>ベクトル上の演算には、長さに関する挙動を型で記述できます。</p>
+<p>たとえば、2 つのベクトルを連結する再帰関数 <code class="docutils literal notranslate"><span class="pre">append</span></code> では、結果の長さが入力の長さの和であることを型が示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> append #a #n #m (v1:vec a n) (v2:vec a m)
+  : vec a (n + m)
+  = <span class="k">match</span> v1 <span class="k">with</span>
+    | Nil -&gt; v2
+    | Cons hd tl -&gt; Cons hd (append tl v2)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">append</span></code> のような関数が定義できれば、それを用いて他の操作も定義でき、型がさらなる性質の証明を助けます。例えば、ベクトルの反転で長さが変わらないことは容易に示せます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> reverse #a #n (v:vec a n)
+  : vec a n
+  = <span class="k">match</span> v <span class="k">with</span>
+    | Nil -&gt; Nil
+    | Cons hd tl -&gt; append (reverse tl) (Cons hd Nil)
+</pre></div>
+</div>
+<p>最後に、ベクトルから要素を取り出す選択関数には、インデックス <code class="docutils literal notranslate"><span class="pre">i</span></code> がベクトル長より小さいことを示す <em>篩型</em> を含められます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> get #a #n (i:nat{i &lt; n}) (v:vec a n)
+  : a
+  = <span class="k">let</span> Cons hd tl = v <span class="k">in</span>
+    <span class="k">if</span> i = 0 <span class="k">then</span> hd
+    <span class="k">else</span> get (i - 1) tl
+</pre></div>
+</div>
+<p>この種の例は他の依存型言語でも書けますが、技術的制約のため骨が折れることが多々あります。F* はより柔軟な等式概念を持つコア論理を備え、プログラミングと証明を容易にします。要点として、他の言語では <a class="reference external" href="http://adam.chlipala.net/cpdt/html/Cpdt.DataStruct.html">かなり技巧的</a> な依存型パターンが、F* では比較的自然に書けることを覚えておいてください。詳しくは <a class="reference internal" href="part2/part2_equality.html#part2-equality"><span class="std std-ref">後の章</span></a> で扱います。</p>
+</section>
+<section id="f-supports-user-defined-effectful-programming">
+<h3>F* はユーザ定義の効果的プログラミングをサポートします<a class="headerlink" href="#f-supports-user-defined-effectful-programming" title="Link to this heading"></a></h3>
+<p>関数型が中心とはいえ、F* は純粋関数だけではありません。実のところ、F* はチューリング完全です。C# や Scala などに慣れた読者には当然に思えるかもしれませんが、非停止は健全性を損ない得るため、依存型言語の多くはチューリング完全ではありません。F* は一般再帰や非停止を、安全性を損なわずに扱えます。</p>
+<p>非停止に留まらず、F* はユーザ定義計算効果の体系を備え、可変状態・例外・並行・IO など多様なプログラミング作法をモデル化できます。</p>
+<p>以下は Low* と呼ばれる F* 方言のコードです。可変メモリを持つ C 風の逐次・命令型モデルを提供します。関数 <code class="docutils literal notranslate"><span class="pre">malloc_copy_free</span></code> は配列 <code class="docutils literal notranslate"><span class="pre">dest</span></code> を確保し、バイト配列 <code class="docutils literal notranslate"><span class="pre">src</span></code> を <code class="docutils literal notranslate"><span class="pre">dest</span></code> にコピーし、<code class="docutils literal notranslate"><span class="pre">src</span></code> を解放して <code class="docutils literal notranslate"><span class="pre">dest</span></code> を返します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> malloc_copy_free (len:uint32 { 0ul &lt; len })
+                     (src:lbuffer len uint8)
+  : ST (lbuffer len uint8)
+       (<span class="k">requires</span> <span class="k">fun</span> h -&gt; 
+         live h src /\
+         freeable src)
+       (<span class="k">ensures</span> <span class="k">fun</span> h0 dest h1 -&gt; 
+         live h1 dest /\
+         (<span class="k">forall</span> (j:uint32). j &lt; len ==&gt; get h0 src j == get h1 dest j))
+  = <span class="k">let</span> dest = malloc 0uy len <span class="k">in</span>
+    memcpy len 0ul src dest;
+    free src;
+    dest
+</pre></div>
+</div>
+<p>詳細は後で説明しますが、ここでは次の 2 点を押さえてください。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>この手続きの型は、呼び出し側の特定の制約の下で <code class="docutils literal notranslate"><span class="pre">malloc_copy_free</span></code> が <a href="#id1"><span class="problematic" id="id2">*</span></a>安全*（確保範囲外を読まない等）かつ <a href="#id3"><span class="problematic" id="id4">*</span></a>正しい*（他のメモリを壊さずに <code class="docutils literal notranslate"><span class="pre">src</span></code> を <code class="docutils literal notranslate"><span class="pre">dest</span></code> に正しくコピーする）ことを主張します。</p></li>
+<li><p>手続きの実装に対し、F* はその型に照らして安全性・正当性の数学的証明を実際に構築します。</p></li>
+</ul>
+</div></blockquote>
+<p>他の検証器にも同様の機能はありますが、F* の注目点は、副作用（メモリの読書き等）を持つプログラムの意味論が、ユーザ定義効果の体系を通じて F* の論理内に完全に埋め込まれていることです。</p>
+<p><code class="docutils literal notranslate"><span class="pre">malloc_copy_free</span></code> は Low* で書かれ、特定の <a class="reference external" href="https://en.wikipedia.org/wiki/Hoare_logic">フロイド–ホーア論理</a> を用いて仕様化されていますが、F* において特別扱いはありません。</p>
+<p>別の方言 Steel による並行プログラムの例です。ヒープ上の 2 つの参照を並列にインクリメントし、<code class="docutils literal notranslate"><span class="pre">malloc_copy_free</span></code> とは異なる種類のフロイド–ホーア論理である <a class="reference external" href="https://en.wikipedia.org/wiki/Separation_logic">並行セパレーション論理</a> で安全性と正当性を仕様化します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> par_incr (#v0 #v1:erased int) (r0 r1:ref int)
+  : SteelT <span class="k">_</span> (pts_to r0 v0 `star` pts_to r1 v1)
+             (<span class="k">fun</span> <span class="k">_</span> -&gt; pts_to r0 (v0 + 1) `star` pts_to r1 (v1 + 1))
+  = par (incr r0) (incr r1)
+</pre></div>
+</div>
+<p>F* の利用者は、用途に合わせてプログラミングモデルと証明抽象化の組を選べます。詳細は <a class="reference internal" href="structure.html#effects"><span class="std std-ref">ユーザ定義効果</span></a> の章で説明します。</p>
+</section>
+<section id="f-proofs-use-smt-solving-symbolic-computation-and-tactics">
+<span id="part1-symbolic-computation"></span><h3>F* の証明は SMT・記号計算・タクティクスを活用します<a class="headerlink" href="#f-proofs-use-smt-solving-symbolic-computation-and-tactics" title="Link to this heading"></a></h3>
+<p>F* では定理や補題を述べることは型シグネチャを宣言することに相当し、証明はその実装を与えることに対応します。証明は手作業が多くなりがちですが、F* は多様な手段で負担を軽減します。</p>
+<p><strong>SMT ソルビング</strong></p>
+<p>単純なプログラムでも、飽和しない・ゼロ除算が起きない等の細かな事実を数十〜数百個証明する必要があります。こうした小証明はすぐに手に余ります。</p>
+<p>F* における主力は自動定理証明器、すなわち <em>SMT（Satisfiability Modulo Theories）ソルバー</em> です。F* ツールチェーンは <a class="reference external" href="https://www.microsoft.com/en-us/research/blog/the-inner-magic-behind-the-z3-theorem-prover/">Z3 SMT Solver</a> を統合しています。</p>
+<p>既定では、F* の型検査器がプログラムで証明すべき事実を収集し、さまざまな数学的論理の組合せを解くエンジンである SMT ソルバーへエンコードします。F* は Z3 へ、未解釈関数と整数算術を含む一階論理の組合せとして問題を渡します。</p>
+<p>Z3 は F* が生成する問題に非常に有効です。その結果、多くの F* プログラムは高い自動化の恩恵を受けます。例えば <code class="docutils literal notranslate"><span class="pre">memcpy</span></code> では前後条件とループ不変式だけを与え、残りの証明は自動で処理されました。</p>
+<p>F* で Z3 を活用する方法の詳細は <a class="reference internal" href="part1/part1_prop_assertions.html#part1-prop-assertions"><span class="std std-ref">こちらの章</span></a> で学びます。</p>
+<p>とはいえ、Z3 がすべてを解けるわけではありません。そこで F* はユーザの制御度合いが異なる複数の仕組みも提供します。</p>
+<p><strong>記号計算</strong></p>
+<p>SMT は書き換え系の証明が得意ですが、多くの証明は単に計算すれば済むこともあります。計算による証明は依存型言語の特徴で、F* も同様です。</p>
+<p>ごく簡単な例として、再帰関数 <code class="docutils literal notranslate"><span class="pre">pow2</span></code> について <code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">12</span> <span class="pre">==</span> <span class="pre">4096</span></code> を示すことを考えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">open</span> FStar.Mul
+
+<span class="k">let</span> <span class="k">rec</span> pow2 (n:nat) : nat =
+  <span class="k">if</span> n = 0 <span class="k">then</span> 1
+  <span class="k">else</span> 2 * pow2 (n - 1)
+
+<span class="k">let</span> proof_by_normalization ()
+  : <span class="k">Lemma</span> (pow2 12 == 4096)
+  = normalize_term_spec (pow2 12)
+</pre></div>
+</div>
+<p>F* に納得してもらう簡単な方法は、<code class="docutils literal notranslate"><span class="pre">normalize_term_spec</span></code> を用いて、ツールチェーン内蔵のインタプリタで <code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">12</span></code> を直接計算させることです。再帰関数の簡約を高コストな SMT に任せる必要はありません。</p>
+<p>この簡約機構（<em>正規化器</em>）は <code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">12</span></code> のような項を結果まで計算するだけでなく、以下の証明で示すように象徴的な F* の項を部分的に簡約することもできます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> partially_reduce_fold_right f more
+  : (fold_right f ([1;2;3]@more) 0 == f 1 (f 2 (f 3 (fold_right f more 0))))
+  =  <span class="k">_</span> <span class="k">by</span> (T.trefl())
+</pre></div>
+</div>
+<p>この証明では <code class="docutils literal notranslate"><span class="pre">T.trefl</span></code> というタクティクスから正規化器を呼び出します。これは F* のもう一つの機能で、次で簡単に触れます。</p>
+<p><strong>タクティクスとメタプログラミング</strong></p>
+<p>証明を完全に制御したい場合のために、F* は強力なタクティクス／メタプログラミング系を備えています。</p>
+<p>以下は命題に関する単純な事実を、F* のタクティクスで対話的に証明する簡単な例です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> a_very_explicit_tactic_proof (a b : prop) : (a ==&gt; b ==&gt; b /\ a)
+  = <span class="k">_</span> <span class="k">by</span>
+       (<span class="k">let</span> ha = implies_intro () <span class="k">in</span>
+        <span class="k">let</span> hb = implies_intro () <span class="k">in</span>
+        split ();
+        hyp hb;
+        hyp ha;
+        qed ())
+</pre></div>
+</div>
+<p>このスタイルは Coq や Lean に近いものです。F* のタクティクスは、F* の証明状態を操作する F* プログラムにほかなりません。ここでは命題論理の規則を適用するコマンドで状態を変換し、<code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">==&gt;</span> <span class="pre">b</span> <span class="pre">==&gt;</span> <span class="pre">(b</span> <span class="pre">/\</span> <span class="pre">a)</span></code> の証明を組み立てます。</p>
+<p>タクティクスは F* のより一般的なメタプログラミング機構の一部で、F* のプログラムから別の F* プログラムを生成できます。</p>
+</section>
+<section id="f-programs-compile-to-ocaml-and-f-c-and-wasm">
+<h3>F* のプログラムは OCaml/F#/C/Wasm にコンパイルできます<a class="headerlink" href="#f-programs-compile-to-ocaml-and-f-c-and-wasm" title="Link to this heading"></a></h3>
+<p>書いたプログラムを実行する手段も必要です。F* はプログラムを OCaml・F#・C・Wasm などへコンパイルし、実行できるようにする複数の方法を提供します。</p>
+<p>そのため、F* の一般的な使い方は、大規模システムの要となるコンポーネントを F* で開発し、証明機能で保証を得たうえで、C/OCaml/F# にコンパイルして他の部分とリンクし統合する、というものです。</p>
+<p>この例では、F* と併用するコンパイラ <a class="reference external" href="https://github.com/FStarLang/karamel">KaRaMeL</a> を使って、<code class="docutils literal notranslate"><span class="pre">memcpy</span></code> の C コードを生成できます。</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint8_t</span><span class="w"> </span><span class="o">*</span><span class="nf">MemCpy_malloc_copy_free</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">KRML_CHECK_SIZE</span><span class="p">(</span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="kt">uint8_t</span><span class="p">),</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">uint8_t</span><span class="w"> </span><span class="o">*</span><span class="n">dest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KRML_HOST_CALLOC</span><span class="p">(</span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="kt">uint8_t</span><span class="p">));</span>
+<span class="w">  </span><span class="n">MemCpy_memcpy</span><span class="p">(</span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="mi">0U</span><span class="p">,</span><span class="w"> </span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="p">);</span>
+<span class="w">  </span><span class="n">KRML_HOST_FREE</span><span class="p">(</span><span class="n">src</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">dest</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>生成されたコードには追加のランタイム検査は含まれません。詳細な requires/ensures は消え、残るのは素の C コードです。後でループの書き方も示し、C に再帰を残さない方法を見ます。重要なのは、証明・仕様の労力はコンパイル前に完結し、実行時オーバーヘッドが一切ないことです。</p>
+</section>
+<section id="to-f-or-not-to-f">
+<h3>F* を使うべきか？<a class="headerlink" href="#to-f-or-not-to-f" title="Link to this heading"></a></h3>
+<p>F* の要素を駆け足で見てきました。プログラム証明が初めてなら少し圧倒されたかもしれません。F* を学ぶ価値があるか、判断材料を挙げます。</p>
+<p>プログラミングが好きで上達したいなら、レベルに関わらず、プログラム証明は役に立ちます。証明や仕様記述は、従来考えなかった観点からプログラムを捉えることを促します。さまざまなツールで学べる優れた資料があり、例えば次があります。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://softwarefoundations.cis.upenn.edu/">Software Foundations</a>：Coq による PL の意味論と形式的証明の総合的入門。</p></li>
+<li><p><a class="reference external" href="https://isabelle.in.tum.de/doc/tutorial.pdf">A Proof Assistant for Higher-Order Logic</a>：Isabelle/HOL のチュートリアル。</p></li>
+<li><p><a class="reference external" href="http://adam.chlipala.net/cpdt/">Certified Programming with Dependent Types</a>：Coq による証明工学の入門。</p></li>
+<li><p><a class="reference external" href="https://www.manning.com/books/type-driven-development-with-idris">Type-driven Development</a>：Idris での依存型による正しい開発の入門。</p></li>
+<li><p><a class="reference external" href="https://lean-lang.org/theorem_proving_in_lean4/">Theorem Proving in Lean</a>：Lean の標準的入門（ほかの <a class="reference external" href="https://leanprover-community.github.io/learn.html">資料</a> も充実）。</p></li>
+<li><p><a class="reference external" href="https://github.com/dafny-lang/dafny#read-more">Dafny resources</a>：上記とは別系統の、命令型向け SMT ベース検証器 Dafny の資料。</p></li>
+<li><p><a class="reference external" href="http://ucsd-progsys.github.io/liquidhaskell-tutorial/">Liquid Haskell</a>：篩型による証明のチュートリアル。</p></li>
+</ul>
+</div></blockquote>
+<p>どれも優れた資料で、各ツールには独自の強みがあります。本書（F*）にも独自の価値があります。次に長所と短所を挙げます。</p>
+<p><strong>依存型と拡張的等式</strong></p>
+<p>F* の依存型の表現力は Coq/Lean/Agda/Idris と同程度で、ほぼあらゆる数学を形式化できます。F* を他と分ける（Nuprl に近い）点は拡張的な型等式で、<a class="reference internal" href="#intro-vec"><span class="std std-ref">ベクトル</span></a> の例のように多くのパターンが滑らかに書けます。一方でこの設計により型検査は決定不能で、タイムアウトして受理されないことがあります。他の依存型言語は原理的には際限なく時間がかかり得るものの、型検査自体は可決定です。</p>
+<p><strong>多様な証明自動化ツール</strong></p>
+<p>依存型言語の中で、F* が SMT による自動化を標準で用いる点は特異です（その代わり、F* の証明の妥当性を F* と Z3 の組を信頼する必要があります）。Isabelle/HOL も Sledgehammer により SMT 支援を提供しますが、SMT を信頼しなくてよい設計です。F* の SMT 利用は Dafny や Liquid Haskell にも近いですが、彼らが SMT 中心なのに対し、F* は Coq/Lean のように記号計算・タクティクス・メタプログラミングも備えます。もっとも、F* のタクティクス/メタプログラミングは、タクティクス中心の他システムほど成熟していません。</p>
+<p><strong>プログラミングへの注力</strong></p>
+<p>他の依存型言語は数学の形式化で輝きを放っています（Lean の <a class="reference external" href="https://github.com/leanprover-community/mathlib4">mathlib</a>、Coq の <a class="reference external" href="https://math-comp.github.io/">Mathematical Components</a> など）。対して F* は純粋数学の形式化は比較的少なく、効果的プログラミングと C など主流言語へのコンパイルに注力し、<a class="reference external" href="https://www.microsoft.com/en-us/research/blog/everparse-hardening-critical-attack-surfaces-with-formally-proven-message-parsers/">Windows</a> や <a class="reference external" href="https://lwn.net/Articles/770750/">Linux</a> のカーネルを含む産業レベルの高信頼ソフトウェアに広く利用されています（<a class="reference external" href="https://project-everest.github.io">他多数</a>）。</p>
+<p><strong>成熟度とコミュニティ</strong></p>
+<p>Isabelle/HOL と Coq は長年の開発と保守により成熟し、学術コミュニティと豊富な文書資源があります。Lean も急速に成長し優れたツール群とドキュメントを備えます。F* は相対的に未成熟で、設計は複数の研究論文の対象となっており実験的側面があります。コミュニティは小さく文書は少なめで、ユーザは開発チームに比較的近い位置にいることが多いです。しかし産業採用の実績は良好で、拡大しています。</p>
+</section>
+<section id="a-bit-of-f-history">
+<h3>F* の小史<a class="headerlink" href="#a-bit-of-f-history" title="Link to this heading"></a></h3>
+<p>F* は <a class="reference external" href="https://github.com/FStarLang/FStar">GitHub</a> 上のオープンソースプロジェクトで、<a class="reference external" href="http://research.microsoft.com/en-us">Microsoft Research</a>、<a class="reference external" href="https://www.microsoft.com/en-us/research/collaboration/inria-joint-centre/">MSR-Inria</a>、<a class="reference external" href="https://www.inria.fr/">Inria</a>、<a class="reference external" href="https://www.cifasis-conicet.gov.ar/en/">Rosario</a>、<a class="reference external" href="https://www.cs.cmu.edu/">Carnegie-Mellon</a> などの研究者が関わっています。</p>
+<p><strong>名前の由来</strong> F* の F は、初期の F* の基礎計算だった System F（<a class="reference external" href="https://en.wikipedia.org/wiki/System_F">https://en.wikipedia.org/wiki/System_F</a>）へのオマージュです（現在はその先へ進んでいます）。また F は、F* の著者らが関わった <a class="reference external" href="https://ieeexplore.ieee.org/document/4531165">Fable</a>、<a class="reference external" href="https://www.microsoft.com/en-us/research/project/f7-refinement-types-for-f/">F7</a>、<a class="reference external" href="https://link.springer.com/chapter/10.1007/978-3-642-11957-6_28">F9</a>、<a class="reference external" href="https://prosecco.gforge.inria.fr/personal/hritcu/publications/rcf-and-or-coq-tosca2011-post.pdf">F5</a>、<a class="reference external" href="https://www.microsoft.com/en-us/research/wp-content/uploads/2011/01/plpv11k-borgstrom.pdf">FX</a>、さらには <a class="reference external" href="https://fsharp.org">F#</a> といった諸言語にも由来します。</p>
+<p>「*」はフィックスポイント演算子の意を込め、諸言語の“帰着点”としての F* を表しました。初期の F* にはアフィン型もあり、セパレーション論理をアフィン型で表現する意図も（「*」はセパレーション論理の「*」も想起）。しかし初期のアフィン版 F* に実際のセパレーション論理はありませんでした。F* にセパレーション論理（Steel 参照）が埋め込まれるまで、アフィン型に頼らない形で、ほぼ 10 年を要しました。</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="structure.html" class="btn btn-neutral float-left" title="本書の構成" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part1/part1.html" class="btn btn-neutral float-right" title="全域関数によるプログラミングと証明" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

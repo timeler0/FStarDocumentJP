@@ -1,0 +1,453 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>帰納的データ型とパターンマッチ &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="停止性の証明" href="part1_termination.html" />
+    <link rel="prev" title="SMT ソルバとの連携" href="part1_prop_assertions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part1.html">全域関数によるプログラミングと証明</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part1_getting_off_the_ground.html">まずは始めてみよう</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_polymorphism.html">多相と型推論</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_equality.html">等値性（Equality）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_prop_assertions.html">SMT ソルバとの連携</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">帰納的データ型とパターンマッチ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#enumerations">列挙型</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#discriminators">判別関数（ディスクリミネータ）</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exhaustiveness">網羅性（エグゾースティブネス）</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tuples">タプル</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#projectors">射影子（プロジェクタ）</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#syntax-for-tuples">タプルの構文シュガー</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#records">レコード</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#options">Option 型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unions-or-the-either-type">共用体（ユニオン）、<code class="docutils literal notranslate"><span class="pre">either</span></code> 型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lists">リスト</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#length-of-a-list">リストの長さ</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#exercises">練習問題</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part1_termination.html">停止性の証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_lemmas.html">補題と帰納法による証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_quicksort.html">ケーススタディ：クイックソート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_execution.html">プログラムの実行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_wrap.html">まとめ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part1.html">全域関数によるプログラミングと証明</a></li>
+      <li class="breadcrumb-item active">帰納的データ型とパターンマッチ</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="inductive-types-and-pattern-matching">
+<span id="part1-ch3"></span><h1>帰納的データ型とパターンマッチ<a class="headerlink" href="#inductive-types-and-pattern-matching" title="Link to this heading"></a></h1>
+<p>この章では、F* で新しい型を定義する方法を学びます。これらは <a href="#id1"><span class="problematic" id="id2">*</span></a>帰納的型*（インダクティブ型）、あるいはより砕けて言えばデータ型と呼ばれます。さらに、これらの帰納的型に対する関数をパターンマッチで定義し、その性質を証明する方法も学びます。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>ここでは帰納的型の最も基本的な形だけを扱います。特に、ここで示す型はインデックス付けや他の依存型の機構を用いません—それらは後の章に回します。</p>
+</div>
+<section id="enumerations">
+<h2>列挙型<a class="headerlink" href="#enumerations" title="Link to this heading"></a></h2>
+<p>すでに、<code class="docutils literal notranslate"><span class="pre">unit</span></code> はただ 1 つの要素 <code class="docutils literal notranslate"><span class="pre">()</span></code> をもつ型であり、<code class="docutils literal notranslate"><span class="pre">bool</span></code> は <code class="docutils literal notranslate"><span class="pre">true</span></code> と <code class="docutils literal notranslate"><span class="pre">false</span></code> の 2 要素をもつ型であることを見ました。</p>
+<p>次のように、要素の列挙で独自の型を定義できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> three =
+  | One_of_three : three
+  | Two_of_three : three
+  | Three_of_three : three
+</pre></div>
+</div>
+<p>This introduces a new type <code class="docutils literal notranslate"><span class="pre">three</span> <span class="pre">:</span> <span class="pre">Type</span></code>, and three <em>distinct</em>
+constants <code class="docutils literal notranslate"><span class="pre">One_of_three</span> <span class="pre">:</span> <span class="pre">three</span></code>, <code class="docutils literal notranslate"><span class="pre">Two_of_three</span> <span class="pre">:</span> <span class="pre">three</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Three_of_three</span> <span class="pre">:</span> <span class="pre">three</span></code>. These constants are also called
+&quot;constructors&quot; or &quot;data constructors&quot;. The name of a constructor must
+begin with an uppercase letter.</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>この場合、各コンストラクタに毎回型 <code class="docutils literal notranslate"><span class="pre">three</span></code> を書くのは冗長に見えるかもしれません。実際、どれも <code class="docutils literal notranslate"><span class="pre">three</span></code> のコンストラクタです。このような場合、F* では次のように簡潔に書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> three =
+  | One_of_three
+  | Two_of_three
+  | Three_of_three
+</pre></div>
+</div>
+<p>インデックス付きの型を使い始めると、各コンストラクタが定義した型の異なるインスタンスを生成しうるため、各コンストラクタの結果型を指定できることが重要になります。統一のため、本書では厳密には不要な場合でもコンストラクタに型注釈を付ける方針にします。</p>
+</div>
+<p>F* は、これらの値が互いに異なること、そして型 <code class="docutils literal notranslate"><span class="pre">three</span></code> の値はこれらだけであることを証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> distinct = <span class="k">assert</span> (One_of_three &lt;&gt; Two_of_three /\
+                       Two_of_three &lt;&gt; Three_of_three /\
+                       Three_of_three &lt;&gt; One_of_three)
+
+<span class="k">let</span> exhaustive (x:three) = <span class="k">assert</span> (x = One_of_three \/
+                                   x = Two_of_three \/
+                                   x = Three_of_three)
+</pre></div>
+</div>
+<p>これらの新しい型を解析する関数は <code class="docutils literal notranslate"><span class="pre">match</span></code> 構文で書きます。F* の <code class="docutils literal notranslate"><span class="pre">match</span></code> は OCaml や F# とよく似ています。基本に馴染みがあるものとして進め、後ほどより高度な使い方も学びます。</p>
+<p>いくつか例を示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> is_one (x:three)
+  : bool
+  = <span class="k">match</span> x <span class="k">with</span>
+    | One_of_three -&gt; <span class="k">true</span>
+    | <span class="k">_</span> -&gt; <span class="k">false</span>
+
+<span class="k">let</span> is_two (x:three)
+  : bool
+  = <span class="k">match</span> x <span class="k">with</span>
+    | Two_of_three -&gt; <span class="k">true</span>
+    | <span class="k">_</span> -&gt; <span class="k">false</span>
+
+<span class="k">let</span> is_three (x:three)
+  : bool
+  = <span class="k">match</span> x <span class="k">with</span>
+    | Three_of_three -&gt; <span class="k">true</span>
+    | <span class="k">_</span> -&gt; <span class="k">false</span>
+</pre></div>
+</div>
+<section id="discriminators">
+<h3>判別関数（ディスクリミネータ）<a class="headerlink" href="#discriminators" title="Link to this heading"></a></h3>
+<p>これらの関数は、<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">:</span> <span class="pre">three</span></code> が与えられたコンストラクタに一致するかを判定し、その都度 <code class="docutils literal notranslate"><span class="pre">bool</span></code> を返します。帰納的型の値がどのコンストラクタかを調べる関数は頻出なので、F* はそれらを自動生成します。例えば、次のように書く代わりに</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> three_as_int (x:three)
+  : int
+  = <span class="k">if</span> is_one x <span class="k">then</span> 1
+    <span class="k">else</span> <span class="k">if</span> is_two x <span class="k">then</span> 2
+    <span class="k">else</span> 3
+</pre></div>
+</div>
+<p>次のように書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> three_as_int&#39; (x:three)
+  : int
+  = <span class="k">if</span> One_of_three? x <span class="k">then</span> 1
+    <span class="k">else</span> <span class="k">if</span> Two_of_three? x <span class="k">then</span> 2
+    <span class="k">else</span> 3
+</pre></div>
+</div>
+<p>言い換えると、帰納的型 <code class="docutils literal notranslate"><span class="pre">t</span></code> の各コンストラクタ <code class="docutils literal notranslate"><span class="pre">T</span></code> に対して、F* は <code class="docutils literal notranslate"><span class="pre">T?</span></code> という（判別関数）を自動生成し、<code class="docutils literal notranslate"><span class="pre">v:t</span></code> が <code class="docutils literal notranslate"><span class="pre">T</span></code> かどうかを判定できます。</p>
+</section>
+<section id="exhaustiveness">
+<h3>網羅性（エグゾースティブネス）<a class="headerlink" href="#exhaustiveness" title="Link to this heading"></a></h3>
+<p>もちろん、<code class="docutils literal notranslate"><span class="pre">three_as_int</span></code> をさらに直接的に書く方法もあります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> three_as_int&#39;&#39; (x:three)
+  : int
+  = <span class="k">match</span> x <span class="k">with</span>
+    | One_of_three -&gt; 1
+    | Two_of_three -&gt; 2
+    | Three_of_three -&gt; 3
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">match</span></code> を使うたび、F* はあらゆる場合を処理しているか（網羅しているか）を証明しようとします。上の <code class="docutils literal notranslate"><span class="pre">three_as_int</span></code> から 1 つケースを抜いてどうなるか試してみてください。</p>
+<p>F* の網羅性検査は意味論的な検査であり、SMT ソルバを用いてすべてのケースが適切に扱われていることを証明できます。例えば、次のように書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> only_two_as_int (x:three { not (Three_of_three? x) })
+  : int
+  = <span class="k">match</span> x <span class="k">with</span>
+    | One_of_three -&gt; 1
+    | Two_of_three -&gt; 2
+</pre></div>
+</div>
+<p>引数の精錬により、その分岐には到達しえないため、パターン中の <code class="docutils literal notranslate"><span class="pre">Three_of_three</span></code> ケースは不要であることを F* が証明できます。</p>
+</section>
+</section>
+<section id="tuples">
+<span id="part1-tuples"></span><h2>タプル<a class="headerlink" href="#tuples" title="Link to this heading"></a></h2>
+<p>列挙の次の段階として、他の型の 2 要素・3 要素・4 要素…からなる複合型（タプル）を定義します。方法は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> tup2 (a:Type)  (b:Type) =
+  | Tup2 : fst:a -&gt; snd:b -&gt; tup2 a b
+
+<span class="k">type</span> tup3 a b c =
+  | Tup3 : fst:a -&gt; snd:b -&gt; thd:c -&gt; tup3 a b c
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">tup2</span> <span class="pre">a</span> <span class="pre">b</span></code> の型定義は、任意の型 <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">Type</span></code> と <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">:</span> <span class="pre">Type</span></code> に対し <code class="docutils literal notranslate"><span class="pre">Tup2</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">tup2</span> <span class="pre">a</span> <span class="pre">b</span></code> であることを述べます。すなわち <code class="docutils literal notranslate"><span class="pre">x:a</span></code> と <code class="docutils literal notranslate"><span class="pre">y:b</span></code> から <code class="docutils literal notranslate"><span class="pre">Tup2</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">:</span> <span class="pre">tup2</span> <span class="pre">a</span> <span class="pre">b</span></code> を作るコンストラクタです。</p>
+<p>他の <code class="docutils literal notranslate"><span class="pre">tup3</span></code> や <code class="docutils literal notranslate"><span class="pre">tup4</span></code> も同様です—束縛変数の型注釈は推論可能です。</p>
+<p>これらは 1 つのケースしか持たない帰納的型なので、<code class="docutils literal notranslate"><span class="pre">Tup2?</span></code>・<code class="docutils literal notranslate"><span class="pre">Tup3?</span></code>・<code class="docutils literal notranslate"><span class="pre">Tup4?</span></code> といった判別関数はあまり有用ではありません。しかし、タプルの各要素を取り出す（<em>射影する</em>）方法が必要で、<code class="docutils literal notranslate"><span class="pre">match</span></code> で行えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> tup2_fst #a #b (x:tup2 a b)
+  : a
+  = <span class="k">match</span> x <span class="k">with</span>
+    | Tup2 fst <span class="k">_</span> -&gt; fst
+
+<span class="k">let</span> tup2_snd #a #b (x:tup2 a b)
+  : b
+  = <span class="k">match</span> x <span class="k">with</span>
+    | Tup2 <span class="k">_</span> snd -&gt; snd
+
+<span class="k">let</span> tup3_fst #a #b #c (x:tup3 a b c)
+  : a
+  = <span class="k">match</span> x <span class="k">with</span>
+    | Tup3 fst <span class="k">_</span> <span class="k">_</span> -&gt; fst
+
+<span class="k">let</span> tup3_snd #a #b #c (x:tup3 a b c)
+  : b
+  = <span class="k">match</span> x <span class="k">with</span>
+    | Tup3 <span class="k">_</span> snd <span class="k">_</span> -&gt; snd
+
+<span class="k">let</span> tup3_third #a #b #c (x:tup3 a b c)
+  : c
+  = <span class="k">match</span> x <span class="k">with</span>
+    | Tup3 <span class="k">_</span> <span class="k">_</span> thd -&gt; thd
+</pre></div>
+</div>
+<section id="projectors">
+<h3>射影子（プロジェクタ）<a class="headerlink" href="#projectors" title="Link to this heading"></a></h3>
+<p>射影は頻出なので、F* は自動生成します。具体的には、任意のデータコンストラクタ <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">:</span> <span class="pre">x1:t1</span> <span class="pre">-&gt;</span> <span class="pre">...</span> <span class="pre">-&gt;</span> <span class="pre">xn:tn</span> <span class="pre">-&gt;</span> <span class="pre">t</span></code> に対し、次の関数を生成します。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">T?.xi</span> <span class="pre">:</span> <span class="pre">y:t{T?</span> <span class="pre">y}</span> <span class="pre">-&gt;</span> <span class="pre">ti</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>つまり <code class="docutils literal notranslate"><span class="pre">T?.xi</span></code> は、<code class="docutils literal notranslate"><span class="pre">y:t</span></code> が <code class="docutils literal notranslate"><span class="pre">T</span></code> である場合に、<code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">x1</span> <span class="pre">...</span> <span class="pre">xn</span></code> の <code class="docutils literal notranslate"><span class="pre">xi</span></code> 成分を返す関数です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">tup2</span></code> と <code class="docutils literal notranslate"><span class="pre">tup3</span></code> の場合、次の射影子が得られます。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Tup2?.fst</span></code>、<code class="docutils literal notranslate"><span class="pre">Tup2?.snd</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Tup3?.fst</span></code>、<code class="docutils literal notranslate"><span class="pre">Tup3?.snd</span></code>、<code class="docutils literal notranslate"><span class="pre">Tup3?.thd</span></code></p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="syntax-for-tuples">
+<h3>タプルの構文シュガー<a class="headerlink" href="#syntax-for-tuples" title="Link to this heading"></a></h3>
+<p>タプルは非常によく使われるため、<code class="docutils literal notranslate"><span class="pre">FStar.Pervasives.Native.fst</span></code> には 14 要素までのタプル型が定義済みです。したがって通常は <code class="docutils literal notranslate"><span class="pre">tup2</span></code> や <code class="docutils literal notranslate"><span class="pre">tup3</span></code> などを自前で定義する必要はありません。</p>
+<p><code class="docutils literal notranslate"><span class="pre">FStar.Pervasives.Native</span></code> のタプル型には構文シュガーが用意されています。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tup2</span> <span class="pre">a</span> <span class="pre">b</span></code> の代わりに <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&amp;</span> <span class="pre">b</span></code>、<code class="docutils literal notranslate"><span class="pre">tup3</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">c</span></code> の代わりに <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&amp;</span> <span class="pre">b</span> <span class="pre">&amp;</span> <span class="pre">c</span></code> と書けます（最大 14 要素まで）。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Tup2</span> <span class="pre">x</span> <span class="pre">y</span></code> の代わりに <code class="docutils literal notranslate"><span class="pre">x,</span> <span class="pre">y</span></code>、<code class="docutils literal notranslate"><span class="pre">Tup3</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span></code> の代わりに <code class="docutils literal notranslate"><span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">z</span></code> と書けます（最大 14 要素まで）。</p></li>
+<li><p>タプルから第 <code class="docutils literal notranslate"><span class="pre">i</span></code> 成分を取り出すには、<code class="docutils literal notranslate"><span class="pre">x._1</span></code>、<code class="docutils literal notranslate"><span class="pre">x._2</span></code>、<code class="docutils literal notranslate"><span class="pre">x._3</span></code> などと書けます（要素数が少なくとも <code class="docutils literal notranslate"><span class="pre">i</span></code> の場合）。</p></li>
+</ul>
+<p>とはいえ、5 要素以上のタプルを使うなら、次に見る <em>レコード</em> を定義する方がよいでしょう。大きなタプルでは各成分の意味を覚えにくいからです。</p>
+</section>
+<section id="records">
+<span id="part1-records"></span><h3>レコード<a class="headerlink" href="#records" title="Link to this heading"></a></h3>
+<p>レコードは、各フィールドに任意の名前を付け、構築や射影のための特別な構文を備えたタプルだと考えられます。例を示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> point3D = { x:int; y:int; z:int}
+
+<span class="k">let</span> origin = { y=0; x=0; z=0 }
+
+<span class="k">let</span> dot (p0 p1:point3D) = p0.x * p1.x + p0.y * p1.y + p0.z * p1.z
+
+<span class="k">let</span> translate_X (p:point3D) (shift:int) = { p <span class="k">with</span> x = p.x + shift}
+
+<span class="k">let</span> is_origin (x:point3D) =
+  <span class="k">match</span> x <span class="k">with</span>
+  | {z=0;y=0;x=0} -&gt; <span class="k">true</span>
+  | <span class="k">_</span> -&gt; <span class="k">false</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>レコード型は波括弧 <code class="docutils literal notranslate"><span class="pre">{}</span></code> で定義します。<code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">point3D</span></code> を参照してください。</p></li>
+<li><p>レコード値も波括弧で構築し、各フィールドに代入します。フィールドは順不同で構いません。<code class="docutils literal notranslate"><span class="pre">origin</span></code> を参照。</p></li>
+<li><p>レコードのフィールドへは <code class="docutils literal notranslate"><span class="pre">p.x</span></code> のようなドット記法でアクセスします。ドット積を計算する <code class="docutils literal notranslate"><span class="pre">dot</span></code> の例を参照してください。</p></li>
+<li><p>レコードは <code class="docutils literal notranslate"><span class="pre">with</span></code> 記法にも対応しており、指定したフィールド以外を元のレコードと同一にした新しいレコードを作れます。つまり <code class="docutils literal notranslate"><span class="pre">translate_X</span> <span class="pre">p</span> <span class="pre">shift</span></code> は <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">p.x</span> <span class="pre">+</span> <span class="pre">shift;</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">p.y;</span> <span class="pre">z</span> <span class="pre">=</span> <span class="pre">p.z</span> <span class="pre">}</span></code> を返します。</p></li>
+<li><p>レコードは値のパターンマッチにも使えます。例えば <code class="docutils literal notranslate"><span class="pre">is_origin</span></code> では、（順不同で）フィールドをパターンに照合しています。</p></li>
+</ul>
+</section>
+</section>
+<section id="options">
+<h2>Option 型<a class="headerlink" href="#options" title="Link to this heading"></a></h2>
+<p>F* の標準ライブラリでよく使うもう一つの型が <code class="docutils literal notranslate"><span class="pre">option</span></code> 型で、存在しない可能性のある値を表現するのに便利です。</p>
+<p>2 つの整数 <code class="docutils literal notranslate"><span class="pre">x</span></code> と <code class="docutils literal notranslate"><span class="pre">y</span></code> に対して <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">/</span> <span class="pre">y</span></code> を行う関数を考えます。<code class="docutils literal notranslate"><span class="pre">y=0</span></code> のときは定義できませんが、以下のようにその場合を除外して部分的に定義できます。（もちろん、<code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">0</span></code> を禁じるように関数の定義域を精錬する方法もありますが、ここでは <code class="docutils literal notranslate"><span class="pre">option</span></code> 型の例示が目的です。）</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> try_divide (x y:int)
+  : option int
+  = <span class="k">if</span> y = 0 <span class="k">then</span> None <span class="k">else</span> Some (x / y)
+
+<span class="k">let</span> divide (x:int) (y:int{y&lt;&gt;0}) = x / y
+</pre></div>
+</div>
+<p>多くの関数型言語と同様、F* には <code class="docutils literal notranslate"><span class="pre">null</span></code> 値はありません。値が存在しない可能性がある場合は通常 <code class="docutils literal notranslate"><span class="pre">option</span></code> 型を用い、存在しない場合を <code class="docutils literal notranslate"><span class="pre">None</span></code>、存在する場合を <code class="docutils literal notranslate"><span class="pre">Some</span> <span class="pre">v</span></code> で表します。</p>
+</section>
+<section id="unions-or-the-either-type">
+<h2>共用体（ユニオン）、<code class="docutils literal notranslate"><span class="pre">either</span></code> 型<a class="headerlink" href="#unions-or-the-either-type" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">FStar.Pervasives</span></code> には <code class="docutils literal notranslate"><span class="pre">either</span></code> 型も定義されています（下記）。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> either a b =
+  | Inl : v: a -&gt; either a b
+  | Inr : v: b -&gt; either a b
+</pre></div>
+</div>
+<p>型 <code class="docutils literal notranslate"><span class="pre">either</span> <span class="pre">a</span> <span class="pre">b</span></code> は、<code class="docutils literal notranslate"><span class="pre">v:a</span></code> をもつ <code class="docutils literal notranslate"><span class="pre">Inl</span> <span class="pre">v</span></code> か、<code class="docutils literal notranslate"><span class="pre">v:b</span></code> をもつ <code class="docutils literal notranslate"><span class="pre">Inr</span> <span class="pre">v</span></code> のいずれかを表します。つまり <code class="docutils literal notranslate"><span class="pre">a</span></code> と <code class="docutils literal notranslate"><span class="pre">b</span></code> のタグ付き共用体です。タグ <a href="#id1"><span class="problematic" id="id2">``</span></a>Inl``（左側）か <a href="#id3"><span class="problematic" id="id4">``</span></a>Inr``（右側）を解析し、その内部の値で計算する関数は簡単に書けます。例：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> same_case #a #b #c #d (x:either a b) (y:either c d)
+  : bool
+  = <span class="k">match</span> x, y <span class="k">with</span>
+    | Inl <span class="k">_</span>, Inl <span class="k">_</span>
+    | Inr <span class="k">_</span>, Inr <span class="k">_</span> -&gt; <span class="k">true</span>
+    | <span class="k">_</span> -&gt; <span class="k">false</span>
+
+<span class="k">let</span> sum (x:either bool int) (y:either bool int{same_case x y})
+  : z:either bool int{ Inl? z &lt;==&gt; Inl? x}
+  = <span class="k">match</span> x, y <span class="k">with</span>
+    | Inl xl, Inl yl -&gt; Inl (xl || yl)
+    | Inr xr, Inr yr -&gt; Inr (xr + yr)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">same_case</span> <span class="pre">x</span> <span class="pre">y</span></code> は、2 つのユニオンが同時に左か右か、同じ側にあるかを判定します。</p>
+<p>そこで <code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">x</span> <span class="pre">y</span></code> では、<code class="docutils literal notranslate"><span class="pre">x</span></code> と <code class="docutils literal notranslate"><span class="pre">y</span></code> が同じ側にあるという精錬のもと、（両方左・両方右の）2 つだけを扱えばよく、F* は網羅性も証明できます。左側では中身が boolean なので <code class="docutils literal notranslate"><span class="pre">||</span></code> で結合し、右側では中身が整数なので <code class="docutils literal notranslate"><span class="pre">+</span></code> で結合し、適切なタグを付けて返します。結果の型 <code class="docutils literal notranslate"><span class="pre">z:either</span> <span class="pre">bool</span> <span class="pre">int{</span> <span class="pre">Inl?</span> <span class="pre">z</span> <span class="pre">&lt;==&gt;</span> <span class="pre">Inl?</span> <span class="pre">x</span> <span class="pre">}</span></code> は、結果が <code class="docutils literal notranslate"><span class="pre">x``（ひいては</span> <span class="pre">``y</span></code>）と同じ側であることを示しています。結果型は <code class="docutils literal notranslate"><span class="pre">z:either</span> <span class="pre">bool</span> <span class="pre">int</span> <span class="pre">{</span> <span class="pre">same_case</span> <span class="pre">z</span> <span class="pre">x</span> <span class="pre">}</span></code> と書くこともできました。</p>
+</section>
+<section id="lists">
+<span id="part1-inductives-list"></span><h2>リスト<a class="headerlink" href="#lists" title="Link to this heading"></a></h2>
+<p>ここまでの型は“形式上”は帰納的でも、コンストラクタが自分自身の型を参照してはいませんでした。ここで最初の本当の帰納的型、リストを扱います。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Prims</span></code> にある <code class="docutils literal notranslate"><span class="pre">list</span></code> の定義は次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> list a =
+  | Nil  : list a
+  | Cons : hd:a -&gt; tl:list a -&gt; list a
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">list</span></code> 型はすべての F* プログラムで暗黙に利用でき、コンストラクタには特別（標準的）な構文があります。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[]</span></code> は <code class="docutils literal notranslate"><span class="pre">Nil</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[v1;</span> <span class="pre">...;</span> <span class="pre">vn]</span></code> は <code class="docutils literal notranslate"><span class="pre">Cons</span> <span class="pre">v1</span> <span class="pre">...</span> <span class="pre">(Cons</span> <span class="pre">vn</span> <span class="pre">Nil)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hd</span> <span class="pre">::</span> <span class="pre">tl</span></code> は <code class="docutils literal notranslate"><span class="pre">Cons</span> <span class="pre">hd</span> <span class="pre">tl</span></code></p></li>
+</ul>
+<p>必要であれば、常に <cite>Nil</cite> や <cite>Cons</cite> を明示的に書いて構いません（例：<code class="docutils literal notranslate"><span class="pre">Cons</span> <span class="pre">hd</span> <span class="pre">:</span> <span class="pre">list</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">a</span></code> の部分適用をしたいときなど）。</p>
+<section id="length-of-a-list">
+<span id="part1-inductives-length"></span><h3>リストの長さ<a class="headerlink" href="#length-of-a-list" title="Link to this heading"></a></h3>
+<p>リストに対する簡単な関数を書いてみましょう。まずは長さの計算からです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> length #a (l:list a)
+  : nat
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; 0
+    | <span class="k">_</span> :: tl -&gt; 1 + length tl
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">length</span></code> 関数は再帰的で、型 <code class="docutils literal notranslate"><span class="pre">a</span></code> に対して暗黙に多相です。任意の <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">:</span> <span class="pre">list</span> <span class="pre">a</span></code> に対し、<code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">l</span></code> は <code class="docutils literal notranslate"><span class="pre">nat</span></code> を返します。定義ではリストにパターンマッチし、<code class="docutils literal notranslate"><span class="pre">[]</span></code> に至るまで末尾に対して再帰的に <code class="docutils literal notranslate"><span class="pre">length</span></code> を呼び出します。</p>
+</section>
+</section>
+<section id="exercises">
+<span id="part1-inductives-append"></span><h2>練習問題<a class="headerlink" href="#exercises" title="Link to this heading"></a></h2>
+<p>演習ファイルは <a class="reference external" href="../code/exercises/Part1.Inductives.fst">こちら</a>。</p>
+<p>2 つのリストを連結する関数 <code class="docutils literal notranslate"><span class="pre">append</span></code> の定義を示します。引数の長さの和に等しい長さのリストを常に返すことを型で証明できるよう、適切な型を与えられますか？</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> append l1 l2
+  = <span class="k">match</span> l1 <span class="k">with</span>
+    | [] -&gt; l2
+    | hd :: tl -&gt; hd :: append tl l2
+</pre></div>
+</div>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> append (#a:Type) (l1 l2:list a)
+  : l:list a { length l = length l1 + length l2 }
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part1_prop_assertions.html" class="btn btn-neutral float-left" title="SMT ソルバとの連携" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part1_termination.html" class="btn btn-neutral float-right" title="停止性の証明" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

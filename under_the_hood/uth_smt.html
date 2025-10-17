@@ -1,0 +1,1416 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F* が Z3 をどう使うかを理解する &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="prev" title="内部の仕組み" href="under_the_hood.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="under_the_hood.html">内部の仕組み</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">F* が Z3 をどう使うかを理解する</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-primer-on-smt2">SMT2 入門</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-brief-tour-of-f-s-smt-encoding">F* の SMT エンコーディング概観</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#term-sort"><code class="docutils literal notranslate"><span class="pre">Term</span></code> ソート</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#booleans">ブール値</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#patterns-for-quantifier-instantiation">量化子インスタンス化のパターン</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#integers">整数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#functions">関数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#recursive-functions-and-fuel">再帰関数と fuel（燃料）</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#inductive-datatypes-and-ifuel">帰納データ型と ifuel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#logical-connectives">論理結合子（ロジック）</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#options-for-z3-and-the-smt-encoding">Z3 と SMT エンコーディングのオプション</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#designing-a-library-with-smt-patterns">SMT パターンを用いたライブラリ設計</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exercise">演習</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#profiling-z3-and-solving-proof-performance-issues">Z3 のプロファイリングと証明性能問題の解決</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#query-statistics">クエリ統計</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#working-though-a-slow-proof">遅い証明に取り組む</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#profiling-quantifier-instantiation">量化子インスタンス化のプロファイリング</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#splitting-queries">クエリの分割</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#taking-control-of-quantifier-instantiations-with-opaque-definitions">不透明化した定義で量化子インスタンス化を制御する</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#other-ways-to-explicitly-trigger-quantifiers">量化子を明示的にトリガする別の方法</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#overhead-due-to-a-large-context">巨大な文脈によるオーバーヘッド</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="under_the_hood.html">内部の仕組み</a></li>
+      <li class="breadcrumb-item active">F* が Z3 をどう使うかを理解する</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="understanding-how-f-uses-z3">
+<span id="uth-smt"></span><h1>F* が Z3 をどう使うかを理解する<a class="headerlink" href="#understanding-how-f-uses-z3" title="Link to this heading"></a></h1>
+<p>これまで見てきたとおり、F* は証明の自動化に SMT（理論に基づく充足可能性）ソルバ Z3 に大きく依存しています。書籍の前半で扱ったような小さな単独の例では、多くの場合、自動化はそのまま問題なく動作します。しかし、開発規模が大きくなるにつれて、自動証明が遅くなったり予測不能になったりし始めます。その段階では、F* が SMT へどのようにエンコードしているかを理解し、証明をよりよく制御することが重要になります。</p>
+<p>最も抽象的な観点では、F* が用いる SMT 論理（未解釈関数と算術を含む一階述語論理）で証明を見つけることは決定不能問題であると理解すべきです。そのため、F* も SMT ソルバも各種ヒューリスティクスや部分的決定手続きを利用します。理論的には決定不能であるにもかかわらず、Z3 のようなソルバは F* が投げる非常に大きな問題を効果的に解くという驚くべき働きをします。とはいえ、Z3 の行う探索は計算量的に高価で、ヒューリスティクスの選択や問題インスタンスの構文的な細部に非常に敏感です。そのため、ヒューリスティクスの選び方が悪いと、Z3 に与えるクエリのほんの小さな変更でも探索経路が変わり、証明が全く見つからなくなったり、全く別の計算資源を消費した後に見つかったりします。</p>
+<p>背景と参考資料:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>F* の SMT エンコーディングは <a class="reference external" href="http://smtlib.cs.uiowa.edu/language.shtml">SMT-LIB v2</a> を用います。以下ではこの言語を SMT2 と呼びます。</p></li>
+<li><p>Alejandro Aguirre による <a class="reference external" href="https://catalin-hritcu.github.io/students/alejandro/report.pdf">技術レポート</a> では、F* の SMT エンコーディングの形式化に向けた進行中の取り組みが説明されています。</p></li>
+<li><p>Michal Moskal の <a class="reference external" href="https://moskal.me/pdf/prtrig.pdf">Programming with Triggers</a> は、VCC および関連する Hypervisor Verification プロジェクトの文脈で、量化子のインスタンシエーションに用いるトリガの選び方、SMT ソルバのデバッグとプロファイルの方法を解説しています。</p></li>
+<li><p>Leonardo de Moura と Nikolaj Bjørner は <a href="#id1"><span class="problematic" id="id2">`</span></a>Z3 における E-matching の実装 &lt;<a class="reference external" href="http://leodemoura.github.io/files/ematching.pdf">http://leodemoura.github.io/files/ematching.pdf</a>&gt;`_（少なくとも 2007 年頃）について説明しています。</p></li>
+</ul>
+</div></blockquote>
+<section id="a-primer-on-smt2">
+<h2>SMT2 入門<a class="headerlink" href="#a-primer-on-smt2" title="Link to this heading"></a></h2>
+<p>SMT2 は多くの SMT ソルバがサポートする標準化された入力言語です。構文は LISP 系言語に着想を得た <a class="reference external" href="https://en.wikipedia.org/wiki/S-expression">S式</a> に基づいています。ここでは構文の基本要素、とりわけ F* の SMT エンコーディングで使われる部分を概観します。</p>
+<ul>
+<li><p>多相（多ソート）論理</p>
+<p>SMT ソルバの論理は多ソートです。ソートは簡易な型体系を与え、例えば異なるソートの項どうしが等しくならないことを保証します。ユーザは次のように新しいソート <code class="docutils literal notranslate"><span class="pre">T</span></code> を定義できます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-sort</span> T)
+</pre></div>
+</div>
+<p>各ソートには等号の概念が組み込みで提供されています。ソート <code class="docutils literal notranslate"><span class="pre">T</span></code> の 2 つの項 <code class="docutils literal notranslate"><span class="pre">p</span></code> と <code class="docutils literal notranslate"><span class="pre">q</span></code> に対し、<code class="docutils literal notranslate"><span class="pre">(=</span> <span class="pre">p</span> <span class="pre">q)</span></code> はそれらが等しいことを表す <code class="docutils literal notranslate"><span class="pre">Bool</span></code> ソートの項です。</p>
+</li>
+<li><p>未解釈関数の宣言</p>
+<p>引数ソートが <code class="docutils literal notranslate"><span class="pre">sort_1</span> <span class="pre">..</span> <span class="pre">sort_n</span></code>、結果ソートが <code class="docutils literal notranslate"><span class="pre">sort</span></code> の新しい関数記号 <code class="docutils literal notranslate"><span class="pre">F</span></code> は次のように宣言します。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-fun</span> F (sort_<span class="m">1</span> ... sort_n) sort)
+</pre></div>
+</div>
+<p>関数記号 <code class="docutils literal notranslate"><span class="pre">F</span></code> は <em>未解釈</em> であり、ソルバが <code class="docutils literal notranslate"><span class="pre">F</span></code> について知っているのは「関数である」という事実だけです。すなわち、等しい引数に適用すると等しい結果を返す、ということのみが仮定されます。</p>
+</li>
+<li><p>理論シンボル</p>
+<blockquote>
+<div><p>Z3 はいくつかの <a href="#id1"><span class="problematic" id="id2">*</span></a>理論*（特に整数・実数算術）をサポートします。例えば無限精度整数ソート <code class="docutils literal notranslate"><span class="pre">Int</span></code> の項 <code class="docutils literal notranslate"><span class="pre">i</span></code> と <code class="docutils literal notranslate"><span class="pre">j</span></code> に対して、次のような項が期待どおりの算術演算を表します。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(+ i j)       <span class="c">; addition</span>
+(- i j)       <span class="c">; subtraction</span>
+(* i j)       <span class="c">; multiplication</span>
+(div i j)     <span class="c">; Euclidean division</span>
+(mod i j)     <span class="c">; Euclidean modulus</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>論理結合子</p>
+<p>SMT2 は基本的な論理結合子を提供します。以下で <code class="docutils literal notranslate"><span class="pre">p</span></code> と <code class="docutils literal notranslate"><span class="pre">q</span></code> は <code class="docutils literal notranslate"><span class="pre">Bool</span></code> ソートの項です。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(and p q)                <span class="c">; conjunction</span>
+(or p q)                 <span class="c">; disjunction</span>
+(not p)                  <span class="c">; negation</span>
+(implies p q)            <span class="c">; implication</span>
+(iff p q)                <span class="c">; bi-implication</span>
+</pre></div>
+</div>
+<p>SMT2 は量化子も提供します。次の項は、変数 <code class="docutils literal notranslate"><span class="pre">x1</span> <span class="pre">...</span> <span class="pre">xn</span></code> をそれぞれ全称・存在で量化した <code class="docutils literal notranslate"><span class="pre">p</span></code> を表します。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(forall ((x<span class="m">1</span> sort_<span class="m">1</span>) ... (xn sort_n)) p)
+(exists ((x<span class="m">1</span> sort_<span class="m">1</span>) ... (xn sort_n)) p)
+</pre></div>
+</div>
+</li>
+<li><p>属性注釈</p>
+<p>項 <code class="docutils literal notranslate"><span class="pre">p</span></code> には次の構文で属性名 <code class="docutils literal notranslate"><span class="pre">a_1</span> <span class="pre">..</span> <span class="pre">a_n</span></code> とその値 <code class="docutils literal notranslate"><span class="pre">v_1</span> <span class="pre">..</span> <span class="pre">v_n</span></code> を付与できます――ここでの <code class="docutils literal notranslate"><span class="pre">!</span></code> は論理否定ではありません。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(! p
+   :a_<span class="m">1</span> v_<span class="m">1</span>
+   ...
+   :a_n v_n)
+</pre></div>
+</div>
+<p>よくある使い方は量化子に対するものです（後述の例を参照）。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(forall ((x Int))
+        (! (implies (&gt;= x <span class="m">0</span>) (f x))
+           :<span class="k">qid</span> some_identifier))
+</pre></div>
+</div>
+</li>
+<li><p>SMT2 の理論と check-sat</p>
+<p>SMT2 における理論は、ソートや関数記号の宣言と、それらに関する事実のアサーションから構成されます。例えば、関数記号 <code class="docutils literal notranslate"><span class="pre">f</span></code> を宣言し、<code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">y</span></code> が <code class="docutils literal notranslate"><span class="pre">(&gt;=</span> <span class="pre">x</span> <span class="pre">y)</span></code> と同値であると仮定する単純な理論は次のようになります。注意：F* と違い、SMT2 の <code class="docutils literal notranslate"><span class="pre">assert</span></code> は主張を「検証する」のではなく「真であると仮定する」ものです。つまり SMT2 の <code class="docutils literal notranslate"><span class="pre">assert</span></code> は F* の <code class="docutils literal notranslate"><span class="pre">assume</span></code> に相当します。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-fun</span> f (Int Int) Bool)
+
+(<span class="k">assert</span> (forall ((x Int) (y Int))
+                (iff (&gt;= y x) (f x y))))
+</pre></div>
+</div>
+<p>この理論の文脈で、<code class="docutils literal notranslate"><span class="pre">f</span></code> に関する事実が妥当かどうかを問えます。例えば <code class="docutils literal notranslate"><span class="pre">f</span></code> が推移的かどうかを調べるには、推移律の <em>否定</em> をアサートし、<code class="docutils literal notranslate"><span class="pre">(check-sat)</span></code> 指示で理論が充足可能かどうかを Z3 に問い合わせます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (not (forall ((x Int) (y Int) (z Int))
+                     (implies (and (f x y) (f y z))
+                              (f x z)))))
+(<span class="k">check-sat</span>)
+</pre></div>
+</div>
+<p>この例では Z3 はすぐに <code class="docutils literal notranslate"><span class="pre">unsat</span></code> と応答します。これは、両方のアサーションと両立する <code class="docutils literal notranslate"><span class="pre">f</span></code> の解釈を持つモデルが存在しない、言い換えれば、すべてのモデルで <code class="docutils literal notranslate"><span class="pre">f</span></code> の推移性が成り立つことを意味します。つまり、成功するクエリは <code class="docutils literal notranslate"><span class="pre">unsat</span></code> を返すのが期待値です。</p>
+</li>
+</ul>
+</section>
+<section id="a-brief-tour-of-f-s-smt-encoding">
+<h2>F* の SMT エンコーディング概観<a class="headerlink" href="#a-brief-tour-of-f-s-smt-encoding" title="Link to this heading"></a></h2>
+<p>次のような単純な F* のコードを考えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> id x = x
+<span class="k">let</span> f (x:int) =
+   <span class="k">if</span> x &lt; 0
+   <span class="k">then</span> <span class="k">assert</span> (- (id x) &gt;= 0)
+   <span class="k">else</span> <span class="k">assert</span> (id x &gt;= 0)
+</pre></div>
+</div>
+<p>このプログラムの証明義務を SMT にエンコードするため、F* は概ね次のような形の SMT2 ファイルを生成します。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span><span class="c">;; Some basic scaffoling</span>
+
+(<span class="k">declare-sort</span> Term)
+...
+
+<span class="c">;; Encoding of some basic modules</span>
+
+(<span class="k">declare-fun</span> Prims.bool () Term)
+...
+
+<span class="c">;; Encoding of background facts about the current module</span>
+
+(<span class="k">declare-fun</span> id (Term) Term)
+(<span class="k">assert</span> (forall ((x Term)) (= (id x) x)))
+
+<span class="c">;; Encoding the query, i.e., negated proof obligation</span>
+
+(<span class="k">assert</span> (not (forall ((x Term))
+                     (and (implies (lt x <span class="m">0</span>) (geq (minus (M.id x)) <span class="m">0</span>))
+                          (implies (not (lt x <span class="m">0</span>)) (geq (M.id x) <span class="m">0</span>))))))
+
+(<span class="k">check-sat</span>)
+
+<span class="c">;; Followed by some instrumentation for error reporting</span>
+<span class="c">;; in case the check-sat call fails (i.e., does not return unsat)</span>
+</pre></div>
+</div>
+<p>これはあくまで大まかなイメージです。実際の F* の SMT エンコーディングの詳細は、以下で見るように少し異なります。</p>
+<p>F* の SMT エンコーディングを観察するため、いくつかの小さな例を通して、F* に生成した SMT2 の理論をログ出力させます。そのために、以下のスケルトンファイルを使います。冒頭の <code class="docutils literal notranslate"><span class="pre">#push-options</span> <span class="pre">&quot;--log_queries&quot;</span></code> は、エンコーディングを <code class="docutils literal notranslate"><span class="pre">.smt2</span></code> に書き出すよう F* に指示します。末尾の <code class="docutils literal notranslate"><span class="pre">force_a_query</span></code> 定義は、F* が少なくとも 1 つのクエリを実際に生成することを保証します——これがないと F* は Z3 に何も送らず、<code class="docutils literal notranslate"><span class="pre">.smt2</span></code> にも何も出力されません。コマンドラインで <code class="docutils literal notranslate"><span class="pre">fstar.exe</span> <span class="pre">SMTEncoding.fst</span></code> を実行すると、カレントディレクトリに <code class="docutils literal notranslate"><span class="pre">queries-SMTEncoding.smt2</span></code> が生成されます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> SMTEncoding
+<span class="k">open</span> FStar.Mul
+#push-options &quot;--log_queries&quot;
+<span class="k">let</span> false_boolean = <span class="k">false</span>
+<span class="k">let</span> true_boolean = <span class="k">true</span>
+
+<span class="k">let</span> <span class="k">rec</span> factorial (n:nat) : nat =
+  <span class="k">if</span> n = 0 <span class="k">then</span> 1
+  <span class="k">else</span> n * factorial (n - 1)
+
+<span class="k">let</span> id (x:Type0) = x
+<span class="k">let</span> force_a_query = <span class="k">assert</span> (id True)
+</pre></div>
+</div>
+<p>このような小さなモジュールでも、<code class="docutils literal notranslate"><span class="pre">.smt2</span></code> ファイルが非常に大きくなることが分かるでしょう。これは既定で F* が常に <code class="docutils literal notranslate"><span class="pre">prims.fst</span></code>、<code class="docutils literal notranslate"><span class="pre">FStar.Pervasives.Native.fst</span></code>、<code class="docutils literal notranslate"><span class="pre">FStar.Pervasives.fsti</span></code> を依存として含めるためです。これらのモジュールのエンコードだけでおよそ 15 万行の SMT2 の定義とコメントが消費されます。</p>
+<p>各モジュールのエンコードは、<code class="docutils literal notranslate"><span class="pre">.smt2</span></code> 内で次のようなコメントによって区切られています。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span><span class="c">;;; Start module Prims</span>
+...
+<span class="c">;;; End module Prims (1334 decls; total size 431263)</span>
+
+<span class="c">;;; Start module FStar.Pervasives.Native</span>
+...
+<span class="c">;;; End module FStar.Pervasives.Native (2643 decls; total size 2546449)</span>
+
+<span class="c">;;; Start interface FStar.Pervasives</span>
+...
+<span class="c">;;; End interface FStar.Pervasives (2421 decls; total size 1123058)</span>
+</pre></div>
+</div>
+<p>各 <cite>End</cite> 行には、そのモジュール内の宣言数と文字数も記されています。</p>
+<section id="term-sort">
+<h3><code class="docutils literal notranslate"><span class="pre">Term</span></code> ソート<a class="headerlink" href="#term-sort" title="Link to this heading"></a></h3>
+<p>SMT2 は多ソート論理ですが、広範に使う <code class="docutils literal notranslate"><span class="pre">Bool</span></code> を除けば、F* の SMT へのエンコードは（大半が）単一ソート <code class="docutils literal notranslate"><span class="pre">Term</span></code> に集約されます。すなわち、純粋（あるいは ghost）な F* の項は未解釈ソート <code class="docutils literal notranslate"><span class="pre">Term</span></code> のインスタンスとして SMT ソルバに渡されます。これにより、F* の豊かな型体系を単純な SMT のソート体系へ写そうとするのではなく、より一般的なエンコードで扱えるようになります。</p>
+</section>
+<section id="booleans">
+<h3>ブール値<a class="headerlink" href="#booleans" title="Link to this heading"></a></h3>
+<p>SMT ソルバで最も原始的なソートの一つがブール値の <code class="docutils literal notranslate"><span class="pre">Bool</span></code> です。SMT の論理結合子はすべて <code class="docutils literal notranslate"><span class="pre">Bool</span></code> 上の演算です。F* の型 <code class="docutils literal notranslate"><span class="pre">bool</span></code> を SMT にエンコードする際は <code class="docutils literal notranslate"><span class="pre">Bool</span></code> を用いますが、F* の項はすべて <code class="docutils literal notranslate"><span class="pre">Term</span></code> にエンコードされるため、以下の SMT2 定義で <code class="docutils literal notranslate"><span class="pre">Bool</span></code> を <code class="docutils literal notranslate"><span class="pre">Term</span></code> へ「ボックス化」します。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-fun</span> BoxBool (Bool) Term)
+(<span class="k">declare-fun</span> BoxBool_proj_<span class="m">0</span> (Term) Bool)
+(<span class="k">assert</span> (! (forall ((@u<span class="m">0</span> Bool))
+                   (! (= (BoxBool_proj_<span class="m">0</span> (BoxBool @u<span class="m">0</span>))
+                          @u<span class="m">0</span>)
+                       :<span class="k">pattern</span> ((BoxBool @u<span class="m">0</span>))
+                       :<span class="k">qid</span> projection_inverse_BoxBool_proj_<span class="m">0</span>))
+            :<span class="k">named</span> projection_inverse_BoxBool_proj_<span class="m">0</span>))
+</pre></div>
+</div>
+<p>これは <code class="docutils literal notranslate"><span class="pre">Bool</span></code> と <code class="docutils literal notranslate"><span class="pre">Term</span></code> の間を相互に変換する未解釈関数 <code class="docutils literal notranslate"><span class="pre">BoxBool</span></code> と <code class="docutils literal notranslate"><span class="pre">BoxBool_proj_0</span></code> を宣言しています。</p>
+<p><code class="docutils literal notranslate"><span class="pre">projection_inverse_BoxBool_proj_0</span></code> という公理は、<code class="docutils literal notranslate"><span class="pre">BoxBool_proj_0</span></code> が <code class="docutils literal notranslate"><span class="pre">BoxBool</span></code> の逆写像である、換言すれば <code class="docutils literal notranslate"><span class="pre">BoxBool</span></code> が <code class="docutils literal notranslate"><span class="pre">Bool</span></code> から <code class="docutils literal notranslate"><span class="pre">Term</span></code> への単射であることを述べています。</p>
+<p><code class="docutils literal notranslate"><span class="pre">qid</span></code> は量化子識別子で、通常はそれを含む仮定の名前と同一、あるいはそれに由来します。<a class="reference internal" href="#profiling-z3"><span class="std std-ref">量化子インスタンス化のプロファイリング</span></a> で再び登場します。</p>
+</section>
+<section id="patterns-for-quantifier-instantiation">
+<h3>量化子インスタンス化のパターン<a class="headerlink" href="#patterns-for-quantifier-instantiation" title="Link to this heading"></a></h3>
+<p>ブールに関する <code class="docutils literal notranslate"><span class="pre">projection_inverse_BoxBool_proj_0</span></code> 公理は、<code class="docutils literal notranslate"><span class="pre">:pattern</span> <span class="pre">((BoxBool</span> <span class="pre">&#64;u0))</span></code> のようなパターン付き量化式の最初の例です。これらのパターンは SMT ソルバの探索を制御する主要なヒューリスティクスであり、以降の節でも繰り返し登場します。</p>
+<p>理論を探索する際、SMT ソルバは理論内のいくつかの変数に基底項を割り当てた現在の部分モデルを保持します。この部分モデル中に現れる項を <em>アクティブ</em> な項と呼び、量化子インスタンス化で重要な役割を果たします。</p>
+<p>スコープ内の各全称量化式は次の形の項です。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(forall ((x<span class="m">1</span> s<span class="m">1</span>) ... (xn sn))
+        (! (  body  )
+         :<span class="k">pattern</span> ((p<span class="m">1</span>) ... (pm))))
+</pre></div>
+</div>
+<p>この量化式は束縛変数 <code class="docutils literal notranslate"><span class="pre">x1</span> <span class="pre">...</span> <span class="pre">xn</span></code> がインスタンス化されるまで不活性です。<code class="docutils literal notranslate"><span class="pre">p1</span> <span class="pre">...</span> <span class="pre">pm</span></code> はパターンと呼ばれ、全ての束縛変数を <em>網羅</em> しなければなりません。量化子をインスタンス化するには、パターン <code class="docutils literal notranslate"><span class="pre">p1..pm</span></code> に一致するアクティブ項 <code class="docutils literal notranslate"><span class="pre">v1..vm</span></code> を見つけます。一致とは、束縛変数 <code class="docutils literal notranslate"><span class="pre">x1..xm</span></code> に対する置換 <code class="docutils literal notranslate"><span class="pre">S</span></code> を見つけ、置換後のパターン <code class="docutils literal notranslate"><span class="pre">S(p1..pm)</span></code> がアクティブ項 <code class="docutils literal notranslate"><span class="pre">v1..vm</span></code> と等しくなることです。そのような置換が得られれば、<code class="docutils literal notranslate"><span class="pre">S(body)</span></code> がアクティブになり、部分モデルをさらに精緻化し得ます。</p>
+<p>存在量化式は全称量化式の双対です。<a href="#id1"><span class="problematic" id="id2">*</span></a>文脈*（負位置、仮定側）にある全称式がパターンのインスタンス化まで不活性であるのと同様に、<a href="#id3"><span class="problematic" id="id4">*</span></a>目標*（正位置）にある存在式もパターンがインスタンス化されるまで不活性です。存在量化子にも、アクティブ項に一致したときに起動するパターンを付与できます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">projection_inverse_BoxBool_proj_0</span></code> に戻ると、ソルバがアクティブ項 <code class="docutils literal notranslate"><span class="pre">BoxBool</span> <span class="pre">b</span></code> を得た時点で量化式をインスタンス化し、<code class="docutils literal notranslate"><span class="pre">(=</span> <span class="pre">(BoxBool_proj_0</span> <span class="pre">(BoxBool</span> <span class="pre">b))</span> <span class="pre">b)</span></code> を導出できる、ということです。</p>
+</section>
+<section id="integers">
+<h3>整数<a class="headerlink" href="#integers" title="Link to this heading"></a></h3>
+<p>F* の型 <code class="docutils literal notranslate"><span class="pre">int</span></code> のエンコードは <code class="docutils literal notranslate"><span class="pre">bool</span></code> と類似です——未上限制の数学的整数ソート <code class="docutils literal notranslate"><span class="pre">Int</span></code> を、単射 <code class="docutils literal notranslate"><span class="pre">BoxInt</span></code> で <code class="docutils literal notranslate"><span class="pre">Term</span></code> に持ち上げます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-fun</span> BoxInt (Int) Term)
+(<span class="k">declare-fun</span> BoxInt_proj_<span class="m">0</span> (Term) Int)
+(<span class="k">assert</span> (! (forall ((@u<span class="m">0</span> Int))
+                   (! (= (BoxInt_proj_<span class="m">0</span> (BoxInt @u<span class="m">0</span>))
+                         @u<span class="m">0</span>)
+                      :<span class="k">pattern</span> ((BoxInt @u<span class="m">0</span>))
+                      :<span class="k">qid</span> projection_inverse_BoxInt_proj_<span class="m">0</span>))
+           :<span class="k">named</span> projection_inverse_BoxInt_proj_<span class="m">0</span>))
+</pre></div>
+</div>
+<p>整数の基本演算は、引数をアンボックスし、結果をボックスする形でエンコードされます。例えば整数加算子 <code class="docutils literal notranslate"><span class="pre">Prims.(+)</span></code> のエンコードは次のとおりです。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-fun</span> Prims.op_Addition (Term Term) Term)
+(<span class="k">assert</span> (! (forall ((@x<span class="m">0</span> Term) (@x<span class="m">1</span> Term))
+                   (! (= (Prims.op_Addition @x<span class="m">0</span>
+                                            @x<span class="m">1</span>)
+                         (BoxInt (+ (BoxInt_proj_<span class="m">0</span> @x<span class="m">0</span>)
+                                    (BoxInt_proj_<span class="m">0</span> @x<span class="m">1</span>))))
+                      :<span class="k">pattern</span> ((Prims.op_Addition @x<span class="m">0</span>
+                                                   @x<span class="m">1</span>))
+                      :<span class="k">qid</span> primitive_Prims.op_Addition))
+         :<span class="k">named</span> primitive_Prims.op_Addition))
+</pre></div>
+</div>
+<p>これは <code class="docutils literal notranslate"><span class="pre">Term</span></code> 上の 2 項未解釈関数 <code class="docutils literal notranslate"><span class="pre">Prims.op_Addition</span></code> を宣言し、整数算術理論の基本演算子 <code class="docutils literal notranslate"><span class="pre">(+)</span></code> と結びつける仮定を与えます。パターンにより、<code class="docutils literal notranslate"><span class="pre">Prims.op_Addition</span></code> のアクティブな適用ごとに量化子がインスタンス化されます。</p>
+<p>ボックス化はオーバーヘッドを生みます。例えば F* で <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">+</span> <span class="pre">y</span> <span class="pre">==</span> <span class="pre">y</span> <span class="pre">+</span> <span class="pre">x</span></code> を示すことは、SMT2 で <code class="docutils literal notranslate"><span class="pre">Prims.op_Addition</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">==</span> <span class="pre">Prims.op_Addition</span> <span class="pre">y</span> <span class="pre">x</span></code> を示すことに相当します。これは量化子のインスタンス化、線形算術理論での推論、最後に <code class="docutils literal notranslate"><span class="pre">BoxInt</span></code> の単射性の利用を伴います。とはいえ通常このオーバーヘッドは目立ちませんし、すべてを単一ソート <code class="docutils literal notranslate"><span class="pre">Term</span></code> に統一することで多くの点が簡素化されます。なお、整数のボックス化／アンボックス化の方法を制御するためのオプションがいくつか用意されています（<a class="reference internal" href="#z3-and-smtencoding-options"><span class="std std-ref">後述</span></a>）。</p>
+</section>
+<section id="functions">
+<h3>関数<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<p>次の F* 関数を考えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> add3 (x y z:int) : int = x + y + z
+</pre></div>
+</div>
+<p>これを SMT にエンコードするにはいくつかの要素があります。</p>
+<p>まず、<code class="docutils literal notranslate"><span class="pre">Term</span></code> 上の 3 項未解釈関数の宣言があります。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-fun</span> SMTEncoding.add<span class="m">3</span> (Term Term Term) Term)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">add3</span></code> の意味は以下の仮定で与えられます。量化子のパターンにより、これは左から右への書き換え規則とみなせます。ソルバが <code class="docutils literal notranslate"><span class="pre">SMTEncoding.add3</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span></code> をアクティブ項として持つたびに、その定義へ展開できます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@x<span class="m">0</span> Term) (@x<span class="m">1</span> Term) (@x<span class="m">2</span> Term))
+                   (! (= (SMTEncoding.add<span class="m">3</span> @x<span class="m">0</span>
+                                           @x<span class="m">1</span>
+                                           @x<span class="m">2</span>)
+                         (Prims.op_Addition (Prims.op_Addition @x<span class="m">0</span>
+                                                               @x<span class="m">1</span>)
+                                            @x<span class="m">2</span>))
+                    :<span class="k">pattern</span> ((SMTEncoding.add<span class="m">3</span> @x<span class="m">0</span>
+                                             @x<span class="m">1</span>
+                                             @x<span class="m">2</span>))
+                    :<span class="k">qid</span> equation_SMTEncoding.add<span class="m">3</span>))
+
+         :<span class="k">named</span> equation_SMTEncoding.add<span class="m">3</span>))
+</pre></div>
+</div>
+<p>定義に加えて、F* は <code class="docutils literal notranslate"><span class="pre">add3</span></code> の <em>型</em> もソルバにエンコードします。重要な述語の一つが <code class="docutils literal notranslate"><span class="pre">HasType</span></code> で、項とその型の関係を表します。<code class="docutils literal notranslate"><span class="pre">typing_SMTEncoding.add3</span></code> の仮定は、引数の型付け仮定に基づいて適用の型付けをエンコードします。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@x<span class="m">0</span> Term) (@x<span class="m">1</span> Term) (@x<span class="m">2</span> Term))
+                   (! (implies (and (HasType @x<span class="m">0</span>
+                                             Prims.int)
+                                    (HasType @x<span class="m">1</span>
+                                             Prims.int)
+                                    (HasType @x<span class="m">2</span>
+                                             Prims.int))
+                               (HasType (SMTEncoding.add<span class="m">3</span> @x<span class="m">0</span> @x<span class="m">1</span> @x<span class="m">2</span>)
+                                        Prims.int))
+                      :<span class="k">pattern</span> ((SMTEncoding.add<span class="m">3</span> @x<span class="m">0</span> @x<span class="m">1</span> @x<span class="m">2</span>))
+                 :<span class="k">qid</span> typing_SMTEncoding.add<span class="m">3</span>))
+      :<span class="k">named</span> typing_SMTEncoding.add<span class="m">3</span>))
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">add3</span></code> が高階に用いられないなら、これで十分です。ですが F* では関数値も他の値と同様に扱われ、他の関数に引数として渡したり戻り値として返したりできます。一方 SMT 論理は一階論理であり、<code class="docutils literal notranslate"><span class="pre">add3</span></code> のような関数は第一級ではありません。そこで F* は高階関数を表現するための別層を導入しますが、ここでは扱いません。</p>
+</section>
+<section id="recursive-functions-and-fuel">
+<span id="uth-smt-fuel"></span><h3>再帰関数と fuel（燃料）<a class="headerlink" href="#recursive-functions-and-fuel" title="Link to this heading"></a></h3>
+<p>非再帰関数はマクロ定義に近く、F* は意味をソルバに書き換え規則として渡すだけです。しかし再帰関数は無限に展開できる可能性があるため、そう単純ではありません。以下の <code class="docutils literal notranslate"><span class="pre">factorial</span></code> のエンコードを見てみましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">open</span> FStar.Mul
+<span class="k">let</span> <span class="k">rec</span> factorial (n:nat) : nat =
+  <span class="k">if</span> n = 0 <span class="k">then</span> 1
+  <span class="k">else</span> n * factorial (n - 1)
+</pre></div>
+</div>
+<p>まず先ほどと同様に、<code class="docutils literal notranslate"><span class="pre">Term</span></code> 上の未解釈関数記号と、その型付けに関する仮定を用意します。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-fun</span> SMTEncoding.factorial (Term) Term)
+
+(<span class="k">assert</span> (! (forall ((@x<span class="m">0</span> Term))
+                   (! (implies (HasType @x<span class="m">0</span> Prims.nat)
+                               (HasType (SMTEncoding.factorial @x<span class="m">0</span>) Prims.nat))
+                    :<span class="k">pattern</span> ((SMTEncoding.factorial @x<span class="m">0</span>))
+                    :<span class="k">qid</span> typing_SMTEncoding.factorial))
+         :<span class="k">named</span> typing_SMTEncoding.factorial))
+</pre></div>
+</div>
+<p>しかし <code class="docutils literal notranslate"><span class="pre">factorial</span></code> の意味を定義するために、<code class="docutils literal notranslate"><span class="pre">Fuel</span></code> ソートの追加引数を持つ「燃料付き」の第 2 の関数記号を導入します。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-fun</span> SMTEncoding.factorial.fuel_instrumented (Fuel Term) Term)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Fuel</span></code> ソートは F* の SMT エンコーディングの冒頭で宣言され、単位元表示の自然数を表します。コンストラクタは <a href="#id1"><span class="problematic" id="id2">``</span></a>ZFuel``（0）と <a href="#id3"><span class="problematic" id="id4">``</span></a>SFuel f``（後者）です。</p>
+<p>肝心のアイデアは、<code class="docutils literal notranslate"><span class="pre">factorial.fuel_instrumented</span></code> の fuel 引数がゼロでない場合にだけ定義を展開できるよう、パターンでガードした定義を与えることです。さらに、この意味付けの仮定は引数に対する型付け仮定 <code class="docutils literal notranslate"><span class="pre">(HasType</span> <span class="pre">&#64;x1</span> <span class="pre">Prims.nat)</span></code> でガードします。というのも F* の再帰関数は全ての項ではなく <code class="docutils literal notranslate"><span class="pre">nat</span></code> 上でのみ良基底だからです。<code class="docutils literal notranslate"><span class="pre">:weight</span></code> 注釈は SMT2 の詳細で、0 に設定すると fuel が非ゼロである限り、必要なだけ量化子をインスタンス化できるようになります。等式は <code class="docutils literal notranslate"><span class="pre">SFuel</span></code> の適用を 1 回だけ剥がすため、無限に連鎖的なインスタンス化は起きません。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@u<span class="m">0</span> Fuel) (@x<span class="m">1</span> Term))
+                   (! (implies (HasType @x<span class="m">1</span> Prims.nat)
+                               (= (SMTEncoding.factorial.fuel_instrumented (SFuel @u<span class="m">0</span>) @x<span class="m">1</span>)
+                                  (let ((@lb<span class="m">2</span> (Prims.op_Equality Prims.int @x<span class="m">1</span> (BoxInt <span class="m">0</span>))))
+                                       (ite (= @lb<span class="m">2</span> (BoxBool true))
+                                            (BoxInt <span class="m">1</span>)
+                                            (Prims.op_Multiply
+                                                   @x<span class="m">1</span>
+                                                   (SMTEncoding.factorial.fuel_instrumented
+                                                        @u<span class="m">0</span>
+                                                        (Prims.op_Subtraction @x<span class="m">1</span> (BoxInt <span class="m">1</span>))))))))
+                     :<span class="k">weight</span> <span class="m">0</span>
+                     :<span class="k">pattern</span> ((SMTEncoding.factorial.fuel_instrumented (SFuel @u<span class="m">0</span>) @x<span class="m">1</span>))
+                     :<span class="k">qid</span> equation_with_fuel_SMTEncoding.factorial.fuel_instrumented))
+         :<span class="k">named</span> equation_with_fuel_SMTEncoding.factorial.fuel_instrumented))
+</pre></div>
+</div>
+<p>また、fuel 引数が展開回数の制御以外には意味論的に無関係であることをソルバに伝える仮定も必要です。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@u<span class="m">0</span> Fuel) (@x<span class="m">1</span> Term))
+                   (! (= (SMTEncoding.factorial.fuel_instrumented (SFuel @u<span class="m">0</span>) @x<span class="m">1</span>)
+                         (SMTEncoding.factorial.fuel_instrumented ZFuel @x<span class="m">1</span>))
+                    :<span class="k">pattern</span> ((SMTEncoding.factorial.fuel_instrumented (SFuel @u<span class="m">0</span>) @x<span class="m">1</span>))
+                    :<span class="k">qid</span> @fuel_irrelevance_SMTEncoding.factorial.fuel_instrumented))
+         :<span class="k">named</span> @fuel_irrelevance_SMTEncoding.factorial.fuel_instrumented))
+</pre></div>
+</div>
+<p>最後に、元の関数と fuel 付きの対応物を関連付けます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@x<span class="m">0</span> Term))
+                   (! (= (SMTEncoding.factorial @x<span class="m">0</span>)
+                         (SMTEncoding.factorial.fuel_instrumented MaxFuel @x<span class="m">0</span>))
+                    :<span class="k">pattern</span> ((SMTEncoding.factorial @x<span class="m">0</span>))
+                    :<span class="k">qid</span> @fuel_correspondence_SMTEncoding.factorial.fuel_instrumented))
+         :<span class="k">named</span> @fuel_correspondence_SMTEncoding.factorial.fuel_instrumented))
+</pre></div>
+</div>
+<p>この定義は定数 <code class="docutils literal notranslate"><span class="pre">MaxFuel</span></code> を用います。値は F* のオプション <code class="docutils literal notranslate"><span class="pre">--initial_fuel</span> <span class="pre">n</span></code> と <code class="docutils literal notranslate"><span class="pre">--max_fuel</span> <span class="pre">m</span></code> により決まります。F* が Z3 にクエリを投げる際、<code class="docutils literal notranslate"><span class="pre">n</span></code> から <code class="docutils literal notranslate"><span class="pre">m</span></code> の範囲で異なる <code class="docutils literal notranslate"><span class="pre">MaxFuel</span></code> を用いて繰り返し試行します。なお <code class="docutils literal notranslate"><span class="pre">--fuel</span> <span class="pre">n</span></code> は初期値と最大値の両方を <code class="docutils literal notranslate"><span class="pre">n</span></code> に設定します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">MaxFuel</span></code> はスコープ内の <em>すべての</em> 再帰関数の展開回数を一括して制御します。もちろん、例えば <code class="docutils literal notranslate"><span class="pre">List.map</span></code> を含むクエリで無関係な <code class="docutils literal notranslate"><span class="pre">factorial</span></code> の量化仮定が発火しないようパターンは調整されています。それでも <code class="docutils literal notranslate"><span class="pre">MaxFuel</span></code> が大きいと探索空間は大幅に増大します。もし <code class="docutils literal notranslate"><span class="pre">--fuel</span> <span class="pre">2</span></code> より大きな設定を必要とし、証明に長時間かかるなら、別の手法が取れないか検討すべきです。</p>
+<p>一方で <code class="docutils literal notranslate"><span class="pre">fuel</span></code> が小さいと、その上限を超えて再帰関数について推論できません。例えば次の例は失敗します。ソルバは 1 回だけ定義を展開して <code class="docutils literal notranslate"><span class="pre">factorial</span> <span class="pre">1</span> <span class="pre">==</span> <span class="pre">1</span> <span class="pre">*</span> <span class="pre">factorial</span> <span class="pre">0</span></code> までは到達しますが、<code class="docutils literal notranslate"><span class="pre">factorial</span> <span class="pre">0</span></code> をさらに展開できないため証明に失敗します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--fuel 1&quot;
+<span class="k">let</span> <span class="k">_</span> = <span class="k">assert</span> (factorial 1 == 1) <span class="c">(* fails *)</span>
+</pre></div>
+</div>
+<p>通常の関数と同様、残りは高階利用の取扱いに関するエンコードです。</p>
+</section>
+<section id="inductive-datatypes-and-ifuel">
+<h3>帰納データ型と ifuel<a class="headerlink" href="#inductive-datatypes-and-ifuel" title="Link to this heading"></a></h3>
+<p>F* の帰納データ型は無限の構造を定義でき、再帰関数と同様に無限の反転を避けるため fuel を付加して SMT にエンコードされます。ごく単純な例として、単位元表示の自然数型を見てみましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> unat =
+  | Z : unat
+  | S : (prec:unat) -&gt; unat
+</pre></div>
+</div>
+<p>Z3 にはデータ型の組み込み理論がありますが、F* のデータ型はより複雑なため（<code class="docutils literal notranslate"><span class="pre">Fuel</span></code> を除き）それを使いません。代わりに未解釈関数を使って独自にエンコードします。<code class="docutils literal notranslate"><span class="pre">unat</span></code> のエンコードは次の関数の宣言から始まります。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-fun</span> SMTEncoding.unat () Term)
+(<span class="k">declare-fun</span> SMTEncoding.Z () Term)
+(<span class="k">declare-fun</span> SMTEncoding.S (Term) Term)
+(<span class="k">declare-fun</span> SMTEncoding.S_prec (Term) Term)
+</pre></div>
+</div>
+<p>型 <code class="docutils literal notranslate"><span class="pre">unat</span></code> 用の関数、各コンストラクタ（<code class="docutils literal notranslate"><span class="pre">Z</span></code> と <code class="docutils literal notranslate"><span class="pre">S</span></code>）用の関数、各コンストラクタの各引数に対する「射影子」（ここでは <code class="docutils literal notranslate"><span class="pre">S?.prec</span></code> に対応する <code class="docutils literal notranslate"><span class="pre">S_prec</span></code> のみ）を用意します。</p>
+<p>型 <code class="docutils literal notranslate"><span class="pre">unat</span></code> には型付け仮定があります。<code class="docutils literal notranslate"><span class="pre">Tm_type</span></code> は F* の型 <code class="docutils literal notranslate"><span class="pre">Type</span></code> の SMT エンコードです——なお F* は宇宙レベルを SMT にはエンコードしません。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (HasType SMTEncoding.unat Tm_type)
+         :<span class="k">named</span> kinding_SMTEncoding.unat@tok))
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">S_prec</span></code> は <code class="docutils literal notranslate"><span class="pre">S</span></code> の逆であると仮定します。もしコンストラクタに複数引数があれば、それぞれの射影子は対応する引数だけを取り出し、コンストラクタが各引数ごとに単射であることをエンコードします。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@x<span class="m">0</span> Term))
+                   (! (= (SMTEncoding.S_prec (SMTEncoding.S @x<span class="m">0</span>)) @x<span class="m">0</span>)
+                    :<span class="k">pattern</span> ((SMTEncoding.S @x<span class="m">0</span>))
+                    :<span class="k">qid</span> projection_inverse_SMTEncoding.S_prec))
+         :<span class="k">named</span> projection_inverse_SMTEncoding.S_prec))
+</pre></div>
+</div>
+<p>エンコードでは、項の先頭コンストラクタが <code class="docutils literal notranslate"><span class="pre">Z</span></code> か <code class="docutils literal notranslate"><span class="pre">S</span></code> かを判定するマクロ <code class="docutils literal notranslate"><span class="pre">is-SMTEncoding.Z</span></code> と <code class="docutils literal notranslate"><span class="pre">is-SMTEncoding.S</span></code> を定義します。これらはデータ型の反転仮定（<code class="docutils literal notranslate"><span class="pre">unat</span></code> 型の項に対し先頭は <code class="docutils literal notranslate"><span class="pre">Z</span></code> か <code class="docutils literal notranslate"><span class="pre">S</span></code> のどちらかである）を記述するのに使います。ただし <code class="docutils literal notranslate"><span class="pre">unat</span></code> は無限なので、無制限な反転適用を避けるため、fuel が非ゼロのときにだけ発火するパターン付き量化子を用います。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@u<span class="m">0</span> Fuel) (@x<span class="m">1</span> Term))
+              (! (implies (HasTypeFuel (SFuel @u<span class="m">0</span>) @x<span class="m">1</span> SMTEncoding.unat)
+                          (or (is-SMTEncoding.Z @x<span class="m">1</span>)
+                              (is-SMTEncoding.S @x<span class="m">1</span>)))
+                 :<span class="k">pattern</span> ((HasTypeFuel (SFuel @u<span class="m">0</span>) @x<span class="m">1</span> SMTEncoding.unat))
+                 :<span class="k">qid</span> fuel_guarded_inversion_SMTEncoding.unat))
+      :<span class="k">named</span> fuel_guarded_inversion_SMTEncoding.unat))
+</pre></div>
+</div>
+<p>ここでは先に見た <code class="docutils literal notranslate"><span class="pre">HasType</span></code> の fuel 付き版である <code class="docutils literal notranslate"><span class="pre">HasTypeFuel</span></code> を使用しています。実際、<code class="docutils literal notranslate"><span class="pre">(HasType</span> <span class="pre">x</span> <span class="pre">t)</span></code> は単なる <code class="docutils literal notranslate"><span class="pre">(HasTypeFuel</span> <span class="pre">MaxIFuel</span> <span class="pre">x</span> <span class="pre">t)</span></code> のマクロです。再帰関数の fuel と同様、<code class="docutils literal notranslate"><span class="pre">MaxIFuel</span></code> は F* の <code class="docutils literal notranslate"><span class="pre">--initial_ifuel</span></code>、<code class="docutils literal notranslate"><span class="pre">--max_ifuel</span></code>、<a href="#id1"><span class="problematic" id="id2">``</span></a>--ifuel``（inversion fuel）によって決まります。</p>
+<p>上の反転仮定が無期限に適用されないことを保証するカギは、データコンストラクタの型付け仮定の構造にあります。これらは導入（introduction）と除去（elimination）の 2 形式を持ちます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">S</span></code> コンストラクタの導入形式は以下のとおりです。<code class="docutils literal notranslate"><span class="pre">x</span></code> が <code class="docutils literal notranslate"><span class="pre">unat</span></code> であれば <code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">x</span></code> も <code class="docutils literal notranslate"><span class="pre">unat</span></code> であると導けます。量化子のパターンにより、これはゴール指向になります：すでに <code class="docutils literal notranslate"><span class="pre">(HasTypeFuel</span> <span class="pre">&#64;u0</span> <span class="pre">(SMTEncoding.S</span> <span class="pre">&#64;x1)</span> <span class="pre">SMTEncoding.unat)</span></code> がアクティブなら、量化子が発火して <code class="docutils literal notranslate"><span class="pre">(HasTypeFuel</span> <span class="pre">&#64;u0</span> <span class="pre">&#64;x1</span> <span class="pre">SMTEncoding.unat)</span></code> をアクティブにし、<code class="docutils literal notranslate"><span class="pre">S</span></code> を 1 つ剥がします。もしパターンに <code class="docutils literal notranslate"><span class="pre">(HasTypeFuel</span> <span class="pre">&#64;u0</span> <span class="pre">&#64;x1</span> <span class="pre">SMTEncoding.unat)</span></code> を用いると、各インスタンス化がより大きなアクティブ項を生み、再びトリガされる無限ループになります。導入形式では fuel は変えません。というのも <code class="docutils literal notranslate"><span class="pre">S</span></code> の適用回数自体が各ステップで減っていくからです。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@u<span class="m">0</span> Fuel) (@x<span class="m">1</span> Term))
+              (! (implies (HasTypeFuel @u<span class="m">0</span> @x<span class="m">1</span> SMTEncoding.unat)
+                          (HasTypeFuel @u<span class="m">0</span> (SMTEncoding.S @x<span class="m">1</span>) SMTEncoding.unat))
+                 :<span class="k">pattern</span> ((HasTypeFuel @u<span class="m">0</span> (SMTEncoding.S @x<span class="m">1</span>) SMTEncoding.unat))
+                 :<span class="k">qid</span> data_typing_intro_SMTEncoding.S@tok))
+         :<span class="k">named</span> data_typing_intro_SMTEncoding.S@tok))
+</pre></div>
+</div>
+<p>除去形式は、よく型付けされたコンストラクタ適用の各部分式もまたよく型付けされることを結論できます。ここでは結論側で fuel を 1 減らす点に注意してください。そうしないと、<code class="docutils literal notranslate"><span class="pre">data_elim_SMTEncoding.S</span></code> と <code class="docutils literal notranslate"><span class="pre">fuel_guarded_inversion_SMTEncoding.unat</span></code> の間でマッチング・ループが起こります。後者の適用は <code class="docutils literal notranslate"><span class="pre">(HasTypeFuel</span> <span class="pre">(SFuel</span> <span class="pre">_)</span> <span class="pre">(S</span> <span class="pre">(S_prec</span> <span class="pre">x))</span> <span class="pre">unat)</span></code> の形のアクティブ項を生み、前者が再びトリガされてしまうからです。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@u<span class="m">0</span> Fuel) (@x<span class="m">1</span> Term))
+                   (! (implies (HasTypeFuel (SFuel @u<span class="m">0</span>) (SMTEncoding.S @x<span class="m">1</span>) SMTEncoding.unat)
+                               (HasTypeFuel @u<span class="m">0</span> @x<span class="m">1</span> SMTEncoding.unat))
+                    :<span class="k">pattern</span> ((HasTypeFuel (SFuel @u<span class="m">0</span>) (SMTEncoding.S @x<span class="m">1</span>) SMTEncoding.unat))
+                    :<span class="k">qid</span> data_elim_SMTEncoding.S))
+         :<span class="k">named</span> data_elim_SMTEncoding.S))
+</pre></div>
+</div>
+<p>データ型エンコードの最後の重要要素は、停止性証明で用いる良基底順序です。次は、<code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">x1</span></code> が（fuel 非ゼロで）よく型付けられていれば、F* の組み込み部分項順序で <code class="docutils literal notranslate"><span class="pre">x1</span></code> は <code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">x1</span></code> に先行することを述べます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@u<span class="m">0</span> Fuel) (@x<span class="m">1</span> Term))
+                   (! (implies (HasTypeFuel (SFuel @u<span class="m">0</span>)
+                                            (SMTEncoding.S @x<span class="m">1</span>)
+                                            SMTEncoding.unat)
+                               (Valid (Prims.precedes Prims.lex_t Prims.lex_t
+                                                      @x<span class="m">1</span> (SMTEncoding.S @x<span class="m">1</span>))))
+                    :<span class="k">pattern</span> ((HasTypeFuel (SFuel @u<span class="m">0</span>) (SMTEncoding.S @x<span class="m">1</span>) SMTEncoding.unat))
+                    :<span class="k">qid</span> subterm_ordering_SMTEncoding.S))
+      :<span class="k">named</span> subterm_ordering_SMTEncoding.S))
+</pre></div>
+</div>
+<p>繰り返しになりますが、データ型の残りのエンコードの多くは、コンストラクタの高階利用の扱いに関するものです。</p>
+<p>再帰関数と同様、<code class="docutils literal notranslate"><span class="pre">MaxIFuel</span></code> はスコープ内の全てのデータ型の反転回数を一括制御します。可能なら <code class="docutils literal notranslate"><span class="pre">ifuel</span></code> はできるだけ小さく（例えば 2 未満、できれば 0）設定するのが望ましいです。ただし小さすぎると、ソルバはある事実を証明できなくなります。例えば <code class="docutils literal notranslate"><span class="pre">ifuel</span></code> が 0 だと、反転仮定を使って <code class="docutils literal notranslate"><span class="pre">x</span></code> の先頭が <code class="docutils literal notranslate"><span class="pre">S</span></code> か <code class="docutils literal notranslate"><span class="pre">Z</span></code> のいずれかであることを示せず、F* は「Patterns are incomplete（パターンが不完全）」というエラーを報告します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--ifuel 0&quot;
+<span class="k">let</span> <span class="k">rec</span> as_nat (x:unat) : nat =
+   <span class="k">match</span> x <span class="k">with</span> <span class="c">(* fails exhaustiveness check *)</span>
+   | S x -&gt; 1 + as_nat x <span class="c">(* fails termination check *)</span>
+   | Z -&gt; 0
+</pre></div>
+</div>
+<p>ときには、帰納型をソルバに任意に反転させるのが有用なこともあります。<code class="docutils literal notranslate"><span class="pre">FStar.Pervasives.allow_inversion</span></code> はそれを可能にするライブラリ関数です。そのスコープ内では <code class="docutils literal notranslate"><span class="pre">unat</span></code> 型の ifuel ガードは課されず、SMT は <code class="docutils literal notranslate"><span class="pre">unat</span></code> を自由に反転できます——以下のコードは F* が受理します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--ifuel 0&quot;
+<span class="k">let</span> <span class="k">rec</span> as_nat (x:unat) : nat =
+   allow_inversion unat;
+   <span class="k">match</span> x <span class="k">with</span>
+   | S x -&gt; 1 + as_nat x
+   | Z -&gt; 0
+</pre></div>
+</div>
+<p>これはときに有用で、例えば ifuel を 0 にして、<code class="docutils literal notranslate"><span class="pre">option</span></code> のような限られた型に対してだけスコープ内で反転を許可できます。ただし、無限の型（<code class="docutils literal notranslate"><span class="pre">list</span></code> や <code class="docutils literal notranslate"><span class="pre">unat</span></code> など）に対して <code class="docutils literal notranslate"><span class="pre">allow_inversion</span></code> を使うのは得策でない場合がほとんどです。</p>
+</section>
+<section id="logical-connectives">
+<h3>論理結合子（ロジック）<a class="headerlink" href="#logical-connectives" title="Link to this heading"></a></h3>
+<p>F* が提供する <a class="reference internal" href="../part2/part2_logical_connectives.html#part2-connectives"><span class="std std-ref">論理結合子</span></a> はすべて導出形です。データ型や関数（ここでは示していない矢印型も含む）のエンコードを与えれば、これら結合子のエンコードは自然に得られます。しかし、これらの結合子は SMT ソルバ側でも命題コアや E-matching による量化子インスタンス化として組み込みサポートがあります。そこで F* の SMT エンコーディングでは導出形のままにせず、それらを認識して SMT の対応する形式に直接エンコードすることが重要な最適化になります。</p>
+<p>F* の項 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">/\</span> <span class="pre">q</span></code> は <code class="docutils literal notranslate"><span class="pre">(and</span> <span class="pre">[[p]]</span> <span class="pre">[[q]])</span></code> にエンコードされます。ここで <code class="docutils literal notranslate"><span class="pre">[[p]]</span></code> と <code class="docutils literal notranslate"><span class="pre">[[q]]</span></code> はそれぞれ <code class="docutils literal notranslate"><span class="pre">p</span></code> と <code class="docutils literal notranslate"><span class="pre">q</span></code> の*論理的* エンコードです。ただし SMT の <code class="docutils literal notranslate"><span class="pre">and</span></code> は <code class="docutils literal notranslate"><span class="pre">Bool</span></code> 上の 2 項関数である一方、これまで述べてきたように F* の項は <code class="docutils literal notranslate"><span class="pre">Term</span></code> にエンコードされます。このギャップを埋めるため、項 <code class="docutils literal notranslate"><span class="pre">p</span></code> の論理エンコードは <code class="docutils literal notranslate"><span class="pre">Term</span></code> を <code class="docutils literal notranslate"><span class="pre">Bool</span></code> に解釈する関数 <code class="docutils literal notranslate"><span class="pre">Valid</span> <span class="pre">p</span></code> を用います。これは <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">:</span> <span class="pre">Term</span></code> が充填可能（inhabited）なら真とみなすものです（以下の定義参照）。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-fun</span> Valid (Term) Bool)
+(<span class="k">assert</span> (forall ((e Term) (t Term))
+             (! (implies (HasType e t) (Valid t))
+                :<span class="k">pattern</span> ((HasType e t) (Valid t))
+                :<span class="k">qid</span> <span class="m">__</span>prelude_valid_intro)))
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">\/</span> <span class="pre">q</span></code>、<code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">==&gt;</span> <span class="pre">q</span></code>、<code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">&lt;==&gt;</span> <span class="pre">q</span></code>、<code class="docutils literal notranslate"><span class="pre">~p</span></code> も同様です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">forall</span></code> と <code class="docutils literal notranslate"><span class="pre">exists</span></code> の量化形は SMT の対応する量化子に写像されます。例えば、</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> fact_positive = <span class="k">forall</span> (x:nat). factorial x &gt;= 1
+</pre></div>
+</div>
+<p>は次のようにエンコードされます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(forall ((@x<span class="m">1</span> Term))
+        (implies (HasType @x<span class="m">1</span> Prims.nat)
+                 (&gt;= (BoxInt_proj_<span class="m">0</span> (SMTEncoding.factorial @x<span class="m">1</span>))
+                     (BoxInt_proj_<span class="m">0</span> (BoxInt <span class="m">1</span>)))))
+</pre></div>
+</div>
+<p>この量化子には明示的なパターン注釈が無い点に注意してください。この場合、Z3 の構文的トリガ選択ヒューリスティクスがパターンを選びます。通常、量化子本体のうち束縛変数を全て含む最小の部分式集合が選ばれます。ここでは <code class="docutils literal notranslate"><span class="pre">(SMTEncoding.factorial</span> <span class="pre">&#64;x1)</span></code> と <code class="docutils literal notranslate"><span class="pre">(HasType</span> <span class="pre">&#64;x1</span> <span class="pre">Prims.nat)</span></code> が候補で、Z3 は両方をパターンとして選び、いずれかに一致するアクティブ項があれば量化子がトリガされます。</p>
+<p>小規模な開発ではパターン選択を Z3 に任せても問題ないことが多いですが、規模が大きくなるとパターン選びにより注意が必要になります。F* では量化子にパターンを明示的に記述でき、次のように SMT に翻訳されます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> fact_positive_2 = <span class="k">forall</span> (x:nat).{:pattern (factorial x)} factorial x &gt;= 1
+</pre></div>
+</div>
+<p>これは次のように生成されます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(forall ((@x<span class="m">1</span> Term))
+        (! (implies (HasType @x<span class="m">1</span> Prims.nat)
+                    (&gt;= (BoxInt_proj_<span class="m">0</span> (SMTEncoding.factorial @x<span class="m">1</span>))
+                        (BoxInt_proj_<span class="m">0</span> (BoxInt <span class="m">1</span>))))
+         :<span class="k">pattern</span> ((SMTEncoding.factorial.fuel_instrumented ZFuel @x<span class="m">1</span>))))
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">factorial</span></code> は fuel 付きであるため、パターンは fuel を必要としない適用として翻訳され、部分的に展開された <code class="docutils literal notranslate"><span class="pre">factorial</span></code> に対しても性質が適用されます。</p>
+<p>存在式も同様です。例えば次のように書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> fact_unbounded = <span class="k">forall</span> (n:nat). <span class="k">exists</span> (x:nat). factorial x &gt;= n
+</pre></div>
+</div>
+<p>そして次のように翻訳されます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(forall ((@x<span class="m">1</span> Term))
+        (implies (HasType @x<span class="m">1</span> Prims.nat)
+                 (exists ((@x<span class="m">2</span> Term))
+                         (and (HasType @x<span class="m">2</span> Prims.nat)
+                              (&gt;= (BoxInt_proj_<span class="m">0</span> (SMTEncoding.factorial @x<span class="m">2</span>))
+                                  (BoxInt_proj_<span class="m">0</span> @x<span class="m">1</span>))))))
+</pre></div>
+</div>
+</section>
+<section id="options-for-z3-and-the-smt-encoding">
+<span id="z3-and-smtencoding-options"></span><h3>Z3 と SMT エンコーディングのオプション<a class="headerlink" href="#options-for-z3-and-the-smt-encoding" title="Link to this heading"></a></h3>
+<p>F* は Z3 にオプションを渡す方法を 2 つ提供します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">--z3cliopt</span> <span class="pre">&lt;string&gt;</span></code> は、Z3 プロセス起動時にコマンドラインオプションとして文字列を渡します。典型例は <code class="docutils literal notranslate"><span class="pre">--z3cliopt</span> <span class="pre">'smt.random_seed=17'</span></code> です。</p>
+<p>一方 <code class="docutils literal notranslate"><span class="pre">--z3smtopt</span> <span class="pre">&lt;string&gt;</span></code> は、SMT2 出力の一部として Z3 に文字列を送ります。<code class="docutils literal notranslate"><span class="pre">--log_queries</span></code> で出力される <code class="docutils literal notranslate"><span class="pre">.smt2</span></code> にも反映されます。そのため、F* が生成した <code class="docutils literal notranslate"><span class="pre">.smt2</span></code> に対する Z3 実行をデバッグ・プロファイルする場合に便利です。典型例は <code class="docutils literal notranslate"><span class="pre">--z3smtopt</span> <span class="pre">'(set-option</span> <span class="pre">:smt.random_seed</span> <span class="pre">17)'</span></code> です。なお、このオプションは乱用可能です（例えば <code class="docutils literal notranslate"><span class="pre">--z3smtopt</span> <span class="pre">'(assert</span> <span class="pre">false)'</span></code> で全クエリが自明に通る）。慎重に使ってください。</p>
+<p>F* の SMT エンコーディング自体にもいくつかのオプションがあります。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--smtencoding.l_arith_repr</span> <span class="pre">native</span></code></p></li>
+</ul>
+<p>このオプションは、線形算術演算子（<code class="docutils literal notranslate"><span class="pre">+</span></code> と <code class="docutils literal notranslate"><span class="pre">-</span></code>）の定義をインライン化するよう F* に指示します。有効化すると、<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">+</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">2</span></code> は次の SMT2 の項にエンコードされます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(BoxInt (+ (BoxInt_proj_<span class="m">0</span> (BoxInt (+ (BoxInt_proj_<span class="m">0</span> @x<span class="m">0</span>)
+                                     (BoxInt_proj_<span class="m">0</span> (BoxInt <span class="m">1</span>)))))
+           (BoxInt_proj_<span class="m">0</span> (BoxInt <span class="m">2</span>))))
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--smtencoding.elim_box</span> <span class="pre">true</span></code></p></li>
+</ul>
+<p>このオプションは <code class="docutils literal notranslate"><span class="pre">smtencoding.l_arith_repr</span> <span class="pre">native</span></code> と組み合わせると有用で、隣接する不要な box/unbox の対を削除する最適化を有効にします。これを先の例に加えると、<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">+</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">2</span></code> のエンコードは次のようになります。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(BoxInt (+ (+ (BoxInt_proj_<span class="m">0</span> @x<span class="m">0</span>) <span class="m">1</span>) <span class="m">2</span>))
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--smtencoding.nl_arith_repr</span> <span class="pre">[native|wrapped|boxwrap]</span></code></p></li>
+</ul>
+<p>このオプションは非線形算術（<code class="docutils literal notranslate"><span class="pre">*,</span> <span class="pre">/,</span> <span class="pre">mod</span></code>）の表現を制御します。デフォルトは <code class="docutils literal notranslate"><span class="pre">boxwrap</span></code> で、<code class="docutils literal notranslate"><span class="pre">Prims.op_Addition</span></code> と同様のスタイルで <code class="docutils literal notranslate"><span class="pre">Prims.op_Multiply</span></code> などをエンコードします。</p>
+<p><code class="docutils literal notranslate"><span class="pre">native</span></code> 設定は <code class="docutils literal notranslate"><span class="pre">smtencoding.l_arith_repr</span> <span class="pre">native</span></code> に類似します。<code class="docutils literal notranslate"><span class="pre">smtencoding.elim_box</span> <span class="pre">true</span></code> と併用すると、F* の <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">*</span> <span class="pre">1</span> <span class="pre">*</span> <span class="pre">2</span></code> は次のようにエンコードされます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(BoxInt (* (* (BoxInt_proj_<span class="m">0</span> @x<span class="m">0</span>) <span class="m">1</span>) <span class="m">2</span>))
+</pre></div>
+</div>
+<p>中間レベルのラッピングを行う第 3 の設定 <code class="docutils literal notranslate"><span class="pre">wrapped</span></code> もあります。これを有効にすると、<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">*</span> <span class="pre">1</span> <span class="pre">*</span> <span class="pre">2</span></code> のエンコードは次のようになります。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(BoxInt (<span class="m">_</span>mul (<span class="m">_</span>mul (BoxInt_proj_<span class="m">0</span> @x<span class="m">0</span>) <span class="m">1</span>) <span class="m">2</span>))
+</pre></div>
+</div>
+<p>ここで <code class="docutils literal notranslate"><span class="pre">_mul</span></code> は次のように宣言されます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">declare-fun</span> <span class="m">_</span>mul (Int Int) Int)
+(<span class="k">assert</span> (forall ((x Int) (y Int)) (! (= (<span class="m">_</span>mul x y) (* x y)) :<span class="k">pattern</span> ((<span class="m">_</span>mul x y)))))
+</pre></div>
+</div>
+<p>なぜこれらの設定が有用なのか疑問に思うかもしれません。確かに <code class="docutils literal notranslate"><span class="pre">--smtencoding.l_arith_repr</span> <span class="pre">native</span> <span class="pre">--smtencoding.nl_arith_repr</span> <span class="pre">native</span> <span class="pre">--smtencoding.elim_box</span> <span class="pre">true</span></code> が最善に見えます。しかし実際には、追加のラッピングやボックス化がある種の証明を通す助けになることがあり、経験的にどの設定も他を常に凌駕するわけではありません。</p>
+<p>とはいえ、新規プロジェクトでの目安としては次が有効です。</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--z3smtopt</span> <span class="pre">'(set-option</span> <span class="pre">:smt.arith.nl</span> <span class="pre">false)'</span></code> の使用を検討してください。これは SMT ソルバの非線形算術理論の推論を完全に無効化します。非線形は高コストかつ不安定だからです。非線形が必要な場合は <code class="docutils literal notranslate"><span class="pre">FStar.Math.Lemmas</span></code> の補題を用い、証明中の非線形部分を手作業で進めることを検討してください。手間は増えますが、より安定した証明につながります。</p></li>
+<li><p>線形算術については <code class="docutils literal notranslate"><span class="pre">--smtencoding.l_arith_repr</span> <span class="pre">native</span> <span class="pre">--smtencoding.elim_box</span> <span class="pre">true</span></code> を検討するとよく、デフォルトより証明性能が向上することがあります。</p></li>
+</ol>
+</section>
+</section>
+<section id="designing-a-library-with-smt-patterns">
+<span id="uth-smt-patterns"></span><h2>SMT パターンを用いたライブラリ設計<a class="headerlink" href="#designing-a-library-with-smt-patterns" title="Link to this heading"></a></h2>
+<p>この節では標準ライブラリの <code class="docutils literal notranslate"><span class="pre">FStar.Set</span></code> の設計を取り上げ、特に自動証明のための補題に付された SMT パターンの使い方を見ます。ここで用いるスタイルは多くの証明指向ライブラリで一般的です——モジュールのインタフェースは抽象型、いくつかのコンストラクタとデストラクタ、そしてそれらの振る舞いを結び付ける補題を提供します。</p>
+<p>最初に、インタフェースでは fuel と ifuel をともに 0 に設定します——ここでは再帰関数や帰納型の反転について推論する必要はありません。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> SimplifiedFStarSet
+<span class="c">(** Computational sets (on eqtypes): membership is a boolean function *)</span>
+#set-options &quot;--fuel 0 --ifuel 0&quot;
+</pre></div>
+</div>
+<p>次に、このモジュールの主な抽象型 <code class="docutils literal notranslate"><span class="pre">set</span></code> のシグネチャを導入します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> set (a:eqtype)
+  : Type0
+</pre></div>
+</div>
+<p>集合は <code class="docutils literal notranslate"><span class="pre">mem</span></code> という 1 つの操作だけを提供し、要素が集合に属するかどうかを判定できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> mem (#a:eqtype) (x:a) (s:set a)
+  : bool
+</pre></div>
+</div>
+<p>一方、集合の構築方法はいくつかあります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> empty (#a:eqtype)
+  : set a
+
+<span class="k">val</span> singleton (#a:eqtype) (x:a)
+  : set a
+
+<span class="k">val</span> union (#a:eqtype) (s0 s1: set a)
+  : set a
+  
+<span class="k">val</span> intersect (#a:eqtype) (s0 s1: set a)
+  : set a
+  
+<span class="k">val</span> complement (#a:eqtype) (s0:set a)
+  : set a
+</pre></div>
+</div>
+<p>最後に、集合には独自の同値関係が備わっています。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> equal (#a:eqtype) (s0 s1:set a)
+  : prop
+</pre></div>
+</div>
+<p>残りは、各コンストラクタに対する <code class="docutils literal notranslate"><span class="pre">mem</span></code> の振る舞いを述べる補題を提供します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> mem_empty (#a:eqtype) (x:a)
+  : <span class="k">Lemma</span>
+    (<span class="k">ensures</span> (not (mem x empty)))
+    [<span class="k">SMTPat</span> (mem x empty)]
+
+<span class="k">val</span> mem_singleton (#a:eqtype) (x y:a)
+  : <span class="k">Lemma</span>
+    (<span class="k">ensures</span> (mem y (singleton x) == (x=y)))
+    [<span class="k">SMTPat</span> (mem y (singleton x))]
+
+<span class="k">val</span> mem_union (#a:eqtype) (x:a) (s1 s2:set a)
+  : <span class="k">Lemma</span>
+    (<span class="k">ensures</span> (mem x (union s1 s2) == (mem x s1 || mem x s2)))
+    [<span class="k">SMTPat</span> (mem x (union s1 s2))]
+
+<span class="k">val</span> mem_intersect (#a:eqtype) (x:a) (s1:set a) (s2:set a)
+  : <span class="k">Lemma</span>
+    (<span class="k">ensures</span> (mem x (intersect s1 s2) == (mem x s1 &amp;&amp; mem x s2)))
+    [<span class="k">SMTPat</span> (mem x (intersect s1 s2))]
+
+<span class="k">val</span> mem_complement (#a:eqtype) (x:a) (s:set a)
+  : <span class="k">Lemma</span>
+    (<span class="k">ensures</span> (mem x (complement s) == not (mem x s)))
+    [<span class="k">SMTPat</span> (mem x (complement s))]
+</pre></div>
+</div>
+<p>各補題は直感的で親しみやすいはずです。注意すべき追加点は各補題に付与された <code class="docutils literal notranslate"><span class="pre">SMTPat</span></code> 注釈です。これは、その補題をユーザ指定パターンでガードされた全称量化式として扱うよう F* の SMT エンコーディングに指示します。例えば補題 <code class="docutils literal notranslate"><span class="pre">mem_empty</span></code> は次のように SMT にエンコードされます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@x<span class="m">0</span> Term) (@x<span class="m">1</span> Term))
+                   (! (implies (and (HasType @x<span class="m">0</span> Prims.eqtype)
+                                    (HasType @x<span class="m">1</span> @x<span class="m">0</span>))
+                               (not (BoxBool_proj_<span class="m">0</span>
+                                       (SimplifiedFStarSet.mem @x<span class="m">0</span>
+                                                               @x<span class="m">1</span>
+                                                              (SimplifiedFStarSet.empty @x<span class="m">0</span>)))))
+                    :<span class="k">pattern</span> ((SimplifiedFStarSet.mem @x<span class="m">0</span>
+                                                      @x<span class="m">1</span>
+                                                      (SimplifiedFStarSet.empty @x<span class="m">0</span>)))
+                    :<span class="k">qid</span> lemma_SimplifiedFStarSet.mem_empty))
+        :<span class="k">named</span> lemma_SimplifiedFStarSet.mem_empty))
+</pre></div>
+</div>
+<p>つまり SMT エンコーディングの観点では、<code class="docutils literal notranslate"><span class="pre">mem_empty</span></code> の主張は次の仮定に相当します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">forall</span> (a:eqtype) (x:a). {:pattern (mem x empty)} not (mem x empty)
+</pre></div>
+</div>
+<p>このように、SMT パターンを付与した補題は、対応する補題の F* による証明を根拠として、新たな量化仮定をソルバの文脈に注入できます。これにより <code class="docutils literal notranslate"><span class="pre">FStar.Set</span></code> の利用者は、<code class="docutils literal notranslate"><span class="pre">set</span></code> を操作に関する自動証明つきのほぼ組み込み型として扱えます。ただし、うまく機能させるにはパターンの慎重な設計が必要です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">mem_union</span></code> を考えましょう。上で選んだパターンにより、ソルバはアクティブ項 <code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">x</span> <span class="pre">(union</span> <span class="pre">s1</span> <span class="pre">s2)</span></code> を <code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">x</span> <span class="pre">s1</span></code> と <code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">x</span> <span class="pre">s2</span></code> に分解できます。どちらも元の項より小さい項です。代わりに次のように書いたとするとどうでしょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> mem_union (#a:eqtype) (x:a) (s1 s2:set a)
+  : <span class="k">Lemma</span>
+    (<span class="k">ensures</span> (mem x (union s1 s2) == (mem x s1 || mem x s2)))
+    [<span class="k">SMTPat</span> (mem x s1); <span class="k">SMTPat</span> (mem x s2)]
+</pre></div>
+</div>
+<p>これはパターンが <code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">x</span> <span class="pre">s1</span></code> と <code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">x</span> <span class="pre">s2</span></code> の組である量化子に翻訳されます。この選択だと、ソルバは <code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">x</span> <span class="pre">s</span></code> という形のアクティブ項のあらゆる組で量化子をインスタンス化でき、さらにマッチ候補となるアクティブ項を増殖させます。具体的には、単一のアクティブ項 <code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">x</span> <span class="pre">s</span></code> から <code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">x</span> <span class="pre">(union</span> <span class="pre">s</span> <span class="pre">s)</span></code>、<code class="docutils literal notranslate"><span class="pre">mem</span> <span class="pre">x</span> <span class="pre">(union</span> <span class="pre">s</span> <span class="pre">(union</span> <span class="pre">s</span> <span class="pre">s))</span></code>、… が導かれます。これはマッチング・ループと呼ばれ、性能に壊滅的な影響を与えます。したがって、<code class="docutils literal notranslate"><span class="pre">SMTPat</span></code> 付きの量化子や補題のパターン選びは慎重に行うことが重要です。</p>
+<p>最後に、集合上の同値関係 <code class="docutils literal notranslate"><span class="pre">equal</span></code> を特徴付ける 2 つの補題を提供します。1 つ目は、<code class="docutils literal notranslate"><span class="pre">mem</span></code> の結果が一致する集合は <code class="docutils literal notranslate"><span class="pre">equal</span></code> であるというもの、2 つ目は、<code class="docutils literal notranslate"><span class="pre">equal</span></code> な集合は証明可能な等しさ <code class="docutils literal notranslate"><span class="pre">(==)</span></code> を持つというものです。これらのパターンにより、ソルバは等値性の推論を所属関係と証明可能な等しさの推論へと変換できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> equal_intro (#a:eqtype) (s1 s2: set a)
+  : <span class="k">Lemma</span>
+    (<span class="k">requires</span>  (<span class="k">forall</span> x. mem x s1 = mem x s2))
+    (<span class="k">ensures</span> (equal s1 s2))
+    [<span class="k">SMTPat</span> (equal s1 s2)]
+
+<span class="k">val</span> equal_elim (#a:eqtype) (s1 s2:set a)
+  : <span class="k">Lemma</span>
+    (<span class="k">requires</span> (equal s1 s2))
+    (<span class="k">ensures</span>  (s1 == s2))
+    [<span class="k">SMTPat</span> (equal s1 s2)]
+</pre></div>
+</div>
+<p>もちろん、以下の実装に示すように、抽象型 <code class="docutils literal notranslate"><span class="pre">set</span></code> の適切な表現に基づけば、これらの補題は F* で容易に証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> SimplifiedFStarSet
+<span class="c">(** Computational sets (on eqtypes): membership is a boolean function *)</span>
+#set-options &quot;--fuel 0 --ifuel 0&quot;
+<span class="k">open</span> FStar.FunctionalExtensionality
+<span class="k">module</span> F = FStar.FunctionalExtensionality
+
+<span class="k">let</span> set (a:eqtype) = F.restricted_t a (<span class="k">fun</span> <span class="k">_</span> -&gt; bool)
+
+<span class="c">(* destructors *)</span>
+
+<span class="k">let</span> mem #a x s = s x
+
+<span class="c">(* constructors *)</span>
+<span class="k">let</span> empty #a = F.on_dom a (<span class="k">fun</span> x -&gt; <span class="k">false</span>)
+<span class="k">let</span> singleton #a x = F.on_dom a (<span class="k">fun</span> y -&gt; y = x)
+<span class="k">let</span> union #a s1 s2 = F.on_dom a (<span class="k">fun</span> x -&gt; s1 x || s2 x)
+<span class="k">let</span> intersect #a s1 s2 = F.on_dom a (<span class="k">fun</span> x -&gt; s1 x &amp;&amp; s2 x)
+<span class="k">let</span> complement #a s = F.on_dom a (<span class="k">fun</span> x -&gt; not (s x))
+
+<span class="c">(* equivalence relation *)</span>
+<span class="k">let</span> equal (#a:eqtype) (s1:set a) (s2:set a) = F.feq s1 s2
+
+<span class="c">(* Properties *)</span>
+<span class="k">let</span> mem_empty      #a x       = ()
+<span class="k">let</span> mem_singleton  #a x y     = ()
+<span class="k">let</span> mem_union      #a x s1 s2 = ()
+<span class="k">let</span> mem_intersect  #a x s1 s2 = ()
+<span class="k">let</span> mem_complement #a x s     = ()
+
+<span class="c">(* extensionality *)</span>
+<span class="k">let</span> equal_intro #a s1 s2 = ()
+<span class="k">let</span> equal_elim  #a s1 s2 = ()
+</pre></div>
+</div>
+<section id="exercise">
+<h3>演習<a class="headerlink" href="#exercise" title="Link to this heading"></a></h3>
+<p>次のシグネチャを持つコンストラクタを追加して集合ライブラリを拡張しなさい。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> from_fun (#a:eqtype) (f: a -&gt; bool) : <span class="k">Tot</span> (set a)
+</pre></div>
+</div>
+<p>そして、要素 <code class="docutils literal notranslate"><span class="pre">x</span></code> が <code class="docutils literal notranslate"><span class="pre">from_fun</span> <span class="pre">f</span></code> に属することと <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">true</span></code> が同値であることを示す補題を証明し、適切な SMT パターンで注釈を付けなさい。</p>
+<p>必要な定義は <a class="reference external" href="../code/SimplifiedFStarSet.fsti">インタフェース</a> とその <a class="reference external" href="../code/SimplifiedFStarSet.fst">実装</a> にあります。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<p>行き詰まったら <a class="reference external" href="https://github.com/FStarLang/FStar/blob/master/ulib/FStar.Set.fsti">FStar.Set.intension</a> を参照してください。</p>
+</div>
+<hr class="docutils" />
+</section>
+</section>
+<section id="profiling-z3-and-solving-proof-performance-issues">
+<span id="profiling-z3"></span><h2>Z3 のプロファイリングと証明性能問題の解決<a class="headerlink" href="#profiling-z3-and-solving-proof-performance-issues" title="Link to this heading"></a></h2>
+<p>ある時点で、望むよりはるかに時間がかかるようになる F* プログラムの証明に出会うでしょう。単純な証明が通らなかったり、少しコードを変えただけで以前は通っていた証明が失敗し始めたりします。理想的にはプロジェクトの早い段階でそれに気づき、遅く予測不能な証明に苦しむ前に改善方法を探るべきです。ソフトウェア工学では早すぎる最適化は避けよと言われがちですが、証明指向ライブラリの開発では、問題が現れたらすぐに証明性能に注意を払うのが賢明です。そうしないと規模が大きくなるにつれ、証明が極端に遅くなったり脆くなったりして、生産性が急速に低下してしまいます。</p>
+<section id="query-statistics">
+<h3>クエリ統計<a class="headerlink" href="#query-statistics" title="Link to this heading"></a></h3>
+<p>ソルバ性能の診断を始めるための第一の道具は F* の <code class="docutils literal notranslate"><span class="pre">--query_stats</span></code> オプションです。まずはとても単純な人工例から始めましょう。</p>
+<p>以下のオプションで、F* は次の統計を出力します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--initial_fuel 0 --max_fuel 4 --ifuel 0 --query_stats&quot;
+<span class="k">let</span> <span class="k">_</span> = <span class="k">assert</span> (factorial 3 == 6)
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;input&gt;(20,0-20,49))        Query-stats (SMTEncoding._test_query_stats, 1)  failed
+   {reason-unknown=unknown because (incomplete quantifiers)} in 31 milliseconds
+   with fuel 0 and ifuel 0 and rlimit 2723280
+   statistics={mk-bool-var=7065 del-clause=242 num-checks=3 conflicts=5
+               binary-propagations=42 arith-fixed-eqs=4 arith-pseudo-nonlinear=1
+               propagations=10287 arith-assert-upper=21 arith-assert-lower=18
+               decisions=11 datatype-occurs-check=2 rlimit-count=2084689
+               arith-offset-eqs=2 quant-instantiations=208 mk-clause=3786
+               minimized-lits=3 memory=21.41 arith-pivots=6 max-generation=5
+               arith-conflicts=3 time=0.03 num-allocs=132027456 datatype-accessor-ax=3
+               max-memory=21.68 final-checks=2 arith-eq-adapter=15 added-eqs=711}
+
+(&lt;input&gt;(20,0-20,49))        Query-stats (SMTEncoding._test_query_stats, 1)  failed
+   {reason-unknown=unknown because (incomplete quantifiers)} in 47 milliseconds
+   with fuel 2 and ifuel 0 and rlimit 2723280
+   statistics={mk-bool-var=7354 del-clause=350 arith-max-min=10 interface-eqs=3
+               num-checks=4 conflicts=8 binary-propagations=56 arith-fixed-eqs=17
+               arith-pseudo-nonlinear=3 arith-bound-prop=2 propagations=13767
+               arith-assert-upper=46 arith-assert-lower=40 decisions=25
+               datatype-occurs-check=5 rlimit-count=2107946 arith-offset-eqs=6
+               quant-instantiations=326 mk-clause=4005 minimized-lits=4
+               memory=21.51 arith-pivots=20 max-generation=5 arith-add-rows=34
+               arith-conflicts=4 time=0.05 num-allocs=143036410 datatype-accessor-ax=5
+               max-memory=21.78 final-checks=6 arith-eq-adapter=31 added-eqs=1053}
+
+(&lt;input&gt;(20,0-20,49))        Query-stats (SMTEncoding._test_query_stats, 1)  succeeded
+    in 48 milliseconds with fuel 4 and ifuel 0 and rlimit 2723280
+    statistics={arith-max-min=26 num-checks=5 binary-propagations=70 arith-fixed-eqs=47
+                arith-assert-upper=78 arith-assert-lower=71 decisions=40
+                rlimit-count=2130332 max-generation=5 arith-nonlinear-bounds=2
+                time=0.05 max-memory=21.78 arith-eq-adapter=53 added-eqs=1517
+                mk-bool-var=7805 del-clause=805 interface-eqs=3 conflicts=16
+                arith-pseudo-nonlinear=6 arith-bound-prop=4 propagations=17271
+                datatype-occurs-check=5 arith-offset-eqs=20 quant-instantiations=481
+                mk-clause=4286 minimized-lits=38 memory=21.23 arith-pivots=65
+                arith-add-rows=114 arith-conflicts=5 num-allocs=149004462
+                datatype-accessor-ax=9 final-checks=7}
+</pre></div>
+</div>
+<p>ここには多くの情報が含まれています。</p>
+<ul class="simple">
+<li><p>出力は 3 行あり、いずれもソース位置と内部クエリ識別子でタグ付けされています（例えば <code class="docutils literal notranslate"><span class="pre">(SMTEncoding._test_query_stats,</span> <span class="pre">1)</span></code> は <code class="docutils literal notranslate"><span class="pre">_test_query_stats</span></code> の検証における最初のクエリ）。</p></li>
+<li><p>最初の 2 回の試行は失敗し、Z3 は失敗理由として <code class="docutils literal notranslate"><span class="pre">unknown</span> <span class="pre">because</span> <span class="pre">(incomplete</span> <span class="pre">quantifiers)</span></code> を報告しました。これは Z3 がクエリの証明に失敗したときによくある応答です——一階論理は決定不能なので、Z3 は理論が充足可能だと断言する代わりに証明が見つからなければ &quot;unknown&quot; を返します。3 回目の試行は成功しました。</p></li>
+<li><p>試行では fuel をそれぞれ <code class="docutils literal notranslate"><span class="pre">0</span></code>、<code class="docutils literal notranslate"><span class="pre">2</span></code>、<code class="docutils literal notranslate"><span class="pre">4</span></code> 使用しています。今回のクエリは <code class="docutils literal notranslate"><span class="pre">factorial</span> <span class="pre">3</span> <span class="pre">==</span> <span class="pre">6</span></code> で、明らかに成功には少なくとも 4 ユニットの fuel が必要です。この例では 2 回の失敗がそれぞれ <code class="docutils literal notranslate"><span class="pre">47</span></code> と <code class="docutils literal notranslate"><span class="pre">48</span></code> ミリ秒しかかからないため大問題ではありませんでしたが、低い fuel 設定で多数の試行が行われ、最終的に高い fuel で成功することもあります。その場合、（可能なら）多くの展開に依存しないよう証明を書き換えるか、本当にその fuel が必要だと判断したら <code class="docutils literal notranslate"><span class="pre">--fuel</span></code> をその値に設定し、遅い失敗と再試行を避けるとよいでしょう。</p></li>
+<li><p>残りは Z3 の内部統計です。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">rlimit</span></code> は F* が Z3 呼び出し時に設定する論理的なリソース上限です。後で見るように、この上限を超えると証明が「キャンセル」されることがあります。その場合は後述のように <code class="docutils literal notranslate"><span class="pre">rlimit</span></code> を増やせます。</p></li>
+<li><p>残りの統計のうち重要なのが <code class="docutils literal notranslate"><span class="pre">quant_instantiations</span></code> です。これは現在のセッションで Z3 がこれまでにインスタンス化した量化子の累積総数です——ここでは各試行でおよそ 100～150 回のインスタンス化が生じています。クエリが単純な割に多いと感じるかもしれませんが、factorial の 4 回の展開だけでなく、<code class="docutils literal notranslate"><span class="pre">BoxBool</span></code> の単射性など多くの量化子がエンコードに含まれていることを思い出してください。典型的なクエリでは数千回規模のインスタンス化が起こります。</p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">quant-instantiations</span></code> は累積値なので、クエリの前に次のような指示を入れておくと便利なことが多いです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--initial_fuel 0 --max_fuel 4 --ifuel 0 --query_stats&quot;
+#restart-solver
+<span class="k">let</span> _dummy = <span class="k">assert</span> (factorial 0 == 1)
+
+<span class="k">let</span> _test_query_stats = <span class="k">assert</span> (factorial 3 == 6)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">#restart-solver</span></code> は新しい Z3 プロセスを起動し、<code class="docutils literal notranslate"><span class="pre">dummy</span></code> クエリは取るに足らないクエリを流してプロセスを「ウォームアップ」します（初期化コストのため若干遅くなります）。その後の本命クエリの統計は、この新鮮なセッションでの数値になります。</p>
+</div>
+</section>
+<section id="working-though-a-slow-proof">
+<h3>遅い証明に取り組む<a class="headerlink" href="#working-though-a-slow-proof" title="Link to this heading"></a></h3>
+<p>証明器の文脈に不適切な量化仮定が 1 つあるだけで、さもなければ単純な証明が非常に長引くことがあります。例として、先ほどの例を次のように変えてみます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">assume</span> Factorial_unbounded: <span class="k">forall</span> (x:nat). <span class="k">exists</span> (y:nat). factorial y &gt; x
+
+#push-options &quot;--fuel 4 --ifuel 0 --query_stats&quot;
+#restart-solver
+<span class="k">let</span> _test_query_stats = <span class="k">assert</span> (factorial 3 == 6)
+</pre></div>
+</div>
+<p>ここでは <code class="docutils literal notranslate"><span class="pre">Factorial_unbounded</span></code> という仮定を文脈に加えました。量化式の SMT エンコードを思い出すと、ソルバの視点では次のように見えます。</p>
+<div class="highlight-smt2 notranslate"><div class="highlight"><pre><span></span>(<span class="k">assert</span> (! (forall ((@x<span class="m">0</span> Term))
+                   (! (implies (HasType @x<span class="m">0</span> Prims.nat)
+                               (exists ((@x<span class="m">1</span> Term))
+                                       (! (and (HasType @x<span class="m">1</span> Prims.nat)
+                                          (&gt; (BoxInt_proj_<span class="m">0</span> (SMTEncoding.factorial @x<span class="m">1</span>))
+                                             (BoxInt_proj_<span class="m">0</span> @x<span class="m">0</span>)))
+                                        :<span class="k">qid</span> assumption_SMTEncoding.Factorial_unbounded.<span class="m">1</span>)))
+                :<span class="k">qid</span> assumption_SMTEncoding.Factorial_unbounded))
+         :<span class="k">named</span> assumption_SMTEncoding.Factorial_unbounded))
+</pre></div>
+</div>
+<p>この量化子には明示的なパターンがありませんが、Z3 は <code class="docutils literal notranslate"><span class="pre">forall</span></code> のパターンとして <code class="docutils literal notranslate"><span class="pre">(HasType</span> <span class="pre">&#64;x0</span> <span class="pre">Prims.nat)</span></code> を選びます。つまり <code class="docutils literal notranslate"><span class="pre">nat</span></code> 型のアクティブ項に対して量化子をインスタンス化できます。ところが、1 回インスタンス化すると存在量化式が現れます。存在量化は Z3 によりすぐに <a class="reference external" href="https://en.wikipedia.org/wiki/Skolem_normal_form">スコーレム化</a> され、存在変数はスコープ内の全変数に依存する新しい関数記号に置き換えられます。すると <code class="docutils literal notranslate"><span class="pre">&#64;x1</span></code> に対応する新しい項 <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&#64;x0</span></code> が導入され、直ちに連言 <code class="docutils literal notranslate"><span class="pre">HasType</span> <span class="pre">(a</span> <span class="pre">&#64;x0)</span> <span class="pre">Prims.nat</span></code> がアクティブ項となって外側の全称量化子を再びインスタンス化できます。この「マッチング・ループ」によりソルバは長く実りのない探索に陥り、以前は数ミリ秒で成功していた <code class="docutils literal notranslate"><span class="pre">factorial</span> <span class="pre">3</span> <span class="pre">==</span> <span class="pre">6</span></code> の証明が今度は失敗します。以下はそのクエリ統計です。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;input&gt;(18,0-18,49))        Query-stats (SMTEncoding._test_query_stats, 1)  failed
+  {reason-unknown=unknown because canceled} in 5647 milliseconds
+  with fuel 4 and ifuel 0 and rlimit 2723280
+  statistics={ ... quant-instantiations=57046 ... }
+</pre></div>
+</div>
+<p>注意点がいくつかあります。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>失敗理由は「unknown because canceled」です。これはソルバがリソース上限に達して探索を停止したことを意味します。この理由が出たときは、後述のように rlimit を引き上げてみるとよいでしょう。</p></li>
+<li><p>失敗までに 5.6 秒かかっています。</p></li>
+<li><p>量化子のインスタンス化は 5.7 万回で、先ほどの 100 回程度に比べて大幅に増えています。どの量化子が過剰にインスタンス化されたのか、すぐに特定方法を見ていきます。</p></li>
+</ul>
+</div></blockquote>
+<section id="increasing-the-rlimit">
+<h4>rlimit を上げる<a class="headerlink" href="#increasing-the-rlimit" title="Link to this heading"></a></h4>
+<p>まずは Z3 により多くのリソースを与えて再試行できます——次の指示は Z3 に与えるリソース上限を 2 倍にします。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--z3rlimit_factor 2&quot;
+</pre></div>
+</div>
+<p>今回は 14 秒かかった末に失敗しました。しかし同じ証明をもう一度試すと成功します。これはあまり気持ちのよい状態ではありません。</p>
+</section>
+<section id="repeating-proofs-with-quake">
+<h4>Quake による繰り返し検証<a class="headerlink" href="#repeating-proofs-with-quake" title="Link to this heading"></a></h4>
+<p>これは人工例ではありますが、動いたり突然失敗したりする不安定な証明は実際に起こります。Z3 は厳密な意味で決定的であることを保証しますが、入力のごく小さな変化（変数名の変更など）や、同一セッション内で同じクエリを連続で投げるだけでも、異なる結果になることがあります。</p>
+<p>しばしば根本原因があります（今回で言えばもちろん <code class="docutils literal notranslate"><span class="pre">Factorial_unbounded</span></code> の仮定です）。証明が「フレーク（不安定）」かどうかを確かめる最初の手段として、F* の <code class="docutils literal notranslate"><span class="pre">--quake</span></code> オプションを使います。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--quake 5/k&quot;
+<span class="k">let</span> _test_query_stats = <span class="k">assert</span> (factorial 3 == 6)
+</pre></div>
+</div>
+<p>これはクエリを 5 回試し、成功と失敗の回数を報告します。</p>
+<p>この例では、F* は次のように報告します。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Quake: query (SMTEncoding._test_query_stats, 1) succeeded 4/5 times (best fuel=4, best ifuel=0)
+</pre></div>
+</div>
+<p>証明の安定化に取り組む際は、<code class="docutils literal notranslate"><span class="pre">--quake</span></code> を付けても証明が通るかどうかを基準にするとよいでしょう。</p>
+<p>Z3 の乱数シードを変えて、複数のシードで動作するかを確認するのも有用です。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--z3smtopt &#39;(set-option :smt.random_seed 1)&#39;&quot;
+</pre></div>
+</div>
+</section>
+</section>
+<section id="profiling-quantifier-instantiation">
+<h3>量化子インスタンス化のプロファイリング<a class="headerlink" href="#profiling-quantifier-instantiation" title="Link to this heading"></a></h3>
+<p>望ましくないほど時間のかかるクエリがあり、統計から大量の量化子インスタンス化が起きていることがわかりました。ここからは、どの量化子が元凶なのかを特定する方法を見ていきます。</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p><code class="docutils literal notranslate"><span class="pre">--log_queries</span></code> を付けて F* に .smt2 ファイルを出力させます。プロファイリングしたい定義の直前に <code class="docutils literal notranslate"><span class="pre">#restart-solver</span></code> を入れておくことも重要です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--fuel 4 --ifuel 0 --query_stats --log_queries --z3rlimit_factor 2&quot;
+#restart-solver
+<span class="k">let</span> _test_query_stats = <span class="k">assert</span> (factorial 3 == 6)
+</pre></div>
+</div>
+<p>F* はクエリ統計の一部として、書き出したファイル名を報告します。例えば次のように出ます。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;input&gt;(18,0-18,49)@queries-SMTEncoding-7.smt2)      Query-stats ...
+</pre></div>
+</div>
+</li>
+<li><p>次に、端末からこの生成された .smt2 に対して Z3 を実行し、以下のオプションを渡して出力をファイルに保存します。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>z3 queries-SMTEncoding-7.smt2 smt.qi.profile=true &gt; sample_qiprofile
+</pre></div>
+</div>
+</li>
+<li><p>出力には <code class="docutils literal notranslate"><span class="pre">[quantifier_instances]</span></code> で始まる行が多数含まれます。これが関心の対象です。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>grep quantifier_instances sample_qiprofile | sort -k 4 -n
+</pre></div>
+</div>
+<p>末尾の数行は次のようになります。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>[quantifier_instances] bool_inversion :    352 :  10 : 11
+[quantifier_instances] bool_typing :    720 :  10 : 11
+[quantifier_instances] constructor_distinct_BoxBool :    720 :  10 : 11
+[quantifier_instances] projection_inverse_BoxBool_proj_0 :   1772 :  10 : 11
+[quantifier_instances] primitive_Prims.op_Equality :   2873 :  10 : 11
+[quantifier_instances] int_typing :   3168 :  10 : 11
+[quantifier_instances] constructor_distinct_BoxInt :   3812 :  10 : 11
+[quantifier_instances] typing_SMTEncoding.factorial :   5490 :  10 : 11
+[quantifier_instances] int_inversion :   5506 :  11 : 12
+[quantifier_instances] @fuel_correspondence_SMTEncoding.factorial.fuel_instrumented :   5746 :  10 : 11
+[quantifier_instances] Prims_pretyping_ae567c2fb75be05905677af440075565 :   5835 :  11 : 12
+[quantifier_instances] projection_inverse_BoxInt_proj_0 :   6337 :  10 : 11
+[quantifier_instances] primitive_Prims.op_Multiply :   6394 :  10 : 11
+[quantifier_instances] primitive_Prims.op_Subtraction :   6394 :  10 : 11
+[quantifier_instances] token_correspondence_SMTEncoding.factorial.fuel_instrumented :   7629 :  10 : 11
+[quantifier_instances] @fuel_irrelevance_SMTEncoding.factorial.fuel_instrumented :   9249 :  10 : 11
+[quantifier_instances] equation_with_fuel_SMTEncoding.factorial.fuel_instrumented :  13185 :  10 : 10
+[quantifier_instances] refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2 :  15346 :  10 : 11
+[quantifier_instances] assumption_SMTEncoding.Factorial_unbounded :  15890 :  10 : 11
+</pre></div>
+</div>
+<p>各行は次の形式になっています。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>qid : number of instances : max generation :  max cost
+</pre></div>
+</div>
+<p>ここで、</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>qid は .smt2 内の量化子の識別子、</p></li>
+<li><p>次がインスタンス化回数（最も重要な数値）、</p></li>
+<li><p>generation と cost は内部指標で、Nikolaj Bjørner による <a class="reference external" href="https://github.com/Z3Prover/z3/issues/4522#issuecomment-644454562">解説</a> があります。</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>結果の読み解き</p>
+<p>予想どおり、<code class="docutils literal notranslate"><span class="pre">assumption_SMTEncoding.Factorial_unbounded</span></code> のインスタンス化が最も多いことがわかります。</p>
+<p>次に .smt2 内で &quot;:qid refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2&quot; を検索すると、述語 <code class="docutils literal notranslate"><span class="pre">HasType</span> <span class="pre">x</span> <span class="pre">Prims.nat</span></code> に意味を与える仮定が見つかります。<code class="docutils literal notranslate"><span class="pre">Factorial_unbounded</span></code> の各インスタンス化が、この事実の新たなインスタンスを生み出しているのです。</p>
+<p><code class="docutils literal notranslate"><span class="pre">equation_with_fuel_SMTEncoding.factorial.fuel_instrumented</span></code> も多くインスタンス化されている点に注意してください。<code class="docutils literal notranslate"><span class="pre">HasType</span> <span class="pre">x</span> <span class="pre">Prims.nat</span></code> に起因するループとは別に、<code class="docutils literal notranslate"><span class="pre">Factorial_unbounded</span></code> の各インスタンス化が新たなアクティブ項として <code class="docutils literal notranslate"><span class="pre">factorial</span></code> の出現を生み、ソルバがそれを最大 4 回まで展開しているためです。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Prims</span></code> 内の量化子や <code class="docutils literal notranslate"><span class="pre">int_inversion</span></code>、<code class="docutils literal notranslate"><span class="pre">bool_typing</span></code> といった基礎事実のインスタンス化も見られます。場合によってはこれらが最も多く発火しているように見えることもありますが、これらは F* の SMT エンコードに固有のもので、ユーザ側でできることはほとんどありません。遅さの主因でもないのが通常で、他の項が過剰にインスタンス化された結果として多く発火しているだけです。自分のコードやライブラリ内で過剰に発火している別の量化子を特定し、その根本原因を理解するようにしましょう。</p>
+</li>
+</ol>
+</div></blockquote>
+<section id="z3-axiom-profiler">
+<h4>Z3 Axiom Profiler<a class="headerlink" href="#z3-axiom-profiler" title="Link to this heading"></a></h4>
+<p><a class="reference external" href="https://github.com/viperproject/axiom-profiler">Z3 Axiom Profiler</a> を使うと、どの項でインスタンス化されたか、量化子間の依存（インスタンス化の連鎖）など、より詳細な情報を得られます。</p>
+<p>ただし現時点では、F* が生成した Z3 ログに対して用いる際に <a class="reference external" href="https://github.com/viperproject/axiom-profiler/issues/26">いくつかの問題</a> があるようです。</p>
+</section>
+</section>
+<section id="splitting-queries">
+<span id="id2"></span><h3>クエリの分割<a class="headerlink" href="#splitting-queries" title="Link to this heading"></a></h3>
+<p>次の 2 節では、Alex Rozanov が報告した小さな例（下記）を見ます。これは先の factorial の人工例と似た問題を示します。問題の量化子を特定するだけでなく、Z3 の量化子インスタンス化への依存を減らすように証明を書き換えて、性能問題を緩和する方法を検討します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> Alex
+
+<span class="k">let</span> unbounded (f: nat -&gt; int) = <span class="k">forall</span> (m: nat). <span class="k">exists</span> (n:nat). abs (f n) &gt; m
+
+<span class="k">assume</span>
+<span class="k">val</span> f : (f:(nat -&gt; int){unbounded f})
+
+<span class="k">let</span> g : (nat -&gt; int) = <span class="k">fun</span> x -&gt; f (x+1)
+
+#push-options &quot;--fuel 0 --ifuel 0 --z3smtopt &#39;(set-option :smt.qi.eager_threshold 2)&#39;&quot;
+<span class="k">let</span> find_above_for_g (m:nat) : <span class="k">Lemma</span>(<span class="k">exists</span> (i:nat). abs(g i) &gt; m) = 
+  <span class="k">assert</span> (unbounded f); <span class="c">// apply forall to m</span>
+  <span class="k">eliminate</span> <span class="k">exists</span> (n:nat). abs(f n) &gt; m
+  <span class="k">returns</span> <span class="k">exists</span> (i:nat). abs(g i) &gt; m <span class="k">with</span> <span class="k">_</span>. <span class="k">begin</span>
+    <span class="k">let</span> m1 = abs(f n) <span class="k">in</span>
+    <span class="k">assert</span> (m1 &gt; m); <span class="c">//prover hint</span>
+    <span class="k">if</span> n&gt;=1 <span class="k">then</span> <span class="k">assert</span> (abs(g (n-1)) &gt; m)
+    <span class="k">else</span> <span class="k">begin</span>
+      <span class="k">assert</span> (n&lt;=0); <span class="c">//arithmetics hint</span>
+      <span class="k">eliminate</span> <span class="k">exists</span> (n1:nat). abs (f n1) &gt; m1
+      <span class="k">returns</span> <span class="k">exists</span> (i:nat). abs(g i) &gt; m <span class="k">with</span> <span class="k">_</span>. 
+      <span class="k">begin</span>
+        <span class="k">assert</span> (n1 &gt; 0);
+        <span class="k">assert</span> (abs (g (n1-1)) &gt; m)
+      <span class="k">end</span> 
+    <span class="k">end</span> 
+  <span class="k">end</span> 
+</pre></div>
+</div>
+<p>仮説としては、<code class="docutils literal notranslate"><span class="pre">unbounded</span> <span class="pre">f</span></code> が factorial の非有界性仮定とまったく同じ問題を持つというものです——すなわち <code class="docutils literal notranslate"><span class="pre">forall/exists</span></code> の量化がマッチング・ループを含みます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">find_above_for_g</span></code> の証明は成功しますが、時間がかかり、F* は次のように報告します。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>(Warning 349) The verification condition succeeded after splitting
+it to localize potential errors, although the original non-split
+verification condition failed. If you want to rely on splitting
+queries for verifying your program please use the &#39;--split_queries
+always&#39; option rather than relying on it implicitly.
+</pre></div>
+</div>
+<p>既定では、F* はトップレベル定義内のすべての証明義務を集め、複数の連言を含む単一のクエリとして Z3 に提示します。通常これは効率的で、ある連言の探索で得た節が他の連言の探索にも役立つことがあります。しかし逆に、連言どうしの探索が悪影響を及ぼし、個別に試せばどれも証明可能なのに全体として失敗することもあります。さらに、F* が Z3 を呼ぶたびに rlimit が適用されます。クエリに N 個の連言がある場合、それらを N 個に分割すると、各クエリが独立に rlimit までリソースを消費できるため、実質的に rlimit の乗数効果が得られます。</p>
+<p>複数連言を含む単一クエリが失敗し、Z3 が F* に局所化可能な追加情報を返さない場合、F* はクエリを連言ごとに分割して個別に試し、失敗している連言を切り分けます。もっとも、このモードで試すとすべての連言が成功してしまうこともあります。</p>
+<p>Warning 349 への対応策の一つは、その指示に従い、少なくとも該当箇所については <code class="docutils literal notranslate"><span class="pre">--split_queries</span> <span class="pre">always</span></code> を明示的に有効化することです。これは不安定だった証明を安定化させることがありますが、根本的な性能問題を先送りにしてしまう可能性もあります。また、安定性はともかく、連言ごとに分割すると証明は多少遅くなります。</p>
+</section>
+<section id="taking-control-of-quantifier-instantiations-with-opaque-definitions">
+<span id="uth-opaque-to-smt"></span><h3>不透明化した定義で量化子インスタンス化を制御する<a class="headerlink" href="#taking-control-of-quantifier-instantiations-with-opaque-definitions" title="Link to this heading"></a></h3>
+<p>以下は Alex のプログラムを改良し、量化子インスタンス化の問題に対処したものです。解決にはいくつかの要素があります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>[@@&quot;opaque_to_smt&quot;]
+<span class="k">let</span> unbounded (f: nat → int) = <span class="k">forall</span> (m: nat). <span class="k">exists</span> (n:nat). abs (f n) &gt; m
+
+<span class="k">let</span> instantiate_unbounded (f:nat → int { unbounded f }) (m:nat)
+  : <span class="k">Lemma</span> (<span class="k">exists</span> (n:nat). abs (f n) &gt; m)
+  = reveal_opaque (`%unbounded) (unbounded f)
+
+<span class="k">assume</span>
+<span class="k">val</span> f : (z:(nat → int){unbounded z})
+
+<span class="k">let</span> g : (nat -&gt; int) = <span class="k">fun</span> x -&gt; f (x+1)
+
+#push-options &quot;--query_stats --fuel 0 --ifuel 0&quot;
+<span class="k">let</span> find_above_for_g (m:nat) : <span class="k">Lemma</span>(<span class="k">exists</span> (i:nat). abs(g i) &gt; m) = 
+  instantiate_unbounded f m;
+  <span class="k">eliminate</span> <span class="k">exists</span> (n:nat). abs(f n) &gt; m
+  <span class="k">returns</span> <span class="k">exists</span> (i:nat). abs(g i) &gt; m <span class="k">with</span> <span class="k">_</span>. <span class="k">begin</span>
+    <span class="k">let</span> m1 = abs(f n) <span class="k">in</span>
+    <span class="k">if</span> n&gt;=1 <span class="k">then</span> <span class="k">assert</span> (abs(g (n-1)) &gt; m)
+    <span class="k">else</span> <span class="k">begin</span>
+      instantiate_unbounded f m1;
+      <span class="k">eliminate</span> <span class="k">exists</span> (n1:nat). abs (f n1) &gt; m1
+      <span class="k">returns</span> <span class="k">exists</span> (i:nat). abs(g i) &gt; m <span class="k">with</span> <span class="k">_</span>. 
+      <span class="k">begin</span>
+        <span class="k">assert</span> (abs (g (n1-1)) &gt; m)
+      <span class="k">end</span> 
+    <span class="k">end</span> 
+  <span class="k">end</span> 
+</pre></div>
+</div>
+<ol class="arabic">
+<li><p>定義を不透明にする</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">unbounded</span></code> の定義に <code class="docutils literal notranslate"><span class="pre">[&#64;&#64;&quot;opaque_to_smt&quot;]</span></code> 属性を付けると、その定義を SMT ソルバにエンコードしないよう F* に指示できます。これにより、問題の交互量化はグローバルスコープから取り除かれます。</p>
+</div></blockquote>
+</li>
+<li><p>スコープ内で選択的に定義を露出させる</p>
+<blockquote>
+<div><p>もちろん非有界述語について推論したいので、呼び出し側が下界 <code class="docutils literal notranslate"><span class="pre">m</span></code> について <code class="docutils literal notranslate"><span class="pre">f</span></code> が非有界であるという仮定を明示的にインスタンス化できる補題 <code class="docutils literal notranslate"><span class="pre">instantiate_unbounded</span></code> を用意します。</p>
+<p>補題の証明には <code class="docutils literal notranslate"><span class="pre">FStar.Pervasives.reveal_opaque</span></code> を使います。第 1 引数は露出させたいシンボル名、第 2 引数はその定義を露出させる項です。この場合、<code class="docutils literal notranslate"><span class="pre">unbounded</span> <span class="pre">f</span></code> が <code class="docutils literal notranslate"><span class="pre">forall</span> <span class="pre">m.</span> <span class="pre">exists</span> <span class="pre">n.</span> <span class="pre">abs</span> <span class="pre">(f</span> <span class="pre">n)</span> <span class="pre">&gt;</span> <span class="pre">m</span></code> と等しいことを示します。</p>
+<p>この事実がローカルスコープで利用できれば、Z3 は補題を証明できます。ただし <code class="docutils literal notranslate"><span class="pre">reveal_opaque</span></code> の使用は注意が必要です。露出させると、問題の交互量化がスコープ内に現れ、マッチング・ループに陥り得るからです。ここでは補題の結論がちょうど量化子の本体そのものなので、Z3 はすばやく証明を完了します。それでも問題が出る場合は、タクティクスの利用を検討する必要があるかもしれません。</p>
+</div></blockquote>
+</li>
+<li><p>必要な箇所で明示的にインスタンス化する</p>
+<blockquote>
+<div><p>インスタンス化用の補題があれば、必要に応じて <code class="docutils literal notranslate"><span class="pre">f</span></code> の非有界性仮定を正確にインスタンス化できます。</p>
+<p>この証明では、<code class="docutils literal notranslate"><span class="pre">m</span></code> と <code class="docutils literal notranslate"><span class="pre">m1</span></code> の 2 箇所でインスタンス化を行います。</p>
+<p>なお、Z3 による非自明な量化子インスタンス化にまだ依存しています。特に、<code class="docutils literal notranslate"><span class="pre">returns</span></code> 節の存在量化をインスタンス化するために 2 つの assert が重要です。これについては後ほど詳しく見ます。</p>
+<p>とはいえ、問題の定義を不透明化して明示的にインスタンス化することで、性能問題は解消されます——現在のクエリ統計は次のとおりです。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;input&gt;(18,2-31,5))    Query-stats (AlexOpaque.find_above_for_g, 1)
+             succeeded in 46 milliseconds
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+<p>不透明化した定義を選択的に露出する方法の詳細は、<a class="reference external" href="https://github.com/FStarLang/FStar/wiki/Code-pattern-for-hiding-definitions-from-Z3-and-selectively-revealing-them">この wiki</a> にあります。</p>
+</section>
+<section id="other-ways-to-explicitly-trigger-quantifiers">
+<h3>量化子を明示的にトリガする別の方法<a class="headerlink" href="#other-ways-to-explicitly-trigger-quantifiers" title="Link to this heading"></a></h3>
+<p>参考までに、量化子インスタンス化を働かせる他の方法も見ておきます。</p>
+<section id="an-artificial-trigger">
+<span id="artificial-triggers"></span><h4>人工的なトリガ<a class="headerlink" href="#an-artificial-trigger" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">unbounded</span></code> の定義を不透明にする代わりに、専用のシンボルを用いたパターンで全称量化子を保護する方法もあります。以下に示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> trigger (x:int) = True
+
+<span class="k">let</span> unbounded_alt (f: nat → int) = <span class="k">forall</span> (m: nat). {:pattern (trigger m)} (<span class="k">exists</span> (n:nat). abs (f n) &gt; m)
+
+<span class="k">assume</span>
+<span class="k">val</span> ff : (z:(nat → int){unbounded_alt z})
+
+<span class="k">let</span> gg : (nat -&gt; int) = <span class="k">fun</span> x -&gt; ff (x+1)
+
+#push-options &quot;--query_stats --fuel 0 --ifuel 0&quot;
+<span class="k">let</span> find_above_for_gg (m:nat) : <span class="k">Lemma</span>(<span class="k">exists</span> (i:nat). abs(gg i) &gt; m) = 
+  <span class="k">assert</span> (unbounded_alt ff);
+  <span class="k">assert</span> (trigger m);
+  <span class="k">eliminate</span> <span class="k">exists</span> (n:nat). abs(ff n) &gt; m
+  <span class="k">returns</span> <span class="k">exists</span> (i:nat). abs(gg i) &gt; m <span class="k">with</span> <span class="k">_</span>. <span class="k">begin</span>
+    <span class="k">let</span> m1 = abs(ff n) <span class="k">in</span>
+    <span class="k">if</span> n&gt;=1 <span class="k">then</span> <span class="k">assert</span> (abs(gg (n-1)) &gt; m)
+    <span class="k">else</span> <span class="k">begin</span>
+      <span class="k">assert</span> (trigger m1);
+      <span class="k">eliminate</span> <span class="k">exists</span> (n1:nat). abs (ff n1) &gt; m1
+      <span class="k">returns</span> <span class="k">exists</span> (i:nat). abs(gg i) &gt; m <span class="k">with</span> <span class="k">_</span>. 
+      <span class="k">begin</span>
+        <span class="k">assert</span> (abs (gg (n1-1)) &gt; m)
+      <span class="k">end</span> 
+    <span class="k">end</span> 
+  <span class="k">end</span> 
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p>自明に真となる新しい関数 <code class="docutils literal notranslate"><span class="pre">trigger</span> <span class="pre">x</span></code> を定義します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unbounded_alt</span></code> では全称量化子に <code class="docutils literal notranslate"><span class="pre">{:pattern</span> <span class="pre">(trigger</span> <span class="pre">x)}</span></code> という明示的パターンを付けます。このパターンは意味論的な関連はなく、量化子のインスタンス化の制御だけが目的です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">find_above_for_gg</span></code> では、特定の下界 <code class="docutils literal notranslate"><span class="pre">k</span></code> で量化子をインスタンス化したいときに <code class="docutils literal notranslate"><span class="pre">trigger</span> <span class="pre">k</span></code> を assert します。これにより Z3 には <code class="docutils literal notranslate"><span class="pre">trigger</span></code> を含むアクティブ項が与えられ、選んだ <code class="docutils literal notranslate"><span class="pre">k</span></code> で量化子をインスタンス化できます。</p></li>
+</ol>
+<p>このスタイルは、意味的に不要なトリガで定義を汚してしまうため、あまり好ましくありません。選択的に不透明定義を露出するスタイルのほうが望ましいです。とはいえ、人工トリガが有用な場面もあります。</p>
+</section>
+<section id="existential-quantifiers">
+<h4>存在量化子<a class="headerlink" href="#existential-quantifiers" title="Link to this heading"></a></h4>
+<p>ゴールには <code class="docutils literal notranslate"><span class="pre">exists</span> <span class="pre">(i:nat).</span> <span class="pre">abs(g</span> <span class="pre">i)</span> <span class="pre">&gt;</span> <span class="pre">m</span></code> という存在式があり、Z3 は <code class="docutils literal notranslate"><span class="pre">i</span></code> をインスタンス化するためのアクティブ項を探します。この場合、Z3 が選ぶパターンは <code class="docutils literal notranslate"><span class="pre">(g</span> <span class="pre">i)</span></code> と、SMT エンコードが導入する述語 <code class="docutils literal notranslate"><span class="pre">(HasType</span> <span class="pre">i</span> <span class="pre">Prims.nat)</span></code> です。現在、<code class="docutils literal notranslate"><span class="pre">returns</span></code> 注釈内の存在量化子にパターンを付けることはできません——将来的には可能になる見込みです。</p>
+<p><code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">i</span></code> がパターンの一つなので、一方の分岐で <code class="docutils literal notranslate"><span class="pre">abs</span> <span class="pre">(g</span> <span class="pre">(n</span> <span class="pre">-</span> <span class="pre">1))</span> <span class="pre">&gt;</span> <span class="pre">m</span></code>、もう一方で <code class="docutils literal notranslate"><span class="pre">abs</span> <span class="pre">(g</span> <span class="pre">(n1</span> <span class="pre">-</span> <span class="pre">1))</span> <span class="pre">&gt;</span> <span class="pre">m</span></code> を assert すれば、Z3 はそれぞれ <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">-</span> <span class="pre">1</span></code> と <code class="docutils literal notranslate"><span class="pre">n1</span> <span class="pre">-</span> <span class="pre">1</span></code> を用いて存在量化子をインスタンス化できます。</p>
+<p>実際には、<code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">(n</span> <span class="pre">-</span> <span class="pre">1)</span></code> や <code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">(n1</span> <span class="pre">-</span> <span class="pre">1)</span></code> を含む任意の assert で構いません。次の例のように自明なものでも有効です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> find_above_for_g1 (m:nat) : <span class="k">Lemma</span>(<span class="k">exists</span> (i:nat). abs(g i) &gt; m) = 
+  instantiate_unbounded f m;
+  <span class="k">eliminate</span> <span class="k">exists</span> (n:nat). abs(f n) &gt; m
+  <span class="k">returns</span> <span class="k">exists</span> (i:nat). abs(g i) &gt; m <span class="k">with</span> <span class="k">_</span>. <span class="k">begin</span>
+    <span class="k">let</span> m1 = abs(f n) <span class="k">in</span>
+    <span class="k">if</span> n&gt;=1 <span class="k">then</span> <span class="k">assert</span> (trigger (g (n-1)))
+    <span class="k">else</span> <span class="k">begin</span>
+      instantiate_unbounded f m1;
+      <span class="k">eliminate</span> <span class="k">exists</span> (n1:nat). abs (f n1) &gt; m1
+      <span class="k">returns</span> <span class="k">exists</span> (i:nat). abs(g i) &gt; m <span class="k">with</span> <span class="k">_</span>. 
+      <span class="k">begin</span>
+        <span class="k">assert</span> (trigger (g (n1-1)))
+      <span class="k">end</span> 
+    <span class="k">end</span> 
+  <span class="k">end</span> 
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">trigger</span> <span class="pre">(g</span> <span class="pre">(n</span> <span class="pre">-</span> <span class="pre">1))</span></code> と <code class="docutils literal notranslate"><span class="pre">trigger</span> <span class="pre">(g</span> <span class="pre">(n1</span> <span class="pre">-</span> <span class="pre">1))</span></code> を assert すれば、Z3 はそれらのアクティブ項を得てインスタンス化に十分です。<code class="docutils literal notranslate"><span class="pre">trigger</span> <span class="pre">(n</span> <span class="pre">-</span> <span class="pre">1)</span></code> では <code class="docutils literal notranslate"><span class="pre">g</span></code> が現れないため不十分な点に注意してください。</p>
+<p>ただし、もう一つのパターン <code class="docutils literal notranslate"><span class="pre">(HasType</span> <span class="pre">i</span> <span class="pre">Prims.nat)</span></code> も使えます。Z3 の文脈に <code class="docutils literal notranslate"><span class="pre">(HasType</span> <span class="pre">(n</span> <span class="pre">-</span> <span class="pre">1)</span> <span class="pre">Prims.nat)</span></code> を注入できれば量化子をインスタンス化できます。下のように <code class="docutils literal notranslate"><span class="pre">trigger_nat</span></code> を使えば、F* が <code class="docutils literal notranslate"><span class="pre">trigger_nat</span> <span class="pre">x</span></code> の引数 <code class="docutils literal notranslate"><span class="pre">x</span></code> が <code class="docutils literal notranslate"><span class="pre">(HasType</span> <span class="pre">x</span> <span class="pre">Prims.nat)</span></code> を満たすという義務を挿入するため、うまくいきます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> trigger_nat (x:nat) = True
+<span class="k">let</span> find_above_for_g2 (m:nat) : <span class="k">Lemma</span>(<span class="k">exists</span> (i:nat). abs(g i) &gt; m) = 
+  instantiate_unbounded f m;
+  <span class="k">eliminate</span> <span class="k">exists</span> (n:nat). abs(f n) &gt; m
+  <span class="k">returns</span> <span class="k">exists</span> (i:nat). abs(g i) &gt; m <span class="k">with</span> <span class="k">_</span>. <span class="k">begin</span>
+    <span class="k">let</span> m1 = abs(f n) <span class="k">in</span>
+    <span class="k">if</span> n&gt;=1 <span class="k">then</span> <span class="k">assert</span> (trigger_nat (n-1))
+    <span class="k">else</span> <span class="k">begin</span>
+      instantiate_unbounded f m1;
+      <span class="k">eliminate</span> <span class="k">exists</span> (n1:nat). abs (f n1) &gt; m1
+      <span class="k">returns</span> <span class="k">exists</span> (i:nat). abs(g i) &gt; m <span class="k">with</span> <span class="k">_</span>. 
+      <span class="k">begin</span>
+        <span class="k">assert</span> (trigger_nat (n1-1))
+      <span class="k">end</span> 
+    <span class="k">end</span> 
+  <span class="k">end</span> 
+</pre></div>
+</div>
+<p>もちろん、存在量化の暗黙トリガに頼らず、下のように各分岐で <code class="docutils literal notranslate"><span class="pre">introduce</span> <span class="pre">exists</span> <span class="pre">...</span></code> を使って証人を直接与える方法もあります。可能であれば、暗黙のパターンや人工トリガに依存するよりも、このスタイルを強く推奨します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> find_above_for_g&#39; (m:nat) : <span class="k">Lemma</span>(<span class="k">exists</span> (i:nat). abs(g i) &gt; m) = 
+  instantiate_unbounded f m;
+  <span class="k">eliminate</span> <span class="k">exists</span> (n:nat). abs(f n) &gt; m
+  <span class="k">returns</span> <span class="k">_</span> <span class="c">// exists (i:nat). abs(g i) &gt; m</span>
+  <span class="k">with</span> <span class="k">_</span>. <span class="k">begin</span>
+    <span class="k">let</span> m1 = abs(f n) <span class="k">in</span>
+    <span class="k">if</span> n&gt;=1 <span class="k">then</span> (
+      <span class="k">introduce</span> <span class="k">exists</span> (i:nat). abs(g i) &gt; m 
+      <span class="k">with</span> (n - 1)
+      <span class="k">and</span> ()
+    )
+    <span class="k">else</span> <span class="k">begin</span>
+      instantiate_unbounded f m1;
+      <span class="k">eliminate</span> <span class="k">exists</span> (n1:nat). abs (f n1) &gt; m1
+      <span class="k">returns</span> <span class="k">_</span> <span class="c">//exists (i:nat). _ abs(g i) &gt; m</span>
+      <span class="k">with</span> <span class="k">_</span>. 
+        <span class="k">begin</span> 
+          <span class="k">introduce</span> <span class="k">exists</span> (i:nat). abs (g i) &gt; m
+          <span class="k">with</span> (n1 - 1)
+          <span class="k">and</span> ()
+        <span class="k">end</span> 
+    <span class="k">end</span> 
+  <span class="k">end</span> 
+</pre></div>
+</div>
+<p>ここに、上述のバリエーションすべてを含む <a class="reference external" href="../code/AlexOpaque.fst">完全なファイル</a> へのリンクがあります。</p>
+</section>
+</section>
+<section id="overhead-due-to-a-large-context">
+<h3>巨大な文脈によるオーバーヘッド<a class="headerlink" href="#overhead-due-to-a-large-context" title="Link to this heading"></a></h3>
+<p>次のプログラムを考えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> T = FStar.Tactics
+<span class="k">module</span> B = LowStar.Buffer
+<span class="k">module</span> SA = Steel.Array
+<span class="k">open</span> FStar.Seq
+
+#push-options &quot;--query_stats&quot;
+<span class="k">let</span> warmup1 (x:bool { x == <span class="k">true</span> }) = <span class="k">assert</span> x
+
+<span class="k">let</span> test1 (a:Type) (s0 s1 s2: seq a)
+  : <span class="k">Lemma</span> (Seq.append (Seq.append s0 s1) s2 `Seq.equal`
+           Seq.append s0 (Seq.append s1 s2))
+  = ()
+</pre></div>
+</div>
+<p>補題 <code class="docutils literal notranslate"><span class="pre">test1</span></code> は <code class="docutils literal notranslate"><span class="pre">FStar.Seq</span></code> に関する単純な性質ですが、この補題は多数のモジュール（この例では標準ライブラリの約 177 モジュール）に依存するモジュール内にあります。これらがすべて SMT ソルバにエンコードされ、約 11MB、約 2 万件のアサーションが生成されます。ソルバは広大な探索空間を扱うことになりますが、ほとんどのアサーションはパターンでガードされた量化式で、アクティブ項がトリガしない限り不活性です。それでも、これら定義は無視できないオーバーヘッドをソルバに課します。<code class="docutils literal notranslate"><span class="pre">--query_stats</span></code> をオンにすると（ウォームアップ 1 回後）、<code class="docutils literal notranslate"><span class="pre">test1</span></code> の証明に Z3 はおよそ 300 ミリ秒（量化子インスタンス化約 3000 回）を要します。</p>
+<p>300 ミリ秒程度のオーバーヘッドはあまり気にならないかもしれません——標準ライブラリにはマッチング・ループを生むような量化子交互は多くありません。しかし、開発がより多くのモジュールに依存し始めると、どこかのモジュールの望ましくない量化子設計の影響で証明が遅くなる危険があります。その場合、一見単純な証明でも数秒かかることがあるでしょう。ここでは、そのような問題の診断に役立ついくつかの手段を紹介します。</p>
+<section id="filtering-the-context">
+<h4>文脈のフィルタリング<a class="headerlink" href="#filtering-the-context" title="Link to this heading"></a></h4>
+<p>まず、文脈から事実を取り除くための F* のオプションを見てみます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>#push-options &quot;--using_facts_from &#39;Prims FStar.Seq&#39;&quot;
+<span class="k">let</span> warmup2 (x:bool { x == <span class="k">true</span> }) = <span class="k">assert</span> x
+
+<span class="k">let</span> test2 (a:Type) (s0 s1 s2: seq a)
+  : <span class="k">Lemma</span> (Seq.append (Seq.append s0 s1) s2 `Seq.equal`
+           Seq.append s0 (Seq.append s1 s2))
+  = ()
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--using_facts_from</span></code> は与えた名前空間セレクタに一致するモジュールの事実だけを残します。この例では、コンテキストは 11MB・2 万アサーションから約 1MB・2000 アサーションに縮み、クエリ統計では 15 ミリ秒で証明が通ると報告されます——絶対値は小さいとはいえ大幅な高速化です。</p>
+<p>もちろん、どの事実を残すかの判断は容易ではありません。例えば <code class="docutils literal notranslate"><span class="pre">FStar.Seq</span></code> だけを残して <code class="docutils literal notranslate"><span class="pre">Prims</span></code> を入れ忘れると証明は失敗します。そのため <code class="docutils literal notranslate"><span class="pre">--using_facts_from</span></code> は常に有用というわけではありません。</p>
+</section>
+<section id="unsat-core-and-hints">
+<h4>Unsat Core とヒント<a class="headerlink" href="#unsat-core-and-hints" title="Link to this heading"></a></h4>
+<p>Z3 が証明を見つけると、証明に関与した文脈内の事実を報告できます。この集合は「unsat core」と呼ばれます。文脈の事実と否定されたゴールが同時に充足不能であることが示されたからです。F* には各クエリの unsat core を記録・再生する機能があり、記録された unsat core を「ヒント」と呼びます。</p>
+<p>ヒントの使い方は次のとおりです。</p>
+<ol class="arabic">
+<li><p>ヒントの記録</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>fstar.exe --record_hints ContextPollution.fst
+</pre></div>
+</div>
+<p>これにより <code class="docutils literal notranslate"><span class="pre">ContextPollution.fst.hints</span></code> というファイルが生成されます。</p>
+<p>ヒントファイルの形式は内部仕様で今後変更される可能性がありますが、テキスト形式であり、おおよその内容は読めます。以下はその一部です。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>[
+   &quot;ContextPollution.test1&quot;,
+   1,
+   2,
+   1,
+   [
+     &quot;@MaxIFuel_assumption&quot;, &quot;@query&quot;, &quot;equation_Prims.nat&quot;,
+     &quot;int_inversion&quot;, &quot;int_typing&quot;, &quot;lemma_FStar.Seq.Base.lemma_eq_intro&quot;,
+     &quot;lemma_FStar.Seq.Base.lemma_index_app1&quot;,
+     &quot;lemma_FStar.Seq.Base.lemma_index_app2&quot;,
+     &quot;lemma_FStar.Seq.Base.lemma_len_append&quot;,
+     &quot;primitive_Prims.op_Addition&quot;, &quot;primitive_Prims.op_Subtraction&quot;,
+     &quot;projection_inverse_BoxInt_proj_0&quot;,
+     &quot;refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2&quot;,
+     &quot;refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b&quot;,
+     &quot;refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55&quot;,
+     &quot;typing_FStar.Seq.Base.append&quot;, &quot;typing_FStar.Seq.Base.length&quot;
+   ],
+   0,
+   &quot;3f144f59e410fbaa970cffb0e20df75d&quot;
+ ]
+</pre></div>
+</div>
+<p>これは ID が <code class="docutils literal notranslate"><span class="pre">(ContextPollution.test1,</span> <span class="pre">1)</span></code> のクエリに対応するヒント項目です。</p>
+<p>次の 2 つのフィールドはそのクエリに用いた fuel と ifuel で、この例ではそれぞれ <code class="docutils literal notranslate"><span class="pre">2</span></code> と <code class="docutils literal notranslate"><span class="pre">1</span></code> です。</p>
+<p>次に、このクエリの unsat core に含まれる事実名の一覧があります。元は 2 万件あったのに対し、必要だったのは約 20 件だけであることがわかります。</p>
+<p>後ろから 2 番目のフィールドは未使用で、常に 0 です。</p>
+<p>最後のフィールドは発行されたクエリのハッシュです。</p>
+</li>
+<li><p>ヒントの再生</p>
+<p>次のコマンドは、インクルードパスから <code class="docutils literal notranslate"><span class="pre">ContextPollution.fst.hints</span></code> を探し、指定 ID のクエリを証明する際にヒントファイルから該当ヒントを読み込み、その fuel / ifuel を使用し、unsat core に含まれる事実だけに文脈を刈り込むよう F* に指示します。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>fstar.exe --use_hints ContextPollution.fst
+</pre></div>
+</div>
+<p>ヒントの利用は通常検証時間を大幅に短縮しますが、この例では先の 15 ミリ秒ほどではなく約 130 ミリ秒かかっています。ヒント使用時は各クエリごとに unsat core の事実だけを読み込んだ新しい Z3 プロセスを起動するため、初期化コストがかかるからです。</p>
+</li>
+</ol>
+<p>F* の標準ライブラリを含む多くのプロジェクトは、ビルド工程の一部としてヒントを利用します。.hints ファイルはリポジトリにコミットされ、証明の進化に応じて定期的に更新されます。これは証明の安定性向上に役立ちます。最初は時間がかかっても、一度通ってしまえば unsat core を記録・再生でき、後続の同じ（あるいは少し変えた）証明は素早く通るようになります。</p>
+<p>一方でヒントを使わないプロジェクトもあります。ヒントは根本的な性能問題を覆い隠すものだと考え（おそらく正当な理由で）、ヒントなしで高速かつ堅牢に証明が通る状態を好むのです。もしヒントに頼らずその状態を達成できるなら、それに越したことはありません！</p>
+<section id="differential-profiling-with-qprofdiff">
+<h5>qprofdiff による差分プロファイリング<a class="headerlink" href="#differential-profiling-with-qprofdiff" title="Link to this heading"></a></h5>
+<p>ヒントなしでは非常に時間がかかるが、ヒントありだと速い証明があるなら、ヒントは元の証明が遅い理由の診断にも役立ちます。Z3 に付属する qprofdiff というツールで、2 つの量化子インスタンス化プロファイルを <a class="reference external" href="https://github.com/FStarLang/FStar/wiki/Profiling-Z3-queries#interpreting-the-results">比較する方法</a> が wiki に解説されています。</p>
+</section>
+<section id="hints-that-fail-to-replay">
+<h5>再生に失敗するヒント<a class="headerlink" href="#hints-that-fail-to-replay" title="Link to this heading"></a></h5>
+<p>Z3 が unsat core を報告したにもかかわらず、F* がそれで再生しようとすると Z3 が unsat の証明を見つけられず、元の文脈での再試行にフォールバックすることがあります。以前に報告された unsat core から再び unsat 証明を見つけられないのは、Z3 の不健全性やバグではありません。論理的には unsat でも、unsat の証明が意味的には不要な事実の量化子インスタンス化ヒントに依存していた可能性があるからです。次の例で説明します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> HintReplay
+
+<span class="k">assume</span>
+<span class="k">val</span> p (x:int) : prop
+
+<span class="k">assume</span>
+<span class="k">val</span> q (x:int) : prop
+
+<span class="k">assume</span>
+<span class="k">val</span> r (x:int) : prop
+
+<span class="k">assume</span> P_Q : <span class="k">forall</span> (x:int). {:pattern q x} q x ==&gt; p x
+<span class="k">assume</span> Q_R : <span class="k">forall</span> (x:int). {:pattern p x} q x ==&gt; r x
+
+<span class="k">let</span> test (x:int { q x }) = <span class="k">assert</span> (r x)
+</pre></div>
+</div>
+<p>例えば次を実行したとします。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>fstar --record_hints HintReplay.fst
+fstar --query_stats --use_hints HintReplay.fst
+</pre></div>
+</div>
+<p>2 回目の実行では次の出力が得られます。</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>(HintReplay.fst(15,27-15,39))   Query-stats (HintReplay.test, 1)        failed
+  {reason-unknown=unknown because (incomplete quantifiers)} (with hint)
+  in 42 milliseconds ..
+
+(HintReplay.fst(15,27-15,39))   Query-stats (HintReplay.test, 1)        succeeded
+  in 740 milliseconds ...
+</pre></div>
+</div>
+<p>最初の試行（ヒント使用）は失敗し、2 回目の試行（ヒントなし）は成功しています。</p>
+<p>理由はこうです。仮定 <code class="docutils literal notranslate"><span class="pre">q</span> <span class="pre">x</span></code> から主張 <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">x</span></code> を示すには、論理的には仮定 <code class="docutils literal notranslate"><span class="pre">Q_R</span></code> で十分です。実際、ヒントファイルを見ると、論理コアには <code class="docutils literal notranslate"><span class="pre">HintReplay.Q_R</span></code> だけが含まれていることがわかります。しかし <code class="docutils literal notranslate"><span class="pre">Q_R</span></code> はパターン <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">x</span></code> でガードされています。<code class="docutils literal notranslate"><span class="pre">P_Q</span></code> が無ければ、ソルバは <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">x</span></code> というアクティブ項を導けず、<code class="docutils literal notranslate"><span class="pre">Q_R</span></code> をインスタンス化できません——そのため、unsat core だけでは証明を完遂できないのです。</p>
+<p>ヒント再生の失敗は、通常、証明内の量化子トリガの不自然さを示しています。例えばここでは <code class="docutils literal notranslate"><span class="pre">Q_R</span></code> に <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">x</span></code> が現れないのに <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">x</span></code> をパターンに使っています——これは普通は良い選択ではありませんが、<a class="reference internal" href="#artificial-triggers"><span class="std std-ref">人工的なトリガ</span></a> を使う場合などには起こり得ます。</p>
+<p>ヒント再生の失敗診断については、特に Low* ライブラリの文脈で、<a class="reference external" href="https://github.com/FStarLang/FStar/wiki/Robust,-replayable-proofs-using-unsat-cores,-(aka,-hints,-or-how-to-replay-verification-in-milliseconds-instead-of-minutes)">ヒントに関する wiki</a> に詳しい情報があります。</p>
+</section>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="under_the_hood.html" class="btn btn-neutral float-left" title="内部の仕組み" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

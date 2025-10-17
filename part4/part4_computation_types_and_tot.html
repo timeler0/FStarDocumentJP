@@ -1,0 +1,170 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Total な計算の効果 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="消去とゴースト効果" href="part4_ghost.html" />
+    <link rel="prev" title="依存関係を追跡する計算型" href="part4_background.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part4.html">計算効果</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part4_background.html">依存関係を追跡する計算型</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Total な計算の効果</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#evaluation-order">評価順序</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part4_ghost.html">消去とゴースト効果</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part4_div.html">発散（非停止）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part4_pure.html">プリミティブ効果の精錬（リファインメント）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part4.html">計算効果</a></li>
+      <li class="breadcrumb-item active">Total な計算の効果</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="the-effect-of-total-computations">
+<span id="part4-computation-types-and-tot"></span><h1>Total な計算の効果<a class="headerlink" href="#the-effect-of-total-computations" title="Link to this heading"></a></h1>
+<p>効果ラベル階層の最下層には <code class="docutils literal notranslate"><span class="pre">Tot</span></code> があり、純粋で total な関数を表します。最下層にあるため、<code class="docutils literal notranslate"><span class="pre">Tot</span></code> 計算は他の <code class="docutils literal notranslate"><span class="pre">Tot</span></code> 計算にのみ依存でき、F* の論理コアが total のままであることを保証します。</p>
+<p>F* のすべての項は計算型をもつように型検査されます。これは、これまで扱ってきた total な項も含みます。そのような項は既定の効果 <code class="docutils literal notranslate"><span class="pre">Tot``（戻り値以外に観測可能な効果を持たない</span> <span class="pre">total</span> <span class="pre">計算の効果）に分類されます。``e:t</span></code> という型付けに与えた意味は <code class="docutils literal notranslate"><span class="pre">e:Tot</span> <span class="pre">t</span></code> にも拡張されます。例えば、<code class="docutils literal notranslate"><span class="pre">e:Tot</span> <span class="pre">t</span></code> なら、実行時に <code class="docutils literal notranslate"><span class="pre">e</span></code> は停止し型 <code class="docutils literal notranslate"><span class="pre">t</span></code> の値を生成します。さらに効果ラベルが <code class="docutils literal notranslate"><span class="pre">Tot</span></code> なので、副作用はありません。</p>
+<p>実際、すでに <a class="reference internal" href="../part1/part1_getting_off_the_ground.html#part1-ch1-arrow-notations"><span class="std std-ref">こちら</span></a> で見たように、記法上 <code class="docutils literal notranslate"><span class="pre">x:t0</span> <span class="pre">-&gt;</span> <span class="pre">t1</span></code> は <code class="docutils literal notranslate"><span class="pre">x:t0</span> <span class="pre">-&gt;</span> <span class="pre">Tot</span> <span class="pre">t1</span></code> の省略形です（<code class="docutils literal notranslate"><span class="pre">t1</span></code> 自体が関数型でも構いません）。より一般には、F* の関数型は <code class="docutils literal notranslate"><span class="pre">x:t</span> <span class="pre">-&gt;</span> <span class="pre">C</span></code> の形を取り、引数型 <code class="docutils literal notranslate"><span class="pre">t</span></code> と、本体の計算型 <code class="docutils literal notranslate"><span class="pre">C``（``x</span></code> に依存してよい）を表します。</p>
+<p>同様に、<code class="docutils literal notranslate"><span class="pre">let</span></code> 定義で見てきた戻り型注釈も省略記法です。例えば <a class="reference internal" href="../part1/part1_polymorphism.html#part1-polymorphism-and-inference"><span class="std std-ref">id 関数</span></a> は</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> id (a:Type) (x:a) : a = x
+</pre></div>
+</div>
+<p>次の省略形です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> id (a:Type) (x:a) : <span class="k">Tot</span> a = x  <span class="c">//the return type annotation is a computation type</span>
+</pre></div>
+</div>
+<p>したがって <code class="docutils literal notranslate"><span class="pre">id</span></code> の型は <code class="docutils literal notranslate"><span class="pre">a:Type</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Tot</span> <span class="pre">a</span></code> です。一般に、<code class="docutils literal notranslate"><span class="pre">let</span></code> 定義の戻り型注釈は計算型 <code class="docutils literal notranslate"><span class="pre">C</span></code> になります。</p>
+<p><a class="reference internal" href="../part1/part1_getting_off_the_ground.html#part1-ch1-named-function"><span class="std std-ref">明示注釈の構文</span></a> <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">&lt;:</span> <span class="pre">t</span></code> は少し挙動が異なります。F* は <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">&lt;:</span> <span class="pre">C</span></code> と書くことを許し、<code class="docutils literal notranslate"><span class="pre">e</span></code> が本当に計算型 <code class="docutils literal notranslate"><span class="pre">C</span></code> を持つか検査します。しかし効果ラベルを省いて <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">&lt;:</span> <span class="pre">t</span></code> と書いた場合は <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">&lt;:</span> <span class="pre">_</span> <span class="pre">t</span></code> と解釈され、省略された効果ラベルは F* により推論され、既定で <code class="docutils literal notranslate"><span class="pre">Tot</span></code> にはなりません。</p>
+<section id="evaluation-order">
+<span id="part4-evaluation-order"></span><h2>評価順序<a class="headerlink" href="#evaluation-order" title="Link to this heading"></a></h2>
+<p>純粋関数においては、評価順序は本質的ではありません。 <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> F* には純粋項を遅延評価／値呼びのいずれでも解釈できる抽象機械があり（<a class="reference internal" href="../under_the_hood/under_the_hood.html#under-the-hood"><span class="std std-ref">F* の正規化器</span></a> の章を参照）、また純粋プログラムを OCaml にコンパイルする場合は、純粋項について OCaml の値呼び意味論を継承します。</p>
+<p>効果のある引数で関数呼び出しを評価する際には、関数呼び出しの前に引数をまず値まで簡約し、その過程で（もしあれば）効果を発現させます。すなわち <code class="docutils literal notranslate"><span class="pre">e1</span></code> と <code class="docutils literal notranslate"><span class="pre">e2</span></code> が効果を持つ可能性があるとき、適用 <code class="docutils literal notranslate"><span class="pre">e1</span> <span class="pre">e2</span></code> は <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">f</span> <span class="pre">=</span> <span class="pre">e1</span> <span class="pre">in</span> <span class="pre">bind</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">e2</span> <span class="pre">in</span> <span class="pre">f</span> <span class="pre">x</span></code> に相当します。実際、どちらかが非自明な効果を持ちうる場合、F* は内部的に <code class="docutils literal notranslate"><span class="pre">e1</span> <span class="pre">e2</span></code> をそのように精密化します。したがって効果のある項については、F* は左から右への <a class="reference external" href="https://en.wikipedia.org/wiki/Evaluation_strategy/">値呼び</a> の意味論を強制します。</p>
+<p>関数に渡されるのは計算が返す値だけなので、F* の関数の引数型は常に値型です。つまり常に <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">-&gt;</span> <span class="pre">C</span></code> の形になります。計算そのものを引数として渡したい場合は、計算を関数に包む必要があります。例えば <code class="docutils literal notranslate"><span class="pre">C</span> <span class="pre">-&gt;</span> <span class="pre">C</span></code> の代わりに <code class="docutils literal notranslate"><span class="pre">(unit</span> <span class="pre">-&gt;</span> <span class="pre">C)</span> <span class="pre">-&gt;</span> <span class="pre">C'</span></code> と書きます。F* では関数（本体が非自明な効果を持つものも含め）が第一級値なので、常にこの手法が使えます。</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>F* は拡張的型理論であるため、純粋な F* の項は <em>弱正規化</em> にとどまります。すなわち、ある評価戦略（例えば到達不能なコードパスの深部にある再帰関数を繰り返し簡約する戦略）では停止しないことがあります。しかし閉じた純粋項については、完全に簡約できる評価戦略が必ず存在します。したがって純粋関数に関しては、特定の評価順序の選択が非停止を引き起こしうることを除けば、評価順序は本質的ではありません。</p>
+</aside>
+</aside>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part4_background.html" class="btn btn-neutral float-left" title="依存関係を追跡する計算型" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part4_ghost.html" class="btn btn-neutral float-right" title="消去とゴースト効果" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

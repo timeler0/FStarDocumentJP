@@ -1,0 +1,391 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>タクティクス概観 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="Pulse: 並行分離論理における証明指向プログラミング" href="../pulse/pulse.html" />
+    <link rel="prev" title="Meta-F* によるタクティクスとメタプログラミング" href="part5.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part5.html">Meta-F* によるタクティクスとメタプログラミング</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">タクティクス概観</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#decorating-assertions-with-tactics">タクティクスによるアサーションの装飾</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-tac-effect"><code class="docutils literal notranslate"><span class="pre">Tac</span></code> 効果</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#goals">ゴール</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quotations">引用（quotation）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#basic-logic">基本的な論理タクティクス</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#normalizing-and-unfolding">正規化と展開</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inspecting-and-building-syntax">構文の観察と構築</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usual-gotchas">よくある落とし穴</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coming-soon">近日公開</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+      <li class="breadcrumb-item active">タクティクス概観</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="an-overview-of-tactics">
+<span id="metafstar-intro"></span><h1>タクティクス概観<a class="headerlink" href="#an-overview-of-tactics" title="Link to this heading"></a></h1>
+<p>本章では、Meta-F* の基礎となる主要概念と、証明自動化のためのタクティクス作成における活用法を手短に紹介します。目的は、タクティクスの基本的な使い方を素早く身につけてもらうことです。後続の章では、ここで触れた内容をより詳しく掘り下げ、Meta-F* の発展的な機能を紹介し、ケーススタディで実際の使われ方を示します。</p>
+<section id="decorating-assertions-with-tactics">
+<h2>タクティクスによるアサーションの装飾<a class="headerlink" href="#decorating-assertions-with-tactics" title="Link to this heading"></a></h2>
+<p>ご存じのとおり、F* は検証条件（VC）を計算し、SMT ソルバ（Z3）に渡して証明することでプログラムを検証します。単純な義務の多くは Z3 が自動で処理しますが、より複雑な主張では補題の呼び出しや中間アサーションでソルバを助けます。補題やアサーションを使う場合でも、定義ごとの VC は基本的に 1 つの塊として Z3 に送られます（ただし <a class="reference internal" href="../under_the_hood/uth_smt.html#splitting-queries"><span class="std std-ref">オプションで SMT クエリを分割</span></a> できます）。この「モノリシック」な証明スタイルは、特にソルバの限界に近づく場面で急速に扱いづらくなります。</p>
+<p>Meta-F* が提供する最初の機能は、アサーションに特定のタクティクスを紐づけられることです。タクティクスは証明すべき「ゴール」に対して動作し、単純化や複数のサブゴールへの分割、特定の SMT オプションの調整などでアサーションを「整形」できます。</p>
+<p>例として、<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">≤</span> <span class="pre">19</span></code> から <code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">x</span></code> が 100 万未満であることを示したいとします。<code class="docutils literal notranslate"><span class="pre">pow2</span></code> が単調増加であり、<code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">19</span></code> が 100 万より小さいことを使えばよいので、次のように書いてみます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> pow2_bound_19 (x:nat{x &lt;= 19}) : <span class="k">Lemma</span> (pow2 x &lt; 1000000) =
+  <span class="k">assert</span> (<span class="k">forall</span> (x y : nat). x &lt;= y ==&gt; pow2 x &lt;= pow2 y);
+  <span class="k">assert</span> (pow2 19 ==  524288);
+  <span class="k">assert</span> (pow2 x &lt; 1000000);
+  ()
+</pre></div>
+</div>
+<p>しかしこれはそのままでは通りません。まず、Z3 は <code class="docutils literal notranslate"><span class="pre">pow2</span></code> の単調性を自動では示せません（想定内です）。単調性自体は帰納法で証明できますが、ここでは <code class="docutils literal notranslate"><span class="pre">x</span></code> と <code class="docutils literal notranslate"><span class="pre">19</span></code> の比較だけで足りるので、ライブラリの <code class="docutils literal notranslate"><span class="pre">FStar.Math.Lemmas.pow2_le_compat</span></code> を呼びます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> pow2_bound_19&#39; (x:nat{x &lt;= 19}) : <span class="k">Lemma</span> (pow2 x &lt; 1000000) =
+  FStar.Math.Lemmas.pow2_le_compat 19 x;
+  <span class="k">assert</span> (pow2 19 == 524288);
+  <span class="k">assert</span> (pow2 x &lt; 1000000);
+  ()
+</pre></div>
+</div>
+<p>ところが 2 つ目のアサーションが失敗します。既定の fuel では Z3 は <code class="docutils literal notranslate"><span class="pre">pow2</span></code> を十分展開できず、<code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">19</span></code> を正確に計算しません。（F* が <a class="reference internal" href="../under_the_hood/uth_smt.html#uth-smt-fuel"><span class="std std-ref">再帰定義の展開能力を &quot;fuel&quot; で制御</span></a> する仕組みを参照。）そこで Meta-F* を使います。<code class="docutils literal notranslate"><span class="pre">by</span></code> キーワードでアサーションにタクティクスを付与できます。今回は Meta-F* に <code class="docutils literal notranslate"><span class="pre">compute()</span></code> を指示し、F* の正規化器で可能な限り簡約します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> pow2_bound_19&#39;&#39; (x:nat{x &lt;= 19}) : <span class="k">Lemma</span> (pow2 x &lt; 1000000) =
+  FStar.Math.Lemmas.pow2_le_compat 19 x;
+  <span class="k">assert</span> (pow2 19 == 524288) <span class="k">by</span> compute ();
+  <span class="k">assert</span> (pow2 x &lt; 1000000);
+  ()
+</pre></div>
+</div>
+<p>これで補題は検証されます。Meta-F* が義務を自明な等式にまで簡約したからです。重要なのは、アサーションの事後条件には <code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">19</span> <span class="pre">==</span> <span class="pre">524288</span></code> という形が保持される点です。単に <code class="docutils literal notranslate"><span class="pre">524288</span> <span class="pre">==</span> <span class="pre">524288</span></code> に書き換えてしまうと、その後利用できなくなってしまいます。</p>
+<p>Meta-F* が何をしたのかは、<code class="docutils literal notranslate"><span class="pre">dump</span></code> タクティクスで <code class="docutils literal notranslate"><span class="pre">compute()</span></code> 実行後の証明状態を表示して確認できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> pow2_bound_19&#39;&#39;&#39; (x:nat{x &lt;= 19}) : <span class="k">Lemma</span> (pow2 x &lt; 1000000) =
+  FStar.Math.Lemmas.pow2_le_compat 19 x;
+  <span class="k">assert</span> (pow2 19 == 524288) <span class="k">by</span> (compute (); dump &quot;after compute&quot;);
+  <span class="k">assert</span> (pow2 x &lt; 1000000);
+  ()
+</pre></div>
+</div>
+<p>この版では、次のような出力が見えるはずです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>Goal 1/1
+x: x: nat{x &lt; 20}
+p: pure_post unit
+uu___: <span class="k">forall</span> (pure_result: unit). pow2 x &lt; 1000000 ==&gt; p pure_result
+pure_result: unit
+uu___&#39;0: pow2 x &lt;= pow2 19
+--------------------------------------------------------------------------------
+squash (524288 == 524288)
+<span class="c">(*?u144*)</span> <span class="k">_</span>
+</pre></div>
+</div>
+<p>（F* の出力、または emacs の fstar-mode.el を使っているなら goals バッファ）に表示されます。<code class="docutils literal notranslate"><span class="pre">print</span></code> プリミティブも有用です。</p>
+<p>「ゴール」は未解決の証明義務です。Meta-F* では（<code class="docutils literal notranslate"><span class="pre">assert..by</span></code> などで）ゴールを取り出し、（<code class="docutils literal notranslate"><span class="pre">compute</span></code> などで）変形し、場合によっては完全に解決できます。ここでは、<code class="docutils literal notranslate"><span class="pre">trivial()</span></code> という自明なゴール（等式など）を片付ける補助タクティクスで Z3 を使わずに解けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> pow2_bound_19&#39;&#39;&#39;&#39; (x:nat{x &lt;= 19}) : <span class="k">Lemma</span> (pow2 x &lt; 1000000) =
+  FStar.Math.Lemmas.pow2_le_compat 19 x;
+  <span class="k">assert</span> (pow2 19 == 524288) <span class="k">by</span> (
+    compute ();
+    trivial ();
+    qed ()
+   );
+  <span class="k">assert</span> (pow2 x &lt; 1000000);
+  ()
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">trivial()</span></code> 実行直後に <code class="docutils literal notranslate"><span class="pre">dump</span></code> すれば、残りのゴールがないことが分かります（<code class="docutils literal notranslate"><span class="pre">qed()</span></code> がチェックするのも同じことです）。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>Meta-F* はまだ完全な対話的証明スタイルには対応していないため、編集のたびに全体を再検証する必要があります。今後の改善を予定しています。</p>
+</div>
+<p>なお、仮定と先のアサーションから <code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">x</span> <span class="pre">&lt;</span> <span class="pre">1000000</span></code> を導くという「残り」の証明があります。これを証明の*骨格*と呼び、（既定では）Meta-F* は扱いません。一般に、タクティクスは SMT ソルバにとって難所となるアサーションのみに使い、残りはソルバに任せます。</p>
+</section>
+<section id="the-tac-effect">
+<h2><code class="docutils literal notranslate"><span class="pre">Tac</span></code> 効果<a class="headerlink" href="#the-tac-effect" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><a class="reference internal" href="../part2/part2_par.html#part2-par"><span class="std std-ref">以前の章</span></a> でモナドと計算効果に触れましたが、F* の効果システム全体はまだ説明していません。以下の一部は少し分かりづらいかもしれませんが、タクティクスを使うのに <code class="docutils literal notranslate"><span class="pre">Tac</span></code> 効果の実装詳細を理解する必要はありません。分からなければ読み飛ばして構いません。</p>
+</div>
+<p>では、タクティクスとは具体的に何でしょうか。これまで簡単なものを書いてきましたが、構造には深入りしていませんでした。</p>
+<p>F* のタクティクス／メタプログラムは、実体としては <em>特定の効果*（``Tac``）内の F</em> の項です。実用的なメタプログラムを作るには、Meta-F* の <em>プリミティブ</em> 群を使います（一覧は <code class="docutils literal notranslate"><span class="pre">FStar.Tactics.Builtins</span></code> にあります）。ここまで直接プリミティブは使わず、標準ライブラリの <em>派生</em> メタプログラムだけを使いました。</p>
+<p>内部的には、<code class="docutils literal notranslate"><span class="pre">Tac</span></code> は 1) <code class="docutils literal notranslate"><span class="pre">proofstate</span></code> を運ぶ状態モナド、2) 例外、3) 発散（非停止）の組み合わせで実装されています。状態モナドにより、すべてのゴールを手作業で扱わずとも暗黙に proofstate を運べます。例外はエラー処理に便利で、宣言された例外はメタプログラム内で <code class="docutils literal notranslate"><span class="pre">raise</span></code> でき、<code class="docutils literal notranslate"><span class="pre">try..with</span></code> も通常のプログラムと同様に機能します。<code class="docutils literal notranslate"><span class="pre">fail</span></code>、<code class="docutils literal notranslate"><span class="pre">catch</span></code>、<code class="docutils literal notranslate"><span class="pre">recover</span></code> といったプリミティブもあります。</p>
+<p>メタプログラムは直接実行できません。これは、状態や例外を持つ計算が <code class="docutils literal notranslate"><span class="pre">Pure</span></code> 片（および互い）から隔離されるのと同様に、純粋計算の健全性を保つためです。メタプログラムは F* が期待する箇所（<code class="docutils literal notranslate"><span class="pre">assert..by</span></code> など）でのみ使えます。この場合、F* は（通常は 1 つのゴールからなる）初期 proofstate でメタプログラムを実行し、その変更を許可します。</p>
+<p>健全性—すなわちメタプログラムが虚偽を証明できないこと—を保証するため、プリミティブはすべて、ゴールに対する小さく正当な変更だけを行うよう設計されています。これらから構成されるメタプログラムは、（抽象的な）proofstate に対してプリミティブ経由の変更以外は行えません。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Tac</span></code> に発散が含まれるのは奇妙に見えるかもしれません。発散を許すと、通常は劣基底再帰で偽の証明が作れてしまうからです。しかし、発散は <em>メタ</em> レベルでのみ起こる点に注意してください。発散するタクティクスを呼ぶと、F* は終了を待って無限ループし、アサーションを受理することはありません。</p>
+<p>ご存じのとおり、F* には元々例外と発散があります。Meta-F* のメタプログラムでは <code class="docutils literal notranslate"><span class="pre">Dv</span></code> や <code class="docutils literal notranslate"><span class="pre">Ex</span></code> の関数に加え、<code class="docutils literal notranslate"><span class="pre">Tot</span></code> や <code class="docutils literal notranslate"><span class="pre">Pure</span></code> の関数もそのまま使えます。例えばリストを扱うなら <code class="docutils literal notranslate"><span class="pre">FStar.List.Tot</span></code> をそのまま利用できます。</p>
+</section>
+<section id="goals">
+<h2>ゴール<a class="headerlink" href="#goals" title="Link to this heading"></a></h2>
+<p>概ね、Meta-F* のタクティクスは <em>ゴール</em> の集合である <em>proofstate</em> を操作します。プリミティブは通常、ゴールに対して働き（<code class="docutils literal notranslate"><span class="pre">compute()</span></code> による簡約や、より小さな <a href="#id1"><span class="problematic" id="id2">*</span></a>サブ*ゴールへの分割など）、証明を進めます。</p>
+<p>アサーションの証明では、ゴールはすべて <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">phi</span></code> の形（<code class="docutils literal notranslate"><span class="pre">phi</span></code> は証明すべき論理式）になります。ゴールを分解する 1 つの方法が <code class="docutils literal notranslate"><span class="pre">mapply</span></code> で、与えられた補題や関数を適用してゴールを解こうとし、必要ならその仮定や引数に対するサブゴールを追加します。これはタクティクス系で一般的な「後ろ向き推論」のスタイルです。</p>
+<p>例えば <code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">pow2</span> <span class="pre">19</span></code> のアサーションは次のようにも証明できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">assert</span> (pow2 x &lt;= pow2 19) <span class="k">by</span> (mapply (`FStar.Math.Lemmas.pow2_le_compat));
+</pre></div>
+</div>
+<p>これで <code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">pow2</span> <span class="pre">19</span></code> の証明は補題の前提 <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">19</span></code> に還元され、文脈上 Z3 が自動で示せます。補題の引数を明示する必要はありません。F* が*単一化*で推論してくれるからです。要するに、補題の事後条件と現在のアサーションが一致するよう、自明な引数の割り当てを見つけます。単一化で決まらない引数がある場合は、そのための新たなゴールが提示されます。</p>
+<p>このスタイルはより*外科的*で、<code class="docutils literal notranslate"><span class="pre">pow2</span> <span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">pow2</span> <span class="pre">19</span></code> の証明が関数の他の部分に「漏れません」。もしこの証明に複数の補助補題やソルバ設定の微調整が必要な場合でも、こうした局所化は堅牢性に効きます。</p>
+<p>多くのタクティクスは <em>現在の</em> ゴール（proofstate の先頭）に作用します。ゴール <code class="docutils literal notranslate"><span class="pre">g</span></code> を <code class="docutils literal notranslate"><span class="pre">g1,...,gn</span></code> に分割すると、新しい <code class="docutils literal notranslate"><span class="pre">g1,..,gn</span></code> は（通常）ゴールリストの先頭に追加されます。</p>
+<p>次の単純化した例では、いくつかの補題を前提に <code class="docutils literal notranslate"><span class="pre">p</span></code> から <code class="docutils literal notranslate"><span class="pre">s</span></code> を示します。まず <code class="docutils literal notranslate"><span class="pre">qr_s</span></code> を適用して、<code class="docutils literal notranslate"><span class="pre">q</span></code> と <code class="docutils literal notranslate"><span class="pre">r</span></code> の 2 つのサブゴールを得ます。先頭の <code class="docutils literal notranslate"><span class="pre">q</span></code> を解くため、他方に影響しないよう <code class="docutils literal notranslate"><span class="pre">focus</span></code> で現在のゴールに集中します。<code class="docutils literal notranslate"><span class="pre">p_r</span></code> を使って <code class="docutils literal notranslate"><span class="pre">q</span></code> を示すと、<code class="docutils literal notranslate"><span class="pre">p</span></code> のサブゴールが得られます。これは SMT に委ねたいので <code class="docutils literal notranslate"><span class="pre">smt()</span></code> を呼び、SMT ゴールに移します。<code class="docutils literal notranslate"><span class="pre">r</span></code> も同様に <code class="docutils literal notranslate"><span class="pre">p_r</span></code> で示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">assume</span> <span class="k">val</span> p : prop
+<span class="k">assume</span> <span class="k">val</span> q : prop
+<span class="k">assume</span> <span class="k">val</span> r : prop
+<span class="k">assume</span> <span class="k">val</span> s : prop
+
+<span class="k">assume</span> <span class="k">val</span> p_q : unit -&gt; <span class="k">Lemma</span> (<span class="k">requires</span> p) (<span class="k">ensures</span> q)
+<span class="k">assume</span> <span class="k">val</span> p_r : squash p -&gt; <span class="k">Lemma</span> r
+<span class="k">assume</span> <span class="k">val</span> qr_s : unit -&gt; <span class="k">Lemma</span> (q ==&gt; r ==&gt; s)
+
+<span class="k">let</span> test () : <span class="k">Lemma</span> (<span class="k">requires</span> p) (<span class="k">ensures</span> s) =
+  <span class="k">assert</span> s <span class="k">by</span> (
+    mapply (`qr_s);
+    focus (<span class="k">fun</span> () -&gt;
+      mapply (`p_q);
+      smt());
+    focus (<span class="k">fun</span> () -&gt;
+      mapply (`p_r);
+      smt());
+    ()
+  )
+</pre></div>
+</div>
+<p>このタクティクスの実行後は <code class="docutils literal notranslate"><span class="pre">p</span></code> の SMT ゴールだけが残り、Z3 が即座に片付けます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">mapply</span></code> は含意を与える補題、<code class="docutils literal notranslate"><span class="pre">requires</span></code>/<code class="docutils literal notranslate"><span class="pre">ensures</span></code> を持つ補題、さらには squashed な証明を引数にとる補題にも使えます。内部的には <code class="docutils literal notranslate"><span class="pre">apply_lemma</span></code> と <code class="docutils literal notranslate"><span class="pre">apply</span></code> のプリミティブで実装されていますが、通常それらを直接使う必要はありません。</p>
+<p>また、各部分の証明は互いに完全に分離されています。<code class="docutils literal notranslate"><span class="pre">p_gives_s</span></code> をサブ補題の直接呼び出しや SMT パターンの追加で証明することも可能ですが、そのスタイルはすぐに煩雑になりがちです。</p>
+</section>
+<section id="quotations">
+<h2>引用（quotation）<a class="headerlink" href="#quotations" title="Link to this heading"></a></h2>
+<p>先の例で、<code class="docutils literal notranslate"><span class="pre">(`FStar.Math.Lemmas.pow2_le_compat)</span></code> のようなバッククォートに気づいたかもしれません。これは*引用*（quotation）で、補題そのものではなく、その*構文*を表します。ちょうど「sun」という語が太陽を表す記号であるのと同じ発想です。</p>
+<p>引用は常に <code class="docutils literal notranslate"><span class="pre">term</span></code> 型（F* の AST を表す抽象型）を持ちます。</p>
+<p>Meta-F* には*アンチ引用*（antiquotation）もあり、既存の項を便利に加工できます。例えば <code class="docutils literal notranslate"><span class="pre">t</span></code> が項なら、<code class="docutils literal notranslate"><span class="pre">`(1</span> <span class="pre">+</span> <span class="pre">`#t)</span></code> で「<code class="docutils literal notranslate"><span class="pre">t</span></code> に 1 を足す」構文を作れます。アンチ引用（<code class="docutils literal notranslate"><span class="pre">`#</span></code>）の中身は <code class="docutils literal notranslate"><span class="pre">term</span></code> 型なら何でもかまいません。</p>
+<p>多くのメタプログラミング・プリミティブ（<code class="docutils literal notranslate"><span class="pre">apply_lemma</span></code> など）は、証明に使うため引数として <code class="docutils literal notranslate"><span class="pre">term</span></code> を受け取ります。この場合、その構文が意味のある型付き F* の項であることを確認するため、内部で型検査します（<code class="docutils literal notranslate"><span class="pre">term_to_string</span></code> など型検査しないものもあります）。</p>
+<p>引用は、<code class="docutils literal notranslate"><span class="pre">pack</span></code> を段階的に使う代わりの、構文を作るための簡便な手段に過ぎないことを後で見ます。</p>
+</section>
+<section id="basic-logic">
+<h2>基本的な論理タクティクス<a class="headerlink" href="#basic-logic" title="Link to this heading"></a></h2>
+<p>Meta-F* には「論理的」ゴールを扱うための定義済みタクティクスがいくつかあります。</p>
+<p>例えば含意 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">==&gt;</span> <span class="pre">q</span></code> を示すには、<code class="docutils literal notranslate"><span class="pre">implies_intro</span></code> で仮定を「導入」し、<code class="docutils literal notranslate"><span class="pre">p</span></code> を仮定した文脈で <code class="docutils literal notranslate"><span class="pre">q</span></code> のゴールに変えます。</p>
+<p>Coq などに慣れた方には単なる <code class="docutils literal notranslate"><span class="pre">intro</span></code> で、ラムダ抽象を作る操作です。F* では squash の都合で少し工夫が要り、後述のバインダを導入する <code class="docutils literal notranslate"><span class="pre">intro</span></code> とは別に <code class="docutils literal notranslate"><span class="pre">implies_intro</span></code> を用意しています。</p>
+<p>他の基本的な論理タクティクス:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">forall_intro</span></code>：ゴールが <code class="docutils literal notranslate"><span class="pre">forall</span> <span class="pre">x.</span> <span class="pre">p</span></code> のとき、新しい <code class="docutils literal notranslate"><span class="pre">x</span></code> を文脈に導入し、<code class="docutils literal notranslate"><span class="pre">p</span></code> のゴールにする。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">l_intros</span></code>：含意と全称を可能な限り導入する。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">split</span></code>：連言（<code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">/\</span> <span class="pre">q</span></code>）を 2 つのゴールに分割。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">left</span></code> / <code class="docutils literal notranslate"><span class="pre">right</span></code>：選言 <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">\/</span> <span class="pre">q</span></code> を、<code class="docutils literal notranslate"><span class="pre">p</span></code> または <code class="docutils literal notranslate"><span class="pre">q</span></code> のどちらかを示して証明。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">assumption</span></code>：文脈の仮定からゴールを示す。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pose_lemma</span></code>：補題呼び出しを表す項 <code class="docutils literal notranslate"><span class="pre">t</span></code> を与えると、その事後条件を文脈に追加。前提があれば別ゴールとして提示。</p></li>
+</ul>
+</div></blockquote>
+<p>詳しくは <a class="reference external" href="https://github.com/FStarLang/FStar/blob/master/ulib/FStar.Tactics.Logic.fst">FStar.Tactics.Logic</a> を参照してください。</p>
+</section>
+<section id="normalizing-and-unfolding">
+<h2>正規化と展開<a class="headerlink" href="#normalizing-and-unfolding" title="Link to this heading"></a></h2>
+<p>先に見た <code class="docutils literal notranslate"><span class="pre">compute()</span></code> は、F* の正規化器でゴールを一気に*正規形*へ落とします。より細かい制御が必要なときのため、さまざまな正規化タクティクスがあります。多くは設定可能な少数のプリミティブの組み合わせで実装されています（定義は標準ライブラリで確認できます）。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">compute()</span></code>：ほぼすべてのステップを有効にして正規化器を呼ぶ。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">simpl()</span></code>：論理式の簡約（例：<code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">/\</span> <span class="pre">True</span></code> を <code class="docutils literal notranslate"><span class="pre">p</span></code> に）。</p></li>
+<li><p><a href="#id1"><span class="problematic" id="id2">``</span></a>whnf()``（weak head normal form）：先頭が明らかになるまで軽く正規化。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unfold_def</span> <span class="pre">`t</span></code>：ゴール中の名前 <code class="docutils literal notranslate"><span class="pre">t</span></code> の定義を展開し、その本体を十分に正規化。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trivial()</span></code>：正規化・簡約後に自明となったゴールを解消。</p></li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">norm</span></code> プリミティブはきめ細かい制御を提供します（型は <code class="docutils literal notranslate"><span class="pre">list</span> <span class="pre">norm_step</span> <span class="pre">-&gt;</span> <span class="pre">Tac</span> <span class="pre">unit</span></code>）。<code class="docutils literal notranslate"><span class="pre">norm_step</span></code> の一覧は <code class="docutils literal notranslate"><span class="pre">FStar.Pervasives</span></code> にあり、<code class="docutils literal notranslate"><span class="pre">Pervasives</span></code> の <code class="docutils literal notranslate"><span class="pre">norm</span></code> マーカーと同じです（<code class="docutils literal notranslate"><span class="pre">Tactics.norm</span></code> と <code class="docutils literal notranslate"><span class="pre">Pervasives.norm</span></code> の名前衝突に注意）。</p>
+</section>
+<section id="inspecting-and-building-syntax">
+<h2>構文の観察と構築<a class="headerlink" href="#inspecting-and-building-syntax" title="Link to this heading"></a></h2>
+<p>証明自動化では、ゴールや文脈中の仮定の構文を観察して方針を決めることがよくあります。例えば <code class="docutils literal notranslate"><span class="pre">split</span></code> をやみくもに試して失敗からリカバリする代わりに、ゴールの*形*を見て <code class="docutils literal notranslate"><span class="pre">p1</span> <span class="pre">/\</span> <span class="pre">p2</span></code> のときだけ <code class="docutils literal notranslate"><span class="pre">split</span></code> する、などです。</p>
+<p>注意：構文の観察はどこでも自由に行えるわけではありません。関数が引数の構文を観察できると、<code class="docutils literal notranslate"><span class="pre">1+2</span></code> と <code class="docutils literal notranslate"><span class="pre">3</span></code> に異なる振る舞いをし得ますが、F* では <code class="docutils literal notranslate"><span class="pre">1+2</span> <span class="pre">==</span> <span class="pre">3</span></code> であり、等しい引数を同じ結果に写すべきです。したがって通常、<code class="docutils literal notranslate"><span class="pre">a</span></code> 型の値を構文に直すことはできません。このため引用は*静的*で、項の構文を表すだけで、値を項に変換することはできません。より強力な <em>動的引用</em> もありますが、これは <code class="docutils literal notranslate"><span class="pre">Tac</span></code> 効果内でのみ可能で、後ほど説明します。</p>
+<p>例として、<code class="docutils literal notranslate"><span class="pre">cur_goal()</span></code> は現在のゴールの構文を <code class="docutils literal notranslate"><span class="pre">typ</span></code> 型（F* の型の構文を示す <code class="docutils literal notranslate"><span class="pre">term</span></code> の別名）で返します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">term</span></code> 型は*抽象*で、それ自体の構造は観察できません。項を入れた不透明な「箱」と考えてください。<code class="docutils literal notranslate"><span class="pre">term</span></code> に対してできることは、型検査する <code class="docutils literal notranslate"><span class="pre">tc</span></code> や正規化する <code class="docutils literal notranslate"><span class="pre">norm_term</span></code> など、対応するプリミティブに渡すことです。ただし、いずれも項構造への完全なプログラム的アクセスは提供しません。</p>
+<p>そこで <code class="docutils literal notranslate"><span class="pre">term_view</span></code> の出番です。<a class="reference external" href="https://dl.acm.org/doi/10.1145/41625.41653">Phil Wadler による古典的な発想</a> に従い、<code class="docutils literal notranslate"><span class="pre">term</span></code> を <code class="docutils literal notranslate"><span class="pre">term_view</span></code> に変換する <code class="docutils literal notranslate"><span class="pre">inspect</span></code> 関数があります。<code class="docutils literal notranslate"><span class="pre">term_view</span></code> は AST に似ていますが、重要な点として再帰的ではなく、部分項は <code class="docutils literal notranslate"><span class="pre">term_view</span></code> ではなく <code class="docutils literal notranslate"><span class="pre">term</span></code> 型です。</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">term_view</span></code> 型の一部。</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">noeq</span>
+ <span class="nb">type</span> <span class="n">term_view</span> <span class="o">=</span>
+   <span class="o">|</span> <span class="n">Tv_FVar</span>   <span class="p">:</span> <span class="n">v</span><span class="p">:</span><span class="n">fv</span> <span class="o">-&gt;</span> <span class="n">term_view</span>
+   <span class="o">|</span> <span class="n">Tv_App</span>    <span class="p">:</span> <span class="n">hd</span><span class="p">:</span><span class="n">term</span> <span class="o">-&gt;</span> <span class="n">a</span><span class="p">:</span><span class="n">argv</span> <span class="o">-&gt;</span> <span class="n">term_view</span>
+   <span class="o">|</span> <span class="n">Tv_Abs</span>    <span class="p">:</span> <span class="n">bv</span><span class="p">:</span><span class="n">binder</span> <span class="o">-&gt;</span> <span class="n">body</span><span class="p">:</span><span class="n">term</span> <span class="o">-&gt;</span> <span class="n">term_view</span>
+   <span class="o">|</span> <span class="n">Tv_Arrow</span>  <span class="p">:</span> <span class="n">bv</span><span class="p">:</span><span class="n">binder</span> <span class="o">-&gt;</span> <span class="n">c</span><span class="p">:</span><span class="n">comp</span> <span class="o">-&gt;</span> <span class="n">term_view</span>
+   <span class="o">...</span>
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">inspect</span></code> は抽象の層を 1 段「はがし」、項のトップレベルの形にアクセスできるようにします。</p>
+<p>上の <code class="docutils literal notranslate"><span class="pre">Tv_FVar</span></code> は（出現としての）グローバル名を表します。<code class="docutils literal notranslate"><span class="pre">fv</span></code> 型も抽象で、<code class="docutils literal notranslate"><span class="pre">inspect_fv</span></code> により <code class="docutils literal notranslate"><span class="pre">name``（``list</span> <span class="pre">string</span></code>）として閲覧できます。</p>
+<p>例えば先ほど使った <code class="docutils literal notranslate"><span class="pre">`qr_s</span></code> を検査すると <code class="docutils literal notranslate"><span class="pre">Tv_FVar</span> <span class="pre">v</span></code> が得られ、<code class="docutils literal notranslate"><span class="pre">inspect_fv</span> <span class="pre">v</span></code> は <code class="docutils literal notranslate"><span class="pre">[&quot;Path&quot;;</span> <span class="pre">&quot;To&quot;;</span> <span class="pre">&quot;Module&quot;;</span> <span class="pre">&quot;qr_s&quot;]</span></code> のように、完全修飾名 <code class="docutils literal notranslate"><span class="pre">Path.To.Module.qr_s</span></code> を展開した形になります。</p>
+<p>（項、自由変数、束縛変数、バインダ、計算型など）あらゆる構文要素は <code class="docutils literal notranslate"><span class="pre">term</span></code> や <code class="docutils literal notranslate"><span class="pre">fv</span></code> と同様に抽象化され、対応する検査関数を持ちます。一覧は <code class="docutils literal notranslate"><span class="pre">FStar.Reflection.Builtins</span></code> にあります。</p>
+<p>検査対象が関数適用なら、<code class="docutils literal notranslate"><span class="pre">inspect</span></code> は <code class="docutils literal notranslate"><span class="pre">Tv_App</span> <span class="pre">f</span> <span class="pre">a</span></code> を返します。ここで <code class="docutils literal notranslate"><span class="pre">f</span></code> は <code class="docutils literal notranslate"><span class="pre">term</span></code> なので、構造を知るには再帰的に <code class="docutils literal notranslate"><span class="pre">inspect</span></code> します。<code class="docutils literal notranslate"><span class="pre">a</span></code> は*引数*で、<code class="docutils literal notranslate"><span class="pre">term</span></code> と引数修飾子（<code class="docutils literal notranslate"><span class="pre">aqualv</span></code>）からなります。修飾子は暗黙か明示かを示します。</p>
+<p>もちろん <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">y</span></code> のような多重適用は <code class="docutils literal notranslate"><span class="pre">(f</span> <span class="pre">x)</span> <span class="pre">y</span></code> と入れ子になりますから、検査すると <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span></code> と <code class="docutils literal notranslate"><span class="pre">y</span></code> を含む <code class="docutils literal notranslate"><span class="pre">Tv_App</span></code> が返ります（<code class="docutils literal notranslate"><span class="pre">Q_Explicit</span></code> 修飾）。適用の検査を助ける関数（項を「ヘッド」とすべての引数に分解する <code class="docutils literal notranslate"><span class="pre">collect_app</span></code> など）も用意されています。</p>
+<p>これを踏まえると、ゴールが連言か判定する関数が欲しくなります。素朴には、ゴールの形が <code class="docutils literal notranslate"><span class="pre">squash</span> <span class="pre">((/\)</span> <span class="pre">a1</span> <span class="pre">a2)</span></code>—すなわちヘッドが連言記号 <code class="docutils literal notranslate"><span class="pre">(/\)</span></code> で引数 2 つの適用—かを調べます。<code class="docutils literal notranslate"><span class="pre">term_view</span></code> でも可能ですが、情報が*多すぎて*不便です。</p>
+<p>そこで Meta-F* は論理式を直接表す <code class="docutils literal notranslate"><span class="pre">formula</span></code> 型を用意しています。<code class="docutils literal notranslate"><span class="pre">term_as_formula</span></code> を呼び、結果にマッチさせれば十分です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="c">(* Check if a given term is a conjunction, via term_as_formula. *)</span>
+<span class="k">let</span> isconj_t (t:term) : Tac bool =
+  <span class="k">match</span> term_as_formula t <span class="k">with</span>
+  | And <span class="k">_</span> <span class="k">_</span> -&gt; <span class="k">true</span>
+  | <span class="k">_</span> -&gt; <span class="k">false</span>
+
+<span class="c">(* Check if the goal is a conjunction. *)</span>
+<span class="k">let</span> isconj () : Tac bool = isconj_t (cur_goal ())
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">term_as_formula</span></code> を含む構文操作系の関数は、<code class="docutils literal notranslate"><span class="pre">inspect</span></code> を用いた「ユーザ空間」（ライブラリのタクティクス／メタプログラム）で定義されています。</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">formula</span></code> 型の一部。</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">noeq</span>
+<span class="nb">type</span> <span class="n">formula</span> <span class="o">=</span>
+  <span class="o">|</span> <span class="n">True_</span>  <span class="p">:</span> <span class="n">formula</span>
+  <span class="o">|</span> <span class="n">False_</span> <span class="p">:</span> <span class="n">formula</span>
+  <span class="o">|</span> <span class="n">And</span>    <span class="p">:</span> <span class="n">term</span> <span class="o">-&gt;</span> <span class="n">term</span> <span class="o">-&gt;</span> <span class="n">formula</span>
+  <span class="o">|</span> <span class="n">Or</span>     <span class="p">:</span> <span class="n">term</span> <span class="o">-&gt;</span> <span class="n">term</span> <span class="o">-&gt;</span> <span class="n">formula</span>
+  <span class="o">|</span> <span class="n">Not</span>    <span class="p">:</span> <span class="n">term</span> <span class="o">-&gt;</span> <span class="n">formula</span>
+  <span class="o">|</span> <span class="n">Implies</span><span class="p">:</span> <span class="n">term</span> <span class="o">-&gt;</span> <span class="n">term</span> <span class="o">-&gt;</span> <span class="n">formula</span>
+  <span class="o">|</span> <span class="n">Forall</span> <span class="p">:</span> <span class="n">bv</span> <span class="o">-&gt;</span> <span class="n">term</span> <span class="o">-&gt;</span> <span class="n">formula</span>
+  <span class="o">...</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>上級者向け注：F* の項は内部的に locally-nameless 表現（バインダ下では名前を持たず de Bruijn 指標を用いる）です。これは利点が多い反面、タクティクス／メタプログラミングでは扱いづらいことがあります。そこで <code class="docutils literal notranslate"><span class="pre">inspect</span></code> はバインダを越える際に変数を*開き*、完全に名前付きの表現に変換します。このため <code class="docutils literal notranslate"><span class="pre">inspect</span></code> は効果的（fresh な名前生成が必要）です。もし効果を避けて locally-nameless のまま扱いたい場合は、<code class="docutils literal notranslate"><span class="pre">inspect_ln``（``Tv_Var</span></code> の代わりに <code class="docutils literal notranslate"><span class="pre">Tv_BVar</span></code> を返す）を使えます。</p>
+</div>
+<p>逆に、<code class="docutils literal notranslate"><span class="pre">term_view</span></code> は <code class="docutils literal notranslate"><span class="pre">pack</span></code> プリミティブで <code class="docutils literal notranslate"><span class="pre">term</span></code> に戻せます。とはいえ、項の構築には上で述べたアンチ引用を使う方が通常は楽です。</p>
+</section>
+<section id="usual-gotchas">
+<h2>よくある落とし穴<a class="headerlink" href="#usual-gotchas" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">smt</span></code> タクティクスは SMT ソルバを*すぐには*呼びません。現在のゴールを「SMT Goals」リストに積むだけで、タクティクス呼び出しの終了時にまとめて送られます。失敗した場合に「もう一度試す」手段は今のところありません。</p></li>
+<li><p>タクティクスをネイティブコンパイルしてプラグインとして読み込んでいる場合、ソースを編集しても反映されないことがあります（ビルド系による）。再コンパイルするか、オブジェクトを削除するか、F* の <code class="docutils literal notranslate"><span class="pre">--no_plugins</span></code> を使って一時的にインタプリタ実行してください。</p></li>
+<li><p>補題の証明では、期待型が <code class="docutils literal notranslate"><span class="pre">unit</span></code> のため単に <code class="docutils literal notranslate"><span class="pre">_</span> <span class="pre">by</span> <span class="pre">...</span></code> とは書けません。回避策として、事後条件をあらためて assert するか、バインダなしで開始します。</p></li>
+</ul>
+</section>
+<section id="coming-soon">
+<h2>近日公開<a class="headerlink" href="#coming-soon" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>メタプログラミング</p></li>
+<li><p>メタ引数と型クラス</p></li>
+<li><p>プラグイン（高効率なタクティクス／メタプログラム、<code class="docutils literal notranslate"><span class="pre">--codegen</span> <span class="pre">Plugin</span></code> と <code class="docutils literal notranslate"><span class="pre">--load</span></code>）</p></li>
+<li><p>SMT オプションの調整</p></li>
+<li><p>inspect/pack の自動コアーション</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">&lt;:</span> <span class="pre">C</span> <span class="pre">by</span> <span class="pre">...</span></code></p></li>
+<li><p>calc 証明のステップとしてタクティクスを使う。</p></li>
+<li><p>暗黙引数の解決（Steel）</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part5.html" class="btn btn-neutral float-left" title="Meta-F* によるタクティクスとメタプログラミング" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../pulse/pulse.html" class="btn btn-neutral float-right" title="Pulse: 並行分離論理における証明指向プログラミング" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,399 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>長さインデックス付きリスト &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="Merkle 木" href="part2_merkle.html" />
+    <link rel="prev" title="帰納的型の定義" href="part2_inductive_type_families.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part2.html">帰納的型によるデータ・証明・計算の表現</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part2_inductive_type_families.html">帰納的型の定義</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">長さインデックス付きリスト</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#even-and-odd-lengthed-lists">偶数長・奇数長リスト</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vectors">ベクタ（長さ付きリスト）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getting-an-element-from-a-vector">ベクタから要素を取り出す</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exercises">練習問題</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exercise-concatenating-vectors">練習: ベクタの連結</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exercise-splitting-a-vector">練習: ベクタの分割</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#vectors-probably-not-worth-it">ベクタ: 実用面では微妙かも</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part2_merkle.html">Merkle 木</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_equality.html">等式型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_logical_connectives.html">構成的連言と古典的連言（論理結合子）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_stlc.html">単純型付きラムダ計算（STLC）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_phoas.html">高階抽象構文（HOAS）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_well_founded.html">良基底関係と停止性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_par.html">計算効果の最初のモデル</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part2_universes.html">ユニバース（Universes）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+      <li class="breadcrumb-item active">長さインデックス付きリスト</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="length-indexed-lists">
+<span id="part2-vectors"></span><h1>長さインデックス付きリスト<a class="headerlink" href="#length-indexed-lists" title="Link to this heading"></a></h1>
+<p>上の形式的定義のいくつかの側面を具体化するために、リストの長さ情報を保持するインデックスを備えた、パラメータ化リストのいくつかの変種を見ていきます。</p>
+<section id="even-and-odd-lengthed-lists">
+<h2>偶数長・奇数長リスト<a class="headerlink" href="#even-and-odd-lengthed-lists" title="Link to this heading"></a></h2>
+<p>最初の例は少し人工的ですが、相互帰納的型の使い方を示すのに役立ちます。</p>
+<p>ここでは <code class="docutils literal notranslate"><span class="pre">even</span></code> と <code class="docutils literal notranslate"><span class="pre">odd</span></code> という 2 つの型コンストラクタ（形式定義での <span class="math notranslate nohighlight">\(T_1\)</span> と <span class="math notranslate nohighlight">\(T_2\)</span>）を定義します。どちらもリスト要素の型を表す 1 つのパラメータ <code class="docutils literal notranslate"><span class="pre">(a:Type)</span></code> を取り、インデックスは持ちません。</p>
+<p><code class="docutils literal notranslate"><span class="pre">even</span> <span class="pre">a</span></code> 型のリストは必ず偶数個の要素を持ちます。最初のコンストラクタ <code class="docutils literal notranslate"><span class="pre">ENil</span></code> で要素数 0、または <code class="docutils literal notranslate"><span class="pre">ECons</span></code> で <code class="docutils literal notranslate"><span class="pre">odd</span> <span class="pre">a``（奇数長リスト）に</span> <span class="pre">1</span> <span class="pre">要素を足したものを作ります。``odd</span> <span class="pre">a</span></code> 型の要素はコンストラクタ <code class="docutils literal notranslate"><span class="pre">OCons</span></code> で構築され、<code class="docutils literal notranslate"><span class="pre">even</span> <span class="pre">a</span></code> に 1 要素を追加します。両者は互いの定義を参照するため、相互帰納的な型です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> even (a:Type) =
+ | ENil : even a
+ | ECons : a -&gt; odd a -&gt; even a
+<span class="k">and</span> odd (a:Type) =
+ | OCons : a -&gt; even a -&gt; odd a
+</pre></div>
+</div>
+<p>密接に関係していますが、<code class="docutils literal notranslate"><span class="pre">even</span> <span class="pre">a</span></code> と <code class="docutils literal notranslate"><span class="pre">odd</span> <span class="pre">a</span></code> は別個の帰納的型です。したがって、例えば長さを計算する場合は、通常これら 2 つを同時に処理する相互再帰関数の組を書きます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> elength #a (e:even a)
+  : n:nat { n % 2 == 0}
+  = <span class="k">match</span> e <span class="k">with</span>
+    | ENil -&gt; 0
+    | ECons <span class="k">_</span> tl -&gt; 1 + olength tl
+<span class="k">and</span> olength #a (o:odd a)
+  : n:nat { n % 2 == 1 }
+  = <span class="k">let</span> OCons <span class="k">_</span> tl = o <span class="k">in</span>
+    1 + elength tl
+</pre></div>
+</div>
+<p>なお、<code class="docutils literal notranslate"><span class="pre">even</span> <span class="pre">a</span></code> の長さは本当に偶数であり、<code class="docutils literal notranslate"><span class="pre">odd</span> <span class="pre">a</span></code> の長さは本当に奇数であることを証明できます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">even</span> <span class="pre">a</span></code> に関数を map したいとすると、<code class="docutils literal notranslate"><span class="pre">even</span></code> と <code class="docutils literal notranslate"><span class="pre">odd</span></code> の両方を同時に処理する相互再帰関数の組が必要になります。これはすぐに面倒になります。そこで、複数の独立した相互帰納型を展開する代わりに、関連する型を同一の帰納的型族にまとめる <em>インデックス付き型</em> を使えます。</p>
+<p>以下の <code class="docutils literal notranslate"><span class="pre">even_or_odd_list</span></code> の定義は、要素型を表す 1 つのパラメータ <code class="docutils literal notranslate"><span class="pre">a</span></code> と、リストが偶数長か奇数長かを示す 1 つのブールインデックスを持つ帰納的型です。コンストラクタではインデックスが変化しますが、パラメータはすべてのインスタンスで同じままです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> even_or_odd_list (a:Type) : bool -&gt; Type =
+ | EONil : even_or_odd_list a <span class="k">true</span>
+ | EOCons : a -&gt; #b:bool -&gt; even_or_odd_list a b -&gt; even_or_odd_list a (not b)
+</pre></div>
+</div>
+<p>これで偶数長・奇数長のリストを 1 つの型族として扱えるため、ブールインデックスを抽象化するだけで両方に適用できる単一の関数を書けます。たとえば <code class="docutils literal notranslate"><span class="pre">eo_length</span></code> は <code class="docutils literal notranslate"><span class="pre">even_or_odd_list</span></code> の長さを計算し、型から <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">true</span></code> のとき偶数、そうでないとき奇数を返すことが分かります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> eo_length #a #b (l:even_or_odd_list a b)
+  : <span class="k">Tot</span> (n:nat { <span class="k">if</span> b <span class="k">then</span> n % 2 == 0 <span class="k">else</span> n % 2 == 1})
+        (<span class="k">decreases</span> l)
+  = <span class="k">match</span> l <span class="k">with</span>
+    | EONil -&gt; 0
+    | EOCons <span class="k">_</span> tl -&gt; 1 + eo_length tl
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">eo_length</span></code> では、関数の停止性を示すために decreases 節を明示する必要がありました。理由は <a class="reference internal" href="../part1/part1_termination.html#part1-termination-default-measures"><span class="std std-ref">default measures</span></a> で説明したとおり、既定ではすべての引数の辞書式順序が減少測度として用いられるからです。decreases を指定しないと、F* は再帰呼び出しでインデックス引数 <code class="docutils literal notranslate"><span class="pre">b</span></code> が減少するかを示そうとしますが、実際には減少しません。</p>
+</div>
+<p>これは、パラメータとインデックスを併せ持つ最初の例です。しかし偶奇の区別だけで止める必要はありません。リストをその長さそのものでインデックス付けできます。</p>
+</section>
+<section id="vectors">
+<h2>ベクタ（長さ付きリスト）<a class="headerlink" href="#vectors" title="Link to this heading"></a></h2>
+<p><a class="reference internal" href="../intro.html#intro-vec"><span class="std std-ref">イントロダクション</span></a> で初めて示した <code class="docutils literal notranslate"><span class="pre">vec</span></code> 型の定義をもう一度見てみましょう。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> vec (a:Type) : nat -&gt; Type =
+  | Nil : vec a 0
+  | Cons : #n:nat -&gt; hd:a -&gt; tl:vec a n -&gt; vec a (n + 1)
+</pre></div>
+</div>
+<p>ここでは <code class="docutils literal notranslate"><span class="pre">vec</span></code> という 1 つの型コンストラクタ（<span class="math notranslate nohighlight">\(T_1\)</span>）を定義し、パラメータに <code class="docutils literal notranslate"><span class="pre">(a:Type)</span></code>、インデックスに 1 つの自然数 <code class="docutils literal notranslate"><span class="pre">nat</span></code> を取ります。</p>
+<p><code class="docutils literal notranslate"><span class="pre">vec</span></code> には 2 つのデータコンストラクタがあります。<code class="docutils literal notranslate"><span class="pre">Nil</span></code> は空ベクタ <code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">a</span> <span class="pre">0</span></code> を作り、<code class="docutils literal notranslate"><span class="pre">Cons</span> <span class="pre">hd</span> <span class="pre">tl</span></code> は先頭 <code class="docutils literal notranslate"><span class="pre">hd:a</span></code> と末尾 <code class="docutils literal notranslate"><span class="pre">tl</span> <span class="pre">:</span> <span class="pre">vec</span> <span class="pre">a</span> <span class="pre">n</span></code> から <code class="docutils literal notranslate"><span class="pre">vec</span> <span class="pre">a</span> <span class="pre">(n</span> <span class="pre">+</span> <span class="pre">1)</span></code> を構築します。つまり同じパラメータ <code class="docutils literal notranslate"><span class="pre">a</span></code> を共有しつつ、インデックス（<code class="docutils literal notranslate"><span class="pre">0</span></code> と <code class="docutils literal notranslate"><span class="pre">n+1</span></code>）が異なるインスタンスを生成します。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>OCaml や F# を含む多くの ML 系言語のデータ型はパラメータこそ持ちますが、インデックスは持ちません。したがってすべてのコンストラクタは同じ型インスタンスを構築します。また各コンストラクタは高々 1 引数を取ります。データ型がこれらの制約に収まるなら、F* でも OCaml/F# に似た記法を用いられます。例えば次は OCaml 風の <code class="docutils literal notranslate"><span class="pre">option</span></code> 型の定義です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> option a =
+  | None
+  | Some <span class="k">of</span> a
+</pre></div>
+</div>
+<p>これは次と等価です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> option a =
+  | None : option a
+  | Some : a -&gt; option a
+</pre></div>
+</div>
+</div>
+</section>
+<section id="getting-an-element-from-a-vector">
+<h2>ベクタから要素を取り出す<a class="headerlink" href="#getting-an-element-from-a-vector" title="Link to this heading"></a></h2>
+<p>長さ付きの <code class="docutils literal notranslate"><span class="pre">vec</span></code> 型を用いると、長さ情報を活用して健全性を保証する型の関数が書けます。例えばベクタの第 <code class="docutils literal notranslate"><span class="pre">i</span></code> 要素を取得するには次のように書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> get #a #n (i:nat{i &lt; n}) (v:vec a n)
+  : a
+  = <span class="k">match</span> v <span class="k">with</span>
+    | Nil -&gt; false_elim()
+    | Cons hd tl -&gt;
+      <span class="k">if</span> i = 0 <span class="k">then</span> hd
+      <span class="k">else</span> get (i - 1) tl
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">get</span> <span class="pre">i</span> <span class="pre">v</span></code> の型は、<code class="docutils literal notranslate"><span class="pre">i</span></code> が <code class="docutils literal notranslate"><span class="pre">v</span></code> の長さ <code class="docutils literal notranslate"><span class="pre">n</span></code> より小さい、すなわち範囲内であることを表します。これにより、常に型 <code class="docutils literal notranslate"><span class="pre">a</span></code> の要素を返せることが保証されます。この関数が F* によってどのように型検査されるかを少し詳しく見てみましょう。</p>
+<p>第一の要点は <code class="docutils literal notranslate"><span class="pre">v</span></code> へのパターンマッチです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">match</span> v <span class="k">with</span>
+| Nil -&gt; false_elim()
+| Cons hd tl -&gt;
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">v</span></code> が <code class="docutils literal notranslate"><span class="pre">Nil</span></code> の場合、その分岐は起こり得ないことを表すために、ライブラリ関数 <code class="docutils literal notranslate"><span class="pre">Prims.false_elim</span> <span class="pre">:</span> <span class="pre">squash</span> <span class="pre">False</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code> を使います。直感的には、<code class="docutils literal notranslate"><span class="pre">i</span></code> が長さ <code class="docutils literal notranslate"><span class="pre">n</span></code> より厳密に小さい自然数なので、<code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">≠</span> <span class="pre">0</span></code> を F* に納得させられるはずです。</p>
+<p>これは、F* が分岐を型検査する際、<code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">:</span> <span class="pre">vec</span> <span class="pre">a</span> <span class="pre">n</span></code> とパターン <code class="docutils literal notranslate"><span class="pre">Nil</span> <span class="pre">:</span> <span class="pre">vec</span> <span class="pre">a</span> <span class="pre">0</span></code> が等しいという <em>等式</em> をコンテキストに追加することで機能します。この前提の下で <code class="docutils literal notranslate"><span class="pre">false_elim</span></code> が型に適合するかを確認し、<code class="docutils literal notranslate"><span class="pre">()</span> <span class="pre">:</span> <span class="pre">squash</span> <span class="pre">False</span></code> が必要になります。その結果として SMT ソルバに証明課題が送られ、<code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">=</span> <span class="pre">Nil</span></code> から <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">0</span></code> が導かれ、<code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">n</span></code> と矛盾するため、この場合 <code class="docutils literal notranslate"><span class="pre">False</span></code> が証明されます。言い換えると、事前条件 <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">n</span></code> のもとでは <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">=</span> <span class="pre">Nil</span></code> の分岐は到達不能です。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>分岐が到達不能な場合、明示的に <code class="docutils literal notranslate"><span class="pre">false_elim</span></code> を書く代わりに、その分岐自体を省略できます。たとえば次のように書くのが一般的です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> get #a #n (i:nat{i &lt; n}) (v:vec a n)
+  : a
+  = <span class="k">let</span> Cons hd tl = v <span class="k">in</span>
+    <span class="k">if</span> i = 0 <span class="k">then</span> hd
+    <span class="k">else</span> get (i - 1) tl
+</pre></div>
+</div>
+<p>ここでは <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">Cons</span> <span class="pre">hd</span> <span class="pre">tl</span> <span class="pre">=</span> <span class="pre">v</span></code> として、<code class="docutils literal notranslate"><span class="pre">v</span></code> を <code class="docutils literal notranslate"><span class="pre">Cons</span> <span class="pre">hd</span> <span class="pre">tl</span></code> にだけパターンマッチしています。他のケースが到達不能であることは F* が自動で証明します。</p>
+</div>
+<p>次に 2 つ目のケースに移ります。パターンは次のようになります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">match</span> v <span class="k">with</span>
+| Cons hd tl -&gt;
+</pre></div>
+</div>
+<p>ただし、<code class="docutils literal notranslate"><span class="pre">Cons</span></code> には <code class="docutils literal notranslate"><span class="pre">tl</span></code> の長さを表す暗黙の第 1 引数があることを思い出してください。より明示的には、次の形になり、ここで <code class="docutils literal notranslate"><span class="pre">tl</span> <span class="pre">:</span> <span class="pre">vec</span> <span class="pre">a</span> <span class="pre">m</span></code> です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">match</span> v <span class="k">with</span>
+| Cons #m hd tl -&gt;
+</pre></div>
+</div>
+<p>F* は <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">==</span> <span class="pre">Cons</span> <span class="pre">#m</span> <span class="pre">hd</span> <span class="pre">tl</span></code> という等式を含む文脈でこの分岐を型検査します。<code class="docutils literal notranslate"><span class="pre">Cons</span></code> の型から、そこから <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">==</span> <span class="pre">m</span> <span class="pre">+</span> <span class="pre">1</span></code> を結論できます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">=</span> <span class="pre">0</span></code> の場合、求める要素が見つかったのでそれを返します。</p>
+<p>それ以外の場合は <code class="docutils literal notranslate"><span class="pre">get</span> <span class="pre">(i</span> <span class="pre">-</span> <span class="pre">1)</span> <span class="pre">tl</span></code> を再帰呼び出しします。ここで F* は次を示す必要があります。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get</span></code> の暗黙引数を <code class="docutils literal notranslate"><span class="pre">tl</span></code> の長さである <code class="docutils literal notranslate"><span class="pre">m</span></code> にインスタンス化すること。すなわち明示的には再帰呼び出しは <code class="docutils literal notranslate"><span class="pre">get</span> <span class="pre">#m</span> <span class="pre">(i</span> <span class="pre">-</span> <span class="pre">1)</span> <span class="pre">tl</span></code> です。これは F* の型推論の一部である単一化アルゴリズムにより行われます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">(i</span> <span class="pre">-</span> <span class="pre">1)</span> <span class="pre">&lt;</span> <span class="pre">m</span></code> を示すこと。これは <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">n</span></code> と <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">==</span> <span class="pre">m</span> <span class="pre">+</span> <span class="pre">1</span></code> から従います。</p></li>
+<li><p>再帰呼び出しが停止すること、すなわち <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">&lt;&lt;</span> <span class="pre">n``（自然数なので同値に</span> <span class="pre">``m</span> <span class="pre">&lt;</span> <span class="pre">n</span></code>）を示すこと。これは <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">==</span> <span class="pre">m</span> <span class="pre">+</span> <span class="pre">1</span></code> から容易です。</p></li>
+</ul>
+</div></blockquote>
+<p>いくつか練習問題をやってみましょう。肝は関数に相応しい型を見つけることです。それさえ決まれば、あとはコードが“自ずと書ける”はずです。</p>
+</section>
+<section id="exercises">
+<h2>練習問題<a class="headerlink" href="#exercises" title="Link to this heading"></a></h2>
+<section id="exercise-concatenating-vectors">
+<h3>練習: ベクタの連結<a class="headerlink" href="#exercise-concatenating-vectors" title="Link to this heading"></a></h3>
+<p>演習用ファイルは <a class="reference external" href="../code/exercises/Part2.Vec.fst">こちら</a>。</p>
+<p>ベクタを連結する関数を実装してください。シグネチャは次のとおりです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> append (#a:Type) (#n #m:nat) (v1:vec a n) (v2:vec a m)
+  : vec a (n + m)
+</pre></div>
+</div>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> append #a #n #m (v1:vec a n) (v2:vec a m)
+  : vec a (n + m)
+  = <span class="k">match</span> v1 <span class="k">with</span>
+    | Nil -&gt; v2
+    | Cons hd tl -&gt; Cons hd (append tl v2)
+</pre></div>
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="exercise-splitting-a-vector">
+<h3>練習: ベクタの分割<a class="headerlink" href="#exercise-splitting-a-vector" title="Link to this heading"></a></h3>
+<p>ベクタ <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">:</span> <span class="pre">vec</span> <span class="pre">a</span> <span class="pre">n</span></code> をインデックス <code class="docutils literal notranslate"><span class="pre">i</span></code> で分割する <code class="docutils literal notranslate"><span class="pre">split_at</span></code> を実装してください。先頭から長さ <code class="docutils literal notranslate"><span class="pre">i</span></code> の前半部分と、位置 <code class="docutils literal notranslate"><span class="pre">i</span></code> から始まる後半部分に分けます。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> split_at #a #n (i:nat{i &lt;= n}) (v:vec a n)
+  : vec a i &amp; vec a (n - i)
+  = <span class="k">if</span> i = 0
+    <span class="k">then</span> Nil, v
+    <span class="k">else</span> <span class="k">let</span> Cons hd tl = v <span class="k">in</span>
+         <span class="k">let</span> l, r = split_at (i - 1) tl <span class="k">in</span>
+         Cons hd l, r
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<p><code class="docutils literal notranslate"><span class="pre">split_at</span></code> の末尾再帰版を実装してください。補助として <code class="docutils literal notranslate"><span class="pre">reverse</span></code> 関数が必要になります。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> reverse #a #n (v:vec a n)
+  : vec a n
+  = <span class="k">match</span> v <span class="k">with</span>
+    | Nil -&gt; Nil
+    | Cons hd tl -&gt; append (reverse tl) (Cons hd Nil)
+</pre></div>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> split_at_tail #a #n (i:nat{i &lt;= n}) (v:vec a n)
+  : vec a i &amp; vec a (n - i)
+  = <span class="k">let</span> <span class="k">rec</span> aux (j:nat{j &lt;= i})
+                (v:vec a (n - (i - j)))
+                (out:vec a (i - j))
+      : vec a i &amp; vec a (n - i)
+      = <span class="k">if</span> j = 0
+        <span class="k">then</span> reverse out, v
+        <span class="k">else</span> <span class="k">let</span> Cons hd tl = v <span class="k">in</span>
+             aux (j - 1) tl (Cons hd out)
+    <span class="k">in</span>
+    aux i v Nil
+</pre></div>
+</div>
+</div>
+<p>ボーナス: <code class="docutils literal notranslate"><span class="pre">split_at</span></code> と <code class="docutils literal notranslate"><span class="pre">split_at_tail</span></code> が同値であることを証明してください。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="vectors-probably-not-worth-it">
+<h2>ベクタ: 実用面では微妙かも<a class="headerlink" href="#vectors-probably-not-worth-it" title="Link to this heading"></a></h2>
+<p>依存型の入門では本稿のように長さ付きベクタがよく取り上げられますが、実務では <code class="docutils literal notranslate"><span class="pre">vec</span></code> をそのまま使いたい場面は多くないかもしれません。特に F* では通常のリストに対して簡単に精密化型（refinement type）を使えるため、長さ付きベクタは多くの場合冗長です。単に <code class="docutils literal notranslate"><span class="pre">length</span></code> 関数で型を精密化すれば足ります。以下がその例です。</p>
+<blockquote>
+<div><div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> LList
+
+<span class="k">let</span> <span class="k">rec</span> length #a (l:list a)
+  : nat
+  = <span class="k">match</span> l <span class="k">with</span>
+    | [] -&gt; 0
+    | <span class="k">_</span>::tl -&gt; 1 + length tl
+
+<span class="k">let</span> <span class="k">rec</span> get #a (i:nat) (v:list a { i &lt; length v })
+  = <span class="k">let</span> hd :: tl = v <span class="k">in</span>
+    <span class="k">if</span> i = 0 <span class="k">then</span> hd
+    <span class="k">else</span> get (i - 1) tl
+
+<span class="k">let</span> <span class="k">rec</span> split_at #a (i:nat) (v:list a { i &lt;= length v })
+  : r:(list a &amp; list a){
+        length (fst r) == i /\
+        length (snd r) == (length v - i)
+     }
+  = <span class="k">if</span> i = 0
+    <span class="k">then</span> [], v
+    <span class="k">else</span> <span class="k">let</span> hd :: tl = v <span class="k">in</span>
+         <span class="k">let</span> l, r = split_at (i - 1) tl <span class="k">in</span>
+         hd::l, r
+
+<span class="k">let</span> <span class="k">rec</span> append #a (v1 v2:list a)
+  : v:list a { length v == length v1 + length v2 }
+  = <span class="k">match</span> v1 <span class="k">with</span>
+    | [] -&gt; v2
+    | hd::tl -&gt; hd :: append tl v2
+</pre></div>
+</div>
+</div></blockquote>
+<p>次のいくつかの節では、単なる長さ付きベクタよりも実用的な、インデックス付き帰納的型の例を見ていきます。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part2_inductive_type_families.html" class="btn btn-neutral float-left" title="帰納的型の定義" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part2_merkle.html" class="btn btn-neutral float-right" title="Merkle 木" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

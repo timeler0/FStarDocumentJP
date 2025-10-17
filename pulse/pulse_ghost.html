@@ -1,0 +1,417 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ゴースト計算 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="高階関数" href="pulse_higher_order.html" />
+    <link rel="prev" title="可変配列" href="pulse_arrays.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pulse_getting_started.html">Codespaces でのセットアップ手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch1.html">Pulse の基本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_ch2.html">可変参照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_existentials.html">存在量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_user_defined_predicates.html">ユーザー定義述語</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_conditionals.html">条件分岐</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_loops.html">ループと再帰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_arrays.html">可変配列</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ゴースト計算</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ghost-functions">ゴースト関数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#some-primitive-ghost-functions">いくつかの基本的なゴースト関数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recursive-predicates-and-ghost-lemmas">再帰述語とゴースト補題</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#recursive-ghost-lemmas">再帰的ゴースト補題</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mutable-ghost-references">可変ゴースト参照</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#a-somewhat-contrived-example">やや作為的な例</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_higher_order.html">高階関数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_implication_and_forall.html">含意と全称量化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_linked_list.html">連結リスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_atomics_and_invariants.html">アトミック操作と不変条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_spin_lock.html">スピンロック</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_parallel_increment.html">並列インクリメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pulse_extraction.html">抽出（エクストラクション）</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+      <li class="breadcrumb-item active">ゴースト計算</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="ghost-computations">
+<span id="pulse-ghost"></span><h1>ゴースト計算<a class="headerlink" href="#ghost-computations" title="Link to this heading"></a></h1>
+<p>純粋な F* の章を通じて、プログラムの性質を証明するために <code class="docutils literal notranslate"><span class="pre">Lemma</span></code> とゴースト関数を常用してきました。思い出していただくと、Lemma は常に <code class="docutils literal notranslate"><span class="pre">unit</span></code> を返す純粋かつ全域的な関数であり、計算的な意味を持たず F* コンパイラによって消去されます。F* の <a class="reference internal" href="../part4/part4_ghost.html#part4-ghost"><span class="std std-ref">ゴースト関数</span></a> も純粋・全域的ですが、消去された値を制御下で参照できる点が異なります—これらも最終的にはコンパイラにより消去されます。</p>
+<p>既に見たように、F* の lemma とゴースト関数は Pulse のコードから直接利用できます。しかしそれらは、スコープ内の純粋な値に関する性質を述べる場合に限って有用です。Pulse ではしばしば、状態について述べ、<code class="docutils literal notranslate"><span class="pre">slprop</span></code> を操作するような lemma が必要になります。そのために Pulse は独自の <em>ゴースト計算*（F</em> の lemma／ゴースト関数に相当しますが、<code class="docutils literal notranslate"><span class="pre">slprop</span></code> を用いて記述されるもの）と、<em>ゴースト状態*（F</em> の消去型に相当しますが、計算的には無意味でありつつ可変な状態）を提供します。ゴースト計算は Pulse の至るところで使われ—すでにいくつか例を見ました—特に並行プログラムの証明ではゴースト状態が有用です。</p>
+<section id="ghost-functions">
+<h2>ゴースト関数<a class="headerlink" href="#ghost-functions" title="Link to this heading"></a></h2>
+<p>次の Pulse 関数は型検査に失敗し、以下のようなエラーになります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@expect_failure]
+<span class="k">fn</span> incr_erased_non_ghost (x:erased int)
+<span class="k">requires</span> emp
+<span class="k">returns</span> y:int
+<span class="k">ensures</span> emp ** pure (y == x + 1)
+{
+  <span class="k">let</span> x = reveal x;
+  (x + 1)
+}
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Cannot</span> <span class="n">bind</span> <span class="n">ghost</span> <span class="n">expression</span> <span class="n">reveal</span> <span class="n">x</span> <span class="k">with</span> <span class="n">ST</span> <span class="n">computation</span>
+</pre></div>
+</div>
+<p>これは失敗して当然です。消去された整数 <code class="docutils literal notranslate"><span class="pre">x</span></code> をインクリメントして整数 <code class="docutils literal notranslate"><span class="pre">y</span></code> を計算できると主張しているからです。<code class="docutils literal notranslate"><span class="pre">x:erased</span> <span class="pre">int</span></code> は実行時には存在しないため、このプログラムはコンパイルできません。</p>
+<p>しかし関数に <code class="docutils literal notranslate"><span class="pre">ghost</span></code> 修飾子を付ければ動作します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> incr_erased (x:erased int)
+<span class="k">requires</span> emp
+<span class="k">returns</span> y:int
+<span class="k">ensures</span> emp ** pure (y == x + 1)
+{
+  <span class="k">let</span> x = reveal x;
+  (x + 1)
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ghost</span></code> 修飾子は、その関数が実行時に消去されることを Pulse に示します。そのため <code class="docutils literal notranslate"><span class="pre">FStar.Ghost.reveal</span></code> のような <code class="docutils literal notranslate"><span class="pre">GTot</span></code> 効果の F* 関数を利用できます。</p>
+<p>ただし健全性のため、コンパイルされるコードが <code class="docutils literal notranslate"><span class="pre">ghost</span></code> 関数の戻り値に依存してはなりません。したがって、次のコードはエラーになります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>[@@expect_failure]
+<span class="k">fn</span> use_incr_erased (x:erased int)
+<span class="k">requires</span> emp
+<span class="k">returns</span> y:int
+<span class="k">ensures</span> emp ** pure (y == x + 1)
+{
+  incr_erased x;
+}
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Expected</span> <span class="n">a</span> <span class="n">term</span> <span class="k">with</span> <span class="n">a</span> <span class="n">non</span><span class="o">-</span><span class="n">informative</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="p">,</span> <span class="n">erased</span><span class="p">)</span> <span class="nb">type</span><span class="p">;</span> <span class="n">got</span> <span class="nb">int</span>
+</pre></div>
+</div>
+<p>つまり、非ゴースト文脈から <code class="docutils literal notranslate"><span class="pre">ghost</span></code> 関数を呼ぶ場合、その戻り型は <code class="docutils literal notranslate"><span class="pre">erased</span></code> や <code class="docutils literal notranslate"><span class="pre">unit</span></code> といった非情報型である必要があります。非情報型のクラスと、F* の <a class="reference internal" href="../part4/part4_ghost.html#ghost-in-total-contexts"><span class="std std-ref">ゴースト計算を全域的文脈で使用可能にする規則</span></a> はここで説明されており、同じ規則が Pulse にも適用されます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">incr_erased</span></code> を非ゴースト文脈で使うには、その結果を消去しなければなりません。方法はいくつかあります。</p>
+<p>やや冗長ですが明示的な方法として、<code class="docutils literal notranslate"><span class="pre">incr_erased</span></code> の呼び出しを包む入れ子のゴースト関数を定義する手があります。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> use_incr_erased (x:erased int)
+<span class="k">requires</span> emp
+<span class="k">returns</span> y:erased int
+<span class="k">ensures</span> emp ** pure (y == x + 1)
+{
+  <span class="k">ghost</span>
+  <span class="k">fn</span> wrap (x:erased int)
+  <span class="k">requires</span> emp
+  <span class="k">returns</span> y:erased int
+  <span class="k">ensures</span> emp ** pure (y == x + 1)
+  {
+    <span class="k">let</span> y = incr_erased x;
+    hide y
+  };
+  wrap x
+}
+</pre></div>
+</div>
+<p>ライブラリにはゴースト呼び出しの結果を消去する高階コンビネータ <code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Pervasives.call_ghost</span></code> も用意されています。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> use_incr_erased_alt (x:erased int)
+<span class="k">requires</span> emp
+<span class="k">returns</span> y:erased int
+<span class="k">ensures</span> emp ** pure (y == x + 1)
+{ 
+  call_ghost incr_erased x;
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">call_ghost</span></code> は引数個数の異なるゴースト関数にも使えますが、適用は次のようにカリー化されている必要があります。</p>
+<p>例えば <code class="docutils literal notranslate"><span class="pre">add_erased</span></code> のような 2 引数のゴースト関数があるとします。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> add_erased (x y:erased int)
+<span class="k">requires</span> emp
+<span class="k">returns</span> z:int
+<span class="k">ensures</span> emp ** pure (z == x + y)
+{
+  <span class="k">let</span> x = reveal x;
+  <span class="k">let</span> y = reveal y;
+  (x + y)
+}
+</pre></div>
+</div>
+<p>これを非ゴースト文脈で呼ぶには、次のようにします。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> use_add_erased (x y:erased int)
+<span class="k">requires</span> emp
+<span class="k">returns</span> z:erased int
+<span class="k">ensures</span> emp ** pure (z == x + y)
+{
+  call_ghost (add_erased x) y
+}
+</pre></div>
+</div>
+<p>とはいえ、非ゴースト文脈で使えるようにするには結局戻り型を非情報型にする必要があるので、各呼び出し箇所でラップするより、最初からそのように定義しておくのが一般に良いでしょう。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> add_erased_erased (x y:erased int)
+<span class="k">requires</span> emp
+<span class="k">returns</span> z:erased int
+<span class="k">ensures</span> emp ** pure (z == x + y)
+{
+  <span class="k">let</span> x = reveal x;
+  <span class="k">let</span> y = reveal y;
+  hide (x + y)
+}
+</pre></div>
+</div>
+</section>
+<section id="some-primitive-ghost-functions">
+<h2>いくつかの基本的なゴースト関数<a class="headerlink" href="#some-primitive-ghost-functions" title="Link to this heading"></a></h2>
+<p>前後条件が <code class="docutils literal notranslate"><span class="pre">emp</span></code> や <code class="docutils literal notranslate"><span class="pre">pure</span> <span class="pre">_</span></code> のようなゴースト関数はあまり面白くありません—それらは通常の F* のゴースト関数で書けるからです。</p>
+<p>ゴースト関数はしばしば <code class="docutils literal notranslate"><span class="pre">slprop</span></code> 間の同値性を示す証明ステップとして用いられます。以前 <a class="reference internal" href="pulse_conditionals.html#pulse-nullable-ref-helpers"><span class="std std-ref">ゴースト関数の例</span></a> をいくつか見ましたが、それらは Pulse ライブラリの <code class="docutils literal notranslate"><span class="pre">ghost</span></code> 関数の合成として実装されているためゴーストです。</p>
+<p><a class="reference internal" href="pulse_user_defined_predicates.html#pulse-rewriting"><span class="std std-ref">以前</span></a> 見た <code class="docutils literal notranslate"><span class="pre">rewrite</span></code> プリミティブも、実は Pulse ライブラリで定義された関数です。そのシグネチャは次のようになっています。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> __rewrite (p q:slprop)
+<span class="k">requires</span> p ** pure (p == q)
+<span class="k">ensures</span> q
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">fold</span></code> や <code class="docutils literal notranslate"><span class="pre">unfold</span></code> など他の多くのプリミティブも <code class="docutils literal notranslate"><span class="pre">rewrite</span></code> を用いて定義されており、ゴースト計算です。</p>
+<p><code class="docutils literal notranslate"><span class="pre">introduce</span> <span class="pre">exists*</span></code> のような他のプリミティブも、次のようなシグネチャを持つライブラリのゴースト関数として実装されています。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> intro_exists (#a:Type0) (p:a -&gt; slprop) (x:erased a)
+<span class="k">requires</span> p x
+<span class="k">ensures</span> <span class="k">exists</span>* x. p x
+</pre></div>
+</div>
+</section>
+<section id="recursive-predicates-and-ghost-lemmas">
+<span id="pulse-recursive-predicates"></span><h2>再帰述語とゴースト補題<a class="headerlink" href="#recursive-predicates-and-ghost-lemmas" title="Link to this heading"></a></h2>
+<p>以前、データ構造の表現述語などを <a class="reference internal" href="pulse_user_defined_predicates.html#pulse-definedvprops"><span class="std std-ref">独自の述語として定義</span></a> する方法を見ました。<code class="docutils literal notranslate"><span class="pre">slprop</span></code> は通常の型に過ぎないため、F* で再帰的に定義することもできます。Pulse でこれらの再帰述語を扱う際は、補題として再帰的なゴースト関数を書くのが一般的です。ここでは簡単な例を示し、連結リストのような無界構造を扱う後続章で再訪します。</p>
+<p>参照のリストがあり、それぞれが高々 <code class="docutils literal notranslate"><span class="pre">n</span></code> の整数を保持していることを表したいとします。そのための再帰述語が <code class="docutils literal notranslate"><span class="pre">all_at_most</span> <span class="pre">l</span> <span class="pre">n</span></code> です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">rec</span> all_at_most (l:list (ref nat)) (n:nat)
+: slprop
+= <span class="k">match</span> l <span class="k">with</span>
+  | [] -&gt; emp
+  | hd::tl -&gt; <span class="k">exists</span>* (i:nat). pts_to hd i ** pure (i &lt;= n) ** all_at_most tl n
+</pre></div>
+</div>
+<p><a class="reference internal" href="pulse_conditionals.html#pulse-nullable-ref-helpers"><span class="std std-ref">ヌル許容参照</span></a> のときと同様に、各場合分けに対応してこの述語を導入・除去する小さなゴースト関数群を用意しておくと便利です。</p>
+<section id="recursive-ghost-lemmas">
+<h3>再帰的ゴースト補題<a class="headerlink" href="#recursive-ghost-lemmas" title="Link to this heading"></a></h3>
+<p>Pulse では、Pulse コードで使う補題として再帰的なゴースト関数を書くことができます。F* の補題と同様、再帰ゴースト関数は全ての入力で停止することを証明しなければなりません—さもないと健全ではありません。</p>
+<p>実例として、<code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">&lt;=</span> <span class="pre">m</span></code> なら <code class="docutils literal notranslate"><span class="pre">all_at_most</span> <span class="pre">l</span> <span class="pre">n</span></code> を <code class="docutils literal notranslate"><span class="pre">all_at_most</span> <span class="pre">l</span> <span class="pre">m</span></code> へ弱められることを示すゴースト関数を書きましょう。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">ghost</span>
+<span class="k">fn</span> <span class="k">rec</span> weaken_at_most (l:list (ref nat)) (n:nat) (m:nat)
+<span class="k">requires</span> all_at_most l n ** pure (n &lt;= m)
+<span class="k">ensures</span> all_at_most l m
+<span class="k">decreases</span> l
+{
+  <span class="k">match</span> l {
+    [] -&gt; {
+      <span class="k">unfold</span> (all_at_most [] n);
+      <span class="k">fold</span> (all_at_most [] n);
+    }
+    hd :: tl -&gt; {
+      <span class="k">unfold</span> (all_at_most (hd::tl) n);
+      weaken_at_most tl n m;
+      <span class="k">fold</span> (all_at_most (hd::tl) m);
+    }
+  }
+}
+</pre></div>
+</div>
+<p>注意すべき点をいくつか：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Pulse での再帰関数は <code class="docutils literal notranslate"><span class="pre">fn</span> <span class="pre">rec</span></code> で定義します。</p></li>
+<li><p>再帰ゴースト関数には <code class="docutils literal notranslate"><span class="pre">decreases</span></code> 注釈も必要です—F* と異なり、Pulse はまだ既定の減少注釈を推論しません。この例ではリスト <code class="docutils literal notranslate"><span class="pre">l</span></code> による再帰です。</p></li>
+<li><p>Pulse のリストパターンは（まだ）F* と同程度の糖衣構文を持ちません。つまり <code class="docutils literal notranslate"><span class="pre">[]</span></code> や <code class="docutils literal notranslate"><span class="pre">hd::tl</span></code> をそのままパターンとしては書けません。</p></li>
+<li><p>証明自体は比較的素直です。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Nil</span></code> の場合、まず <code class="docutils literal notranslate"><span class="pre">n</span></code> での <code class="docutils literal notranslate"><span class="pre">all_at_most</span></code> を除去し、<code class="docutils literal notranslate"><span class="pre">m</span></code> で導入します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Cons</span></code> の場合、<code class="docutils literal notranslate"><span class="pre">all_at_most</span> <span class="pre">l</span> <span class="pre">n</span></code> を除去し、帰納法の仮定を用いて <code class="docutils literal notranslate"><span class="pre">tl</span></code> 上の述語を弱め、最後に <code class="docutils literal notranslate"><span class="pre">hd</span></code> の仮定と合わせて再導入します。</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+<section id="mutable-ghost-references">
+<h2>可変ゴースト参照<a class="headerlink" href="#mutable-ghost-references" title="Link to this heading"></a></h2>
+<p>Pulse の基盤となるロジックは、可換部分モノイド（PCM）に基づく非常に一般的なゴースト状態をサポートします。ユーザは F* で PCM を使って独自のゴースト状態抽象を定義し、Pulse プログラムで利用できます。ライブラリ <code class="docutils literal notranslate"><span class="pre">Pulse.Lib.GhostReference</span></code> は最も単純で一般的な形式—消去値への参照と、分数パーミッションに基づく所有権規律—を提供します。</p>
+<p>以下では <code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">GR</span> <span class="pre">=</span> <span class="pre">Pulse.Lib.GhostReference</span></code> というモジュール略称を使います。このライブラリは <code class="docutils literal notranslate"><span class="pre">Pulse.Lib.Reference</span></code> に非常によく似ており、次のものを提供します：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">GR.ref</span> <span class="pre">a</span></code>：ゴースト参照の主要な型。<code class="docutils literal notranslate"><span class="pre">GR.ref</span></code> は消去可能な型であり、非情報型として扱われます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GR.pts_to</span> <span class="pre">(#a:Type0)</span> <span class="pre">(r:GR.ref</span> <span class="pre">a)</span> <span class="pre">(#p:perm)</span> <span class="pre">(v:a)</span> <span class="pre">:</span> <span class="pre">slprop</span></code>：ライブラリが提供する主たる述語。通常の <code class="docutils literal notranslate"><span class="pre">pts_to</span></code> と同様、パーミッション引数の既定は <code class="docutils literal notranslate"><span class="pre">1.0R</span></code> です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">a``（というより</span> <span class="pre">``box</span> <span class="pre">a</span></code> に近い）と異なり、ゴースト参照 <code class="docutils literal notranslate"><span class="pre">GR.ref</span> <span class="pre">a</span></code> は字句スコープに束縛されません。<code class="docutils literal notranslate"><span class="pre">GR.alloc</span></code> で確保し、<code class="docutils literal notranslate"><span class="pre">GR.free</span></code> で解放します。もちろん確保／解放は実行時コストを持たず、純粋にゴースト操作です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">r:GR.ref</span> <span class="pre">a</span></code> のとき、<code class="docutils literal notranslate"><span class="pre">!r</span></code> による読み出しは <code class="docutils literal notranslate"><span class="pre">erased</span> <span class="pre">a</span></code> を返します。同様に、更新には新しい値 <code class="docutils literal notranslate"><span class="pre">v:erased</span> <span class="pre">a</span></code> を与えれば十分です。</p></li>
+<li><p>ゴースト参照の <code class="docutils literal notranslate"><span class="pre">share</span></code> と <code class="docutils literal notranslate"><span class="pre">gather</span></code> も <code class="docutils literal notranslate"><span class="pre">ref</span></code> と同様に機能します。</p></li>
+</ul>
+</div></blockquote>
+<section id="a-somewhat-contrived-example">
+<h3>やや作為的な例<a class="headerlink" href="#a-somewhat-contrived-example" title="Link to this heading"></a></h3>
+<p>ゴースト状態が必要となる例の多くは、複数スレッド間の興味深い不変量の記述や、逐次実行でも異なるコンポーネント間の知識の関連付けに関わります。これらは後の章で扱います。ここでは雰囲気を掴むための小さな例を示します。</p>
+<p>関数に参照への読み書き権限を与えつつ、戻る前に参照の値を元に戻すことを保証したいとします。最も単純なのは、次のようなシグネチャを関数に与えることです。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> uses_but_resets #a (x:ref a)
+<span class="k">requires</span> pts_to x &#39;v
+<span class="k">ensures</span> pts_to x &#39;v
+</pre></div>
+</div>
+<p>これをゴースト参照を用いて実現する別の方法を示します。</p>
+<p>まず、実体参照への全権限とゴースト参照への半分の権限を持ち、両者が同じ値を保持していることを強制する述語 <code class="docutils literal notranslate"><span class="pre">correlated</span></code> を定義します。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> correlated #a (x:ref a) (y:GR.ref a) (v:a)=
+  pts_to x v ** GR.pts_to y #0.5R v
+</pre></div>
+</div>
+<p>次に関数 <code class="docutils literal notranslate"><span class="pre">use_temp</span></code> のシグネチャを示します。これだけを見ると、事前条件で束縛された証人 <code class="docutils literal notranslate"><span class="pre">v0</span></code> と事後条件で束縛される <code class="docutils literal notranslate"><span class="pre">v1</span></code> は無関係に見えるかもしれません。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> use_temp (x:ref int) (y:GR.ref int)
+<span class="k">requires</span> <span class="k">exists</span>* v0. correlated x y v0
+<span class="k">ensures</span> <span class="k">exists</span>* v1. correlated x y v1
+</pre></div>
+</div>
+<p>しかし <code class="docutils literal notranslate"><span class="pre">use_temp</span></code> はゴースト参照に対して半分の権限しか持たず、そこは変更できません。したがって実体参照を変更できるとしても、事後条件を満たして戻るには、参照を初期値に戻さざるを得ません。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span>{
+  <span class="k">unfold</span> correlated u#0;
+  <span class="k">let</span> v = !x;
+  x := 17; <span class="c">//temporarily mutate x, give to to another function to use with full perm</span>
+  x := v; <span class="c">//but, we&#39;re forced to set it back to its original value</span>
+  <span class="k">fold</span> correlated u#0;
+}
+</pre></div>
+</div>
+<p>呼び出し側はこの性質を利用して、参照を <code class="docutils literal notranslate"><span class="pre">use_temp</span></code> に渡し、戻ってきたときに値が変わっていないことを保証できます。</p>
+<div class="highlight-pulse notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> use_correlated ()
+<span class="k">requires</span> emp
+<span class="k">ensures</span> emp
+{
+  <span class="k">let</span> <span class="k">mut</span> x = 17;
+  <span class="k">let</span> g = GR.alloc 17;
+  GR.share g;
+  <span class="k">fold</span> correlated u#0;  <span class="c">// GR.pts_to g #0.5R 17 ** correlated x g 17</span>
+  use_temp x g;     <span class="c">// GR.pts_to g #0.5R 17 ** correlated x g ?v1</span>
+  <span class="k">unfold</span> correlated u#0; <span class="c">// GR.pts_to g #0.5R 17 ** GR.pts_to g #0.5R ?v1 ** pts_to x ?v1</span>
+  GR.gather g;       <span class="c">//this is the crucial step</span>
+                     <span class="c">// GT.pts_to g 17 ** pure (?v1 == 17) ** pts_to x ?v1</span>
+  <span class="k">assert</span> (pts_to x 17);
+  GR.free g;
+}
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pulse_arrays.html" class="btn btn-neutral float-left" title="可変配列" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pulse_higher_order.html" class="btn btn-neutral float-right" title="高階関数" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,808 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>型クラス &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="型クラスで遊ぶ：Datatypes à la Carte" href="part3_alacarte.html" />
+    <link rel="prev" title="インターフェース" href="part3_interfaces.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part1/part1.html">全域関数によるプログラミングと証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="part3.html">インターフェースと型クラスによるモジュール性</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="part3_interfaces.html">インターフェース</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">型クラス</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#printable">Printable</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#under-the-hood">仕組み</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exercises">演習</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bounded-unsigned-integers">有界符号なし整数</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#typeclass-inheritance">型クラスの継承</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#infix-operators">中置演算子</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#derived-instances">導出インスタンス</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ground-instances">具象インスタンス</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dealing-with-diamonds">ダイヤモンド問題への対処</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#overloading-monadic-syntax">モナド構文のオーバーロード</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exercise">演習</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#beyond-monads-with-let-operators">Let 演算子でモナドを越えて</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#summary">まとめ</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="part3_alacarte.html">型クラスで遊ぶ：Datatypes à la Carte</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="part3.html">インターフェースと型クラスによるモジュール性</a></li>
+      <li class="breadcrumb-item active">型クラス</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="typeclasses">
+<span id="part3-typeclasses"></span><h1>型クラス<a class="headerlink" href="#typeclasses" title="Link to this heading"></a></h1>
+<p>実際の有界整数型に依存しない汎用的な形で有界符号なし整数を使うプログラム――たとえば、オーバーフロー検査をしながら有界整数のリストを合計する関数（<code class="docutils literal notranslate"><span class="pre">UInt32</span></code> にも <code class="docutils literal notranslate"><span class="pre">UInt64</span></code> にも適用可能）――を書きたいとします。F* のインターフェースは第一級ではないため、それらを抽象化したプログラムを簡単には書けません。ここで役立つのが型クラスです。</p>
+<p>型クラスに関する参考文献：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Phil Wadler と Stephen Blott が 1989 年の論文「<a class="reference external" href="https://dl.acm.org/doi/10.1145/75277.75283">How to make ad hoc polymorphism less ad hoc</a>」で提案しました。以後の拡張を経て、このアイデアは Haskell の型クラスの基礎となりました。</p></li>
+<li><p>Coq 証明支援系における型クラスのチュートリアルは <a class="reference external" href="https://softwarefoundations.cis.upenn.edu/qc-current/Typeclasses.html">こちら</a> にあります。</p></li>
+<li><p>Lean 証明支援系では <a class="reference external" href="https://arxiv.org/pdf/1910.09336.pdf">数学ライブラリ</a> の構成に型クラスが多用されています。</p></li>
+</ul>
+</div></blockquote>
+<section id="printable">
+<h2>Printable<a class="headerlink" href="#printable" title="Link to this heading"></a></h2>
+<p>型クラスは、ある型（や型の組）で利用できる操作に対応する <em>メソッド</em> の集合を、その型に結び付ける仕組みです。</p>
+<p>例えば、ある型は自分を文字列として表示する操作を提供するかもしれません。型クラス <code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">(a:Type)</span></code> は、<code class="docutils literal notranslate"><span class="pre">to_string</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">string</span></code> を提供するすべての型のクラスを表します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> printable (a:Type) =
+{
+  to_string : a -&gt; string
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">class</span></code> キーワードで新しい型クラスを導入します。これは <a class="reference internal" href="../part1/part1_inductives.html#part1-records"><span class="std std-ref">レコード型</span></a> として定義され、各メソッドはそのレコードのフィールドとして表されます。</p>
+<p>型クラスのインスタンスは、以下のように <code class="docutils literal notranslate"><span class="pre">instance</span></code> キーワードで定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> printable_bool : printable bool =
+{
+  to_string = Prims.string_of_bool
+}
+
+<span class="k">instance</span> printable_int : printable int =
+{
+  to_string = Prims.string_of_int
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">instance</span> <span class="pre">printable_bool</span> <span class="pre">:</span> <span class="pre">printable</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">e</span></code> は、値 <code class="docutils literal notranslate"><span class="pre">e</span></code> が <code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">bool</span></code> 型のレコードであり、<code class="docutils literal notranslate"><span class="pre">let</span></code> 束縛と同様に <code class="docutils literal notranslate"><span class="pre">e</span></code> をトップレベル名 <code class="docutils literal notranslate"><span class="pre">printable_bool</span></code> に束縛することを表します。</p>
+<p>型クラスの利点は、一度クラスを定義すれば、そのメソッドがクラスの全インスタンスに対して自動的に多相的に利用でき、型推論が適切なインスタンスを見つけてくれる点です。これは、演算子オーバーロードに体系立った方法を与えるという、型クラスの元来の動機でもあります。</p>
+<p>例えば、<code class="docutils literal notranslate"><span class="pre">printb</span></code> や <code class="docutils literal notranslate"><span class="pre">printi</span></code> を書いて、<code class="docutils literal notranslate"><span class="pre">to_string</span></code> を使って真偽値や整数の両方を表示できます。どちらも <code class="docutils literal notranslate"><span class="pre">printable</span></code> クラスのインスタンスであると示したからです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> printb (x:bool) = to_string x
+<span class="k">let</span> printi (x:int) = to_string x
+</pre></div>
+</div>
+<p>インスタンスは基底型に限りません。例えば、要素が printable である限り、リストも printable です。次の定義でそれを表せます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> printable_list (#a:Type) (x:printable a) : printable (list a) =
+{
+  to_string = (<span class="k">fun</span> l -&gt; &quot;[&quot; ^ FStar.String.concat &quot;; &quot; (List.<span class="k">Tot</span>.map to_string l) ^ &quot;]&quot;)
+}
+</pre></div>
+</div>
+<p>つまり <code class="docutils literal notranslate"><span class="pre">printable_list</span></code> は、<code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">a</span></code> の <code class="docutils literal notranslate"><span class="pre">to_string</span></code> を各要素に適用して <code class="docutils literal notranslate"><span class="pre">list</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">string</span></code> を作ります。これで真偽値や整数のリストにも <code class="docutils literal notranslate"><span class="pre">to_string</span></code> を使えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> printis (l:list int) = to_string l
+<span class="k">let</span> printbs (l:list bool) = to_string l
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">bool</span></code> や <code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">int</span></code> といった具体インスタンスに特別な点はありません。printable な型に対して多相なプログラムが書けます。例えば、<code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">a</span></code> を明示的に受け取る <code class="docutils literal notranslate"><span class="pre">print_any_list</span></code> 関数を定義し、使いたいインスタンスを渡して呼び出せます：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> print_any_list_explicit #a ( <span class="k">_</span> : printable a ) (l:list a) = to_string l
+<span class="k">let</span> <span class="k">_</span> = print_any_list_explicit printable_int [1;2;3]
+</pre></div>
+</div>
+<p>とはいえ、次に示す型クラス引数用の特別な記法を使えば、どのインスタンスを使うかをコンパイラに推論させられます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> print_any_list #a {| <span class="k">_</span> : printable a |} (l:list a) = to_string l
+<span class="k">let</span> _ex1 = print_any_list [[1;2;3]]
+<span class="k">let</span> _ex2 = print_any_list #<span class="k">_</span> #(printable_list printable_int) [[1;2;3]]
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">{|</span> <span class="pre">_</span> <span class="pre">:</span> <span class="pre">printable</span> <span class="pre">a</span> <span class="pre">|}</span></code> という仮引数は暗黙引数であり、呼び出し箇所ごとにスコープ内のインスタンスから適切な型クラスインスタンスをコンパイラが探索して与えます。最初の例では、必要なのは <code class="docutils literal notranslate"><span class="pre">printable_list</span> <span class="pre">printable_int</span> <span class="pre">:</span> <span class="pre">printable</span> <span class="pre">(list</span> <span class="pre">int)</span></code> だと推論されます。なお、本当に必要なら、上の <code class="docutils literal notranslate"><span class="pre">_ex2</span></code> のようにインスタンスを明示的に渡すこともできます。</p>
+<p>多くの場合、暗黙の型クラス引数に名前は不要なので、名前を省略して次のように書けます：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> print_any_list_alt #a {| printable a |} (l:list a) = to_string l
+</pre></div>
+</div>
+<section id="under-the-hood">
+<h3>仕組み<a class="headerlink" href="#under-the-hood" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">class</span></code> を定義すると、F* はそのメソッドに対応する汎用関数を自動生成します。例えば <code class="docutils literal notranslate"><span class="pre">printable</span></code> では次の関数が生成されます：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> to_string #a {| i : printable a |} (x:a) = i.to_string x
+</pre></div>
+</div>
+<p>これがスコープに入ると、<code class="docutils literal notranslate"><span class="pre">to_string</span></code> は <code class="docutils literal notranslate"><span class="pre">printable</span></code> のすべてのインスタンスに対してオーバーロードされます。実装ではインスタンス <code class="docutils literal notranslate"><span class="pre">i``（単なるレコードで、型クラス文献では辞書とも呼ばれます）から</span> <span class="pre">``to_string</span></code> フィールドを取り出して <code class="docutils literal notranslate"><span class="pre">x</span></code> に適用します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">instance</span> <span class="pre">p</span> <span class="pre">x1..xn</span> <span class="pre">:</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">e</span></code> の定義は通常の <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">p</span> <span class="pre">x1..xn</span> <span class="pre">:</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">e</span></code> と同様ですが、<code class="docutils literal notranslate"><span class="pre">instance</span></code> キーワードにより、型推論は型クラスの暗黙引数を解決する際に <code class="docutils literal notranslate"><span class="pre">p</span></code> を候補として用いるよう指示されます。</p>
+<p>例えば <code class="docutils literal notranslate"><span class="pre">to_string</span> <span class="pre">(x:bool)</span></code> の呼び出しでは、暗黙型引数 <code class="docutils literal notranslate"><span class="pre">a</span></code> が <code class="docutils literal notranslate"><span class="pre">bool</span></code> に単一化された後、<code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">bool</span></code> のインスタンス探索が残ります。F* は現在のコンテキスト（ローカルの束縛とトップレベルの <code class="docutils literal notranslate"><span class="pre">instance</span></code> 宣言）を調べ、構成可能な最初の <code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">bool</span></code> インスタンスを選びます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">to_string</span> <span class="pre">[[1;2;3]]</span></code> の解決はやや興味深いです。<code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">(list</span> <span class="pre">int)</span></code> の具象インスタンスは存在しませんが、解決手順は <code class="docutils literal notranslate"><span class="pre">printable_list</span></code> というインスタンス関数を見つけます。これは結果型が <code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">(list</span> <span class="pre">a)</span></code> なので、<code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">int</span></code> とできれば目標に一致します。そこで部分目標 <code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">int</span></code> を立て、これを解いて <code class="docutils literal notranslate"><span class="pre">printable</span> <span class="pre">(list</span> <span class="pre">int)</span></code> の導出を完了します。</p>
+<p>この型クラス解決の後ろ向き・目標指向の探索は、一種のロジックプログラミングです。興味深い実装上の事実として、型クラス機構の多くはコンパイラ本体の外側にある <code class="docutils literal notranslate"><span class="pre">FStar.Tactics.Typeclasses</span></code> のメタプログラムとして実装されています。したがって、使用するメタプログラムを差し替えるだけで解決挙動を完全にカスタマイズできます。詳細は <a class="reference external" href="http://fstar-lang.org/papers/metafstar/">Meta F*</a> の論文にあります。</p>
+</section>
+<section id="exercises">
+<h3>演習<a class="headerlink" href="#exercises" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">string</span></code>、<code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&amp;</span> <span class="pre">b</span></code>、<code class="docutils literal notranslate"><span class="pre">option</span> <span class="pre">a</span></code>、<code class="docutils literal notranslate"><span class="pre">either</span> <span class="pre">a</span> <span class="pre">b</span></code> に対する <code class="docutils literal notranslate"><span class="pre">printable</span></code> のインスタンスを定義し、<code class="docutils literal notranslate"><span class="pre">to_string</span> <span class="pre">[Inl</span> <span class="pre">(0,</span> <span class="pre">1);</span> <span class="pre">Inr</span> <span class="pre">(Inl</span> <span class="pre">(Some</span> <span class="pre">true));</span> <span class="pre">Inr</span> <span class="pre">(Inr</span> <span class="pre">&quot;hello&quot;)]</span></code> が型クラス解決で動くことを確認してください。</p>
+<p>理解を確かめるため、必要な型クラスインスタンスを明示的に渡す版も書いてみてください。これにより、型クラスが表現力を増してはいない（型クラスで書けることは、必要な操作を収めたレコードを明示的に渡しても書ける）ことが分かるはずです。もっとも、操作を毎回手渡しするのはすぐに煩雑になります。型クラスの推論はこの複雑さを抑え、汎用的で抽象的なスタイルのプログラムを楽に記述できるようにします。</p>
+<p>必要な定義は <a class="reference external" href="../code/exercises/Part3.Typeclasses.fst">この演習ファイル</a> にあります。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> printable_string : printable string =
+{
+  to_string = <span class="k">fun</span> x -&gt; &quot;\&quot;&quot; ^ x ^ &quot;\&quot;&quot;
+}
+
+<span class="k">instance</span> printable_pair #a #b {| printable a |} {| printable b |} : printable (a &amp; b) =
+{
+  to_string = (<span class="k">fun</span> (x, y) -&gt; &quot;(&quot; ^ to_string x ^ &quot;, &quot; ^ to_string y ^ &quot;)&quot;)
+}
+
+<span class="k">instance</span> printable_option #a {| printable a |} : printable (option a) =
+{
+  to_string = (<span class="k">function</span> None -&gt; &quot;None&quot; | Some x -&gt; &quot;(Some &quot; ^ to_string x ^ &quot;)&quot;)
+}
+
+<span class="k">instance</span> printable_either #a #b {| printable a |} {| printable b |} : printable (either a b) =
+{
+  to_string = (<span class="k">function</span> Inl x -&gt; &quot;(Inl &quot; ^ to_string x ^ &quot;)&quot; | Inr x -&gt; &quot;(Inr &quot; ^ to_string x ^ &quot;)&quot;)
+}
+
+<span class="k">let</span> <span class="k">_</span> = to_string [Inl (0, 1); Inr (Inl (Some <span class="k">true</span>)); Inr (Inr &quot;hello&quot;) ]
+
+<span class="c">//You can always pass the typeclass instance you want explicitly, if you really want to</span>
+<span class="c">//typeclass resolution really saves you from LOT of typing!</span>
+<span class="k">let</span> <span class="k">_</span> = to_string #<span class="k">_</span>
+             #(printable_list
+                (printable_either #<span class="k">_</span> #<span class="k">_</span> #(printable_pair #<span class="k">_</span> #<span class="k">_</span> #printable_int #printable_int)
+                                        #(printable_either #<span class="k">_</span> #<span class="k">_</span> #(printable_option #<span class="k">_</span> #printable_bool)
+                                                                 #(printable_string))))
+             [Inl (0, 1); Inr (Inl (Some <span class="k">true</span>)); Inr (Inr &quot;hello&quot;)]
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="bounded-unsigned-integers">
+<h2>有界符号なし整数<a class="headerlink" href="#bounded-unsigned-integers" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">printable</span></code> 型クラスは比較的標準的で、型クラスを持つ多くの言語で定義できます。ここからは、<a class="reference internal" href="part3_interfaces.html#part3-interfaces"><span class="std std-ref">前章</span></a> で作った有界符号なし整数のインターフェースを一般化し、F* の依存型を活用する型クラスに進みます。</p>
+<p>型 <code class="docutils literal notranslate"><span class="pre">a</span></code> が <code class="docutils literal notranslate"><span class="pre">bounded_unsigned_int</span></code> クラスに属するとは、次を備えることです：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>最大値を表す要素 <code class="docutils literal notranslate"><span class="pre">bound</span> <span class="pre">:</span> <span class="pre">a</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">a</span></code> と <code class="docutils literal notranslate"><span class="pre">to_nat</span> <span class="pre">bound</span></code> 未満の自然数の間に全単射を与える関数 <code class="docutils literal notranslate"><span class="pre">from_nat</span></code> と <code class="docutils literal notranslate"><span class="pre">to_nat</span></code> の組</p></li>
+</ul>
+</div></blockquote>
+<p>これを次の <code class="docutils literal notranslate"><span class="pre">class</span></code> で表します：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> bounded_unsigned_int (a:Type) = {
+   bound      : a;
+   as_nat     : a -&gt; nat;
+   from_nat   : (x:nat { x &lt;= as_nat bound }) -&gt; a;
+   [@@@FStar.Tactics.Typeclasses.no_method]
+   properties : squash (
+     (<span class="k">forall</span> (x:a). as_nat x &lt;= as_nat bound) /\ <span class="c">// the bound is really an upper bound</span>
+     (<span class="k">forall</span> (x:a). from_nat (as_nat x) == x) /\ <span class="c">//from_nat/as_nat form a bijection</span>
+     (<span class="k">forall</span> (x:nat{ x &lt;= as_nat bound}). as_nat (from_nat x) == x)
+   )
+}
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">properties</span></code> フィールドに付けた <code class="docutils literal notranslate"><span class="pre">FStar.Tactics.Typeclasses.no_method</span></code> 属性は、このフィールドについて型クラスメソッドを生成しないよう指示します。ここでは <code class="docutils literal notranslate"><span class="pre">properties</span></code> という名前を全インスタンス向け演算子としてオーバーロードしたくないため有用です。型クラスを使う際は <code class="docutils literal notranslate"><span class="pre">open</span> <span class="pre">FStar.Tactics.Typeclasses</span></code> したり、<code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">TC</span> <span class="pre">=</span> <span class="pre">FStar.Tactics.Typeclasses</span></code> のように略称を使うと <code class="docutils literal notranslate"><span class="pre">no_method</span></code> を完全修飾せずに済み便利です。</p>
+</div>
+<p>すべての <code class="docutils literal notranslate"><span class="pre">bounded_unsigned_int</span></code> に対し、<code class="docutils literal notranslate"><span class="pre">UInt32</span></code> インターフェースで導入した境界チェック条件に対応する汎用述語 <code class="docutils literal notranslate"><span class="pre">fits</span></code> を定義できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> fits #a {| bounded_unsigned_int a |}
+            (op: int -&gt; int -&gt; int)
+            (x y:a)
+  : prop
+  = 0 &lt;= op (as_nat x) (as_nat y) /\
+    op (as_nat x) (as_nat y) &lt;= as_nat #a bound
+</pre></div>
+</div>
+<p>同様に、述語 <code class="docutils literal notranslate"><span class="pre">related_ops</span></code> は、有界整数上の演算 <code class="docutils literal notranslate"><span class="pre">bop</span></code> が数学的整数上の演算 <code class="docutils literal notranslate"><span class="pre">iop</span></code> と同値であることを定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> related_ops #a {| bounded_unsigned_int a |}
+                (iop: int -&gt; int -&gt; int)
+                (bop: (x:a -&gt; y:a { fits iop x y } -&gt; a))
+  = <span class="k">forall</span> (x y:a).  fits iop x y ==&gt; as_nat (bop x y) = as_nat x `iop` as_nat y
+</pre></div>
+</div>
+<section id="typeclass-inheritance">
+<h3>型クラスの継承<a class="headerlink" href="#typeclass-inheritance" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">bounded_unsigned_int</span> <span class="pre">a</span></code> は、<code class="docutils literal notranslate"><span class="pre">a</span></code> がある上限未満の自然数と全単射で結ばれることだけを示しました。ここに加算・減算などの操作を拡張した別のクラスを定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> bounded_unsigned_int_ops (a:Type) = {
+   [@@@TC.no_method]
+   base       : bounded_unsigned_int a;
+   add        : (x:a -&gt; y:a { fits ( + ) x y } -&gt; a);
+   sub        : (x:a -&gt; y:a { fits op_Subtraction x y } -&gt; a);
+   lt         : (a -&gt; a -&gt; bool);
+   [@@@TC.no_method]
+   properties : squash (
+     related_ops ( + ) add /\
+     related_ops op_Subtraction sub /\      
+     (<span class="k">forall</span> (x y:a). lt x y &lt;==&gt; as_nat x &lt; as_nat y) /\ <span class="c">// lt is related to &lt;</span>
+     (<span class="k">forall</span> (x:a). fits op_Subtraction bound x) <span class="c">//subtracting from the maximum element never triggers underflow</span>
+   )
+}
+</pre></div>
+</div>
+<p>上のクラスは <em>型クラスの継承</em> を使います。<code class="docutils literal notranslate"><span class="pre">base</span></code> フィールドに基底クラス <code class="docutils literal notranslate"><span class="pre">bounded_unsigned_int</span></code> のインスタンスを保持し、残りのフィールドで次を拡張します：</p>
+<blockquote>
+<div><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">add</span></code>：有界加算</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sub</span></code>：有界減算</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lt</span></code>：比較関数</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">properties</span></code>：以下を示す性質</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">add</span></code> は整数加算 <code class="docutils literal notranslate"><span class="pre">+</span></code> に対応する</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sub</span></code> は整数減算 <code class="docutils literal notranslate"><span class="pre">-</span></code> に対応する</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lt</span></code> は <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> に対応する</p></li>
+<li><p>そして <code class="docutils literal notranslate"><span class="pre">sub</span> <span class="pre">bound</span> <span class="pre">x</span></code> は常に安全である</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">base</span></code> のような追加フィールドによる継承は柔軟で、多重継承も可能です（ただし後述のように、思わぬ事態を避けるため注意が必要です）。</p>
+<p>あるクラスのインスタンスを、その基底クラスのインスタンスとして扱うのは、インスタンス生成関数として簡単に書けます。次のコードは、<code class="docutils literal notranslate"><span class="pre">d</span> <span class="pre">:</span> <span class="pre">bounded_unsigned_int_ops</span> <span class="pre">a</span></code> から、その <code class="docutils literal notranslate"><span class="pre">base</span></code> を取り出すだけで <code class="docutils literal notranslate"><span class="pre">bounded_unsigned_int</span> <span class="pre">a</span></code> のインスタンスが得られることを述べます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> ops_base #a {| d : bounded_unsigned_int_ops a |} 
+  : bounded_unsigned_int a
+  = d.base
+</pre></div>
+</div>
+</section>
+<section id="infix-operators">
+<h3>中置演算子<a class="headerlink" href="#infix-operators" title="Link to this heading"></a></h3>
+<p>F* では、レコードのフィールド名に中置演算子の記号を用いることはできません（将来変わる可能性はあります）。現状、型クラスのメソッドを中置記法で使いたい場合は、手動で演算子関数を定義します：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> ( +^ ) #a {| bounded_unsigned_int_ops a |}
+           (x : a)
+           (y : a { fits ( + ) x y })
+  : a
+  = add x y
+
+<span class="k">let</span> ( -^ ) #a {| bounded_unsigned_int_ops a |}
+           (x : a)
+           (y : a { fits op_Subtraction x y })
+  : a
+  = sub x y
+
+<span class="k">let</span> ( &lt;^ ) #a {| bounded_unsigned_int_ops a |}
+           (x : a)
+           (y : a)
+  : bool
+  = lt x y
+</pre></div>
+</div>
+</section>
+<section id="derived-instances">
+<h3>導出インスタンス<a class="headerlink" href="#derived-instances" title="Link to this heading"></a></h3>
+<p>型クラスの継承により、基底クラスのインスタンスが得られることを見ましたが、導出インスタンスは継承だけではありません――他のインスタンスから <em>計算</em> できる場合もあります。</p>
+<p>例えば、可判定な等値性を持つ型のためのクラス <code class="docutils literal notranslate"><span class="pre">eq</span></code> を次のように定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> eq (a:Type) = {
+  eq_op: a -&gt; a -&gt; bool;
+
+  [@@@TC.no_method]
+  properties : squash (
+    <span class="k">forall</span> x y. eq_op x y &lt;==&gt; x == y
+  )
+}
+
+<span class="k">let</span> ( =?= ) #a {| eq a |} (x y: a) = eq_op x y
+</pre></div>
+</div>
+<p>F* の <code class="docutils literal notranslate"><span class="pre">eqtype</span></code> に対する組み込みの可判定等号 <code class="docutils literal notranslate"><span class="pre">(=)</span></code> と紛らわしくないよう、このクラスの等値比較メソッドは <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=?=</span> <span class="pre">y</span></code> と書くことにします。</p>
+<p><code class="docutils literal notranslate"><span class="pre">bounded_unsigned_int_ops</span> <span class="pre">a</span></code> のインスタンスがあれば、自然数の <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> と同値な厳密比較演算子 <code class="docutils literal notranslate"><span class="pre">&lt;^</span></code> があるので、<code class="docutils literal notranslate"><span class="pre">eq</span> <span class="pre">a</span></code> のインスタンスを構成できます。<code class="docutils literal notranslate"><span class="pre">bounded_unsigned_int_ops</span></code> と基底 <code class="docutils literal notranslate"><span class="pre">bounded_unsigned_int</span></code> の性質から、<code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">(x</span> <span class="pre">&lt;^</span> <span class="pre">y)</span> <span class="pre">&amp;&amp;</span> <span class="pre">not</span> <span class="pre">(y</span> <span class="pre">&lt;^</span> <span class="pre">x)</span></code> が成り立つのは <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">==</span> <span class="pre">y</span></code> のときに限る、と F* が自動で証明できます。これにより非厳密比較の実装も容易になります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> bounded_unsigned_int_ops_eq #a {| bounded_unsigned_int_ops a |}
+  : eq a
+  = {
+      eq_op = (<span class="k">fun</span> x y -&gt; not (x &lt;^ y) &amp;&amp; not (y &lt;^ x));
+      properties = ()
+    }
+
+<span class="k">let</span> ( &lt;=^ ) #a {| bounded_unsigned_int_ops a |} (x y : a)
+  : bool
+  = x &lt;^ y || x =?= y
+</pre></div>
+</div>
+</section>
+<section id="ground-instances">
+<h3>具象インスタンス<a class="headerlink" href="#ground-instances" title="Link to this heading"></a></h3>
+<p>F* の各有界符号なし整数型に対して <code class="docutils literal notranslate"><span class="pre">bounded_unsigned_int_ops</span></code> の具象インスタンスを容易に与えられます。ここでは <code class="docutils literal notranslate"><span class="pre">FStar.UInt32.t</span></code> と <code class="docutils literal notranslate"><span class="pre">FStar.UInt64.t</span></code> の例を示し、インスタンス構成に必要な性質の証明は自動化されます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> U32 = FStar.UInt32
+<span class="k">module</span> U64 = FStar.UInt64
+<span class="k">instance</span> u32_instance_base : bounded_unsigned_int U32.t =
+  <span class="k">let</span> <span class="k">open</span> U32 <span class="k">in</span>
+  {
+    bound    = 0xfffffffful;
+    as_nat   = v;
+    from_nat = uint_to_t;
+    properties = ()
+}
+
+<span class="k">instance</span> u32_instance_ops : bounded_unsigned_int_ops U32.t =
+  <span class="k">let</span> <span class="k">open</span> U32 <span class="k">in</span>
+  {
+    base = u32_instance_base;
+    add  = (<span class="k">fun</span> x y -&gt; add x y);
+    sub  = (<span class="k">fun</span> x y -&gt; sub x y);
+    lt   = (<span class="k">fun</span> x y -&gt; lt x y);
+    properties = ()
+  }
+
+
+<span class="k">instance</span> u64_instance_base : bounded_unsigned_int U64.t =
+  <span class="k">let</span> <span class="k">open</span> U64 <span class="k">in</span>
+  {
+    bound    = 0xffffffffffffffffuL;
+    as_nat   = v;
+    from_nat = uint_to_t;
+    properties = ()
+}
+
+<span class="k">instance</span> u64_instance_ops : bounded_unsigned_int_ops U64.t =
+  <span class="k">let</span> <span class="k">open</span> U64 <span class="k">in</span>
+  {
+    base = u64_instance_base;
+    add  = (<span class="k">fun</span> x y -&gt; add x y);
+    sub  = (<span class="k">fun</span> x y -&gt; sub x y);
+    lt   = (<span class="k">fun</span> x y -&gt; lt x y);
+    properties = ()
+  }
+</pre></div>
+</div>
+<p>これらの具象インスタンスに対して型クラス解決が適切に機能することも確認できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> test32 (x:U32.t)
+           (y:U32.t)
+  = <span class="k">if</span> x &lt;=^ 0xffffffful &amp;&amp;
+       y &lt;=^ 0xffffffful
+    <span class="k">then</span> Some (x +^ y)
+    <span class="k">else</span> None
+
+<span class="k">let</span> test64 (x y:U64.t)
+  = <span class="k">if</span> x &lt;=^ 0xfffffffuL &amp;&amp;
+       y &lt;=^ 0xfffffffuL
+    <span class="k">then</span> Some (x +^ y)
+    <span class="k">else</span> None
+</pre></div>
+</div>
+<p>そして冒頭で述べたとおり、インターフェースだけではできなかった、すべての有界符号なし整数に対して汎用な関数が書けるようになります。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> L = FStar.List.<span class="k">Tot</span>
+<span class="k">let</span> sum #a {| bounded_unsigned_int_ops a |}
+        (l:list a) (acc:a)
+  : option a 
+  = L.fold_right
+     (<span class="k">fun</span> (x:a) (acc:option a) -&gt;
+       <span class="k">match</span> acc <span class="k">with</span>
+       | None -&gt; None
+       | Some y -&gt;
+         <span class="k">if</span> x &lt;=^ bound -^ y
+         <span class="k">then</span> Some (x +^ y)
+         <span class="k">else</span> None)
+     l
+     (Some acc)
+
+<span class="k">let</span> testsum32 : U32.t = Some?.v (sum [0x01ul; 0x02ul; 0x03ul] 0x00ul)
+<span class="k">let</span> testsum64 : U64.t = Some?.v (sum [0x01uL; 0x02uL; 0x03uL] 0x00uL)
+</pre></div>
+</div>
+<p>F* は、<code class="docutils literal notranslate"><span class="pre">sum</span></code> の境界チェックがオーバーフローしないことを示すのに十分であり、さらに 2 つのテストがオーバーフローで失敗せず <code class="docutils literal notranslate"><span class="pre">Some</span> <span class="pre">_</span></code> を返すことも証明できます。</p>
+<p>ただし、<code class="docutils literal notranslate"><span class="pre">Some?</span> <span class="pre">(sum</span> <span class="pre">[0x01ul;</span> <span class="pre">0x02ul;</span> <span class="pre">0x03ul]</span> <span class="pre">0x00ul)</span></code> を SMT ソルバだけで示すのは高コストになることがあります。再帰関数 <code class="docutils literal notranslate"><span class="pre">sum</span></code> の展開を繰り返すためです。この種の証明は、<a class="reference internal" href="../part2/part2_par.html#part2-par"><span class="std std-ref">前章</span></a> で見た <code class="docutils literal notranslate"><span class="pre">assert_norm</span></code> など、F* の正規化器を使う方が簡単なことが多いです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> testsum32&#39; : U32.t =
+  <span class="k">let</span> <span class="k">unfold</span> x =
+    sum #U32.t
+        [0x01ul; 0x02ul; 0x03ul;
+         0x01ul; 0x02ul; 0x03ul;
+         0x01ul; 0x02ul; 0x03ul]
+        0x00ul
+  <span class="k">in</span>
+  <span class="k">assert_norm</span> (Some? x /\ as_nat (Some?.v x) == 18);
+  Some?.v x
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>なお、<a class="reference internal" href="../part2/part2_phoas.html#part2-phoas-denotation"><span class="std std-ref">以前</span></a> に少し触れた依存型によるジェネリックプログラミングを使えば、型クラスなしでも全ての機械語整数型を抽象化するプログラムは可能です（F* の <code class="docutils literal notranslate"><span class="pre">FStar.Integers</span></code> が例です）。とはいえ、ここで示した型クラスのアプローチはより広く適用でき、拡張性にも優れます。</p>
+</div>
+</section>
+</section>
+<section id="dealing-with-diamonds">
+<h2>ダイヤモンド問題への対処<a class="headerlink" href="#dealing-with-diamonds" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bounded_unsigned_int_ops</span></code> をさらに分割し、各操作を別クラスに切り出したくなるかもしれません。実際、ある型は加算だけ、別の型は減算だけをサポート、という状況もあるでしょう。ですが、型クラス階層を設計する際は、多重継承の様々な形に起因する一貫性（coherence）問題を招かないよう注意が必要です。</p>
+<p>以下は減算だけを扱い、基底クラスを継承する型クラスです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> subtractable_bounded_unsigned_int (a:Type) = {
+   [@@@no_method]
+   base   : bounded_unsigned_int a;
+   sub    : (x:a -&gt; y:a { fits op_Subtraction x y } -&gt; a);
+
+   [@@@no_method]
+   properties : squash (
+     related_ops op_Subtraction sub /\
+     (<span class="k">forall</span> (x:a). fits op_Subtraction bound x)
+   )
+}
+
+<span class="k">instance</span> subtractable_base {| d : subtractable_bounded_unsigned_int &#39;a |} 
+  : bounded_unsigned_int &#39;a 
+  = d.base
+</pre></div>
+</div>
+<p>こちらは比較だけを提供し、同じく基底クラスを継承する型クラスです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> comparable_bounded_unsigned_int (a:Type) = {
+   [@@@no_method]
+   base   : bounded_unsigned_int a;
+   comp   : a -&gt; a -&gt; bool;
+
+   [@@@no_method]
+   properties : squash (
+     (<span class="k">forall</span> (x y:a).{:pattern comp x y} comp x y &lt;==&gt; as_nat x &lt; as_nat y)
+   )
+}
+
+<span class="k">instance</span> comparable_base {| d : comparable_bounded_unsigned_int &#39;a |} 
+  : bounded_unsigned_int &#39;a 
+  = d.base
+</pre></div>
+</div>
+<p>しかし、減算も比較も期待するプログラムを書くと、一貫性問題が生じます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">sub</span></code> の検証が失敗し、F* は <code class="docutils literal notranslate"><span class="pre">fits</span> <span class="pre">op_Subtraction</span> <span class="pre">bound</span> <span class="pre">acc</span></code> が証明できない（つまりこの <code class="docutils literal notranslate"><span class="pre">sub</span></code> はアンダーフローするかもしれない）と訴えます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span>[@@expect_failure [19]]
+<span class="k">let</span> try_sub #a {| s: subtractable_bounded_unsigned_int a|}
+               {| c: comparable_bounded_unsigned_int a |}
+            (acc:a)
+  = bound `sub` acc
+</pre></div>
+</div>
+<p>一見不思議ですが、<code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">:</span> <span class="pre">subtractable_bounded_unsigned_int</span> <span class="pre">a</span></code> は <code class="docutils literal notranslate"><span class="pre">bound</span></code> からの減算が常に安全だと述べています。問題は <code class="docutils literal notranslate"><span class="pre">bound</span></code> がオーバーロードされた（引数なしの）演算子で、<code class="docutils literal notranslate"><span class="pre">s.base.bound</span></code> と <code class="docutils literal notranslate"><span class="pre">c.base.bound</span></code> の 2 つの解決法があり、同値でないことです。<code class="docutils literal notranslate"><span class="pre">s</span></code> から言えるのは <code class="docutils literal notranslate"><span class="pre">s.base.bound</span> <span class="pre">`sub`</span> <span class="pre">acc</span></code> が安全ということであり、<code class="docutils literal notranslate"><span class="pre">c.base.bound</span> <span class="pre">`sub`</span> <span class="pre">acc</span></code> の安全性は分かりません。</p>
+<p>型クラス階層を細切れにしすぎると、この種の一貫性問題が起こり、原因究明が難しくなります。可能なら設計段階で避けるのが最善です。生じてしまった場合は、複数の選択肢が実は同一であることを保証する前提条件を追加するなどの対処があり得ます。基底クラスでインデックス付けする方法や、等式仮定を加える方法などがあります。以下の等式仮定で十分です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> try_sub {| s: subtractable_bounded_unsigned_int &#39;a |}
+            {| c: comparable_bounded_unsigned_int &#39;a |}
+            (acc:&#39;a { s.base == c.base } )
+  = bound `sub` acc
+</pre></div>
+</div>
+</section>
+<section id="overloading-monadic-syntax">
+<span id="part3-monadic-syntax"></span><h2>モナド構文のオーバーロード<a class="headerlink" href="#overloading-monadic-syntax" title="Link to this heading"></a></h2>
+<p>ここからは <em>型関数</em> に対する型クラス、特にファンクタやモナドの型クラスの例を見ます。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>モナドに馴染みがなければ、<a class="reference internal" href="../part2/part2_par.html#part2-par"><span class="std std-ref">計算効果の最初のモデル</span></a> を参照すると良いでしょう。</p>
+</div>
+<p><a class="reference internal" href="../part2/part2_par.html#part2-par"><span class="std std-ref">前章</span></a> ではモナド計算の糖衣構文を紹介しました。F* の構文は次をサポートします：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">f</span> <span class="pre">(fun</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">e)</span></code> の代わりに、カスタムの <code class="docutils literal notranslate"><span class="pre">let!</span></code> 演算子を定義して <code class="docutils literal notranslate"><span class="pre">let!</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">in</span> <span class="pre">e</span></code> と書けます。</p></li>
+<li><p>同様に <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">f</span> <span class="pre">(fun</span> <span class="pre">_</span> <span class="pre">-&gt;</span> <span class="pre">e)</span></code> の代わりに <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">;!</span> <span class="pre">e</span></code> と書けます。</p></li>
+</ul>
+<p>ここで <code class="docutils literal notranslate"><span class="pre">bind</span></code> を任意のモナドで使えるようにオーバーロードできれば、上記の糖衣構文がすべてのモナドで機能します。次のように実現します。</p>
+<p><code class="docutils literal notranslate"><span class="pre">return</span></code> と <code class="docutils literal notranslate"><span class="pre">(</span> <span class="pre">let!</span> <span class="pre">)</span></code> の 2 メソッドを持つ型クラス <code class="docutils literal notranslate"><span class="pre">monad</span></code> を定義します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> monad (m:Type -&gt; Type) =
+{
+   return : (#a:Type -&gt; a -&gt; m a);
+   ( <span class="k">let</span>! )  : (#a:Type -&gt; #b:Type -&gt; (f:m a) -&gt; (g:(a -&gt; m b)) -&gt; m b);
+}
+</pre></div>
+</div>
+<p>これにより、次の型で <code class="docutils literal notranslate"><span class="pre">return</span></code> と <code class="docutils literal notranslate"><span class="pre">(</span> <span class="pre">let!</span> <span class="pre">)</span></code> がスコープに入ります：</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> return #m {| d : monad m |} #a (x:a) : m a = d.return x
+<span class="k">let</span> ( <span class="k">let</span>! ) #m {| d : monad m |} #a #b (f:m a) (g: a -&gt; m b) : m b = d.bind f g
+</pre></div>
+</div>
+<p>つまり、どのモナドインスタンスにも使えるほど一般的な型で <code class="docutils literal notranslate"><span class="pre">(</span> <span class="pre">let!</span> <span class="pre">)</span></code> が使えるようになりました。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">let!</span></code> 自体に特別な意味はありません。F* では <code class="docutils literal notranslate"><span class="pre">let</span></code> トークンに演算子文字のサフィックスを付けられます。例は <a class="reference external" href="https://github.com/FStarLang/FStar/blob/master/examples/misc/MonadicLetBindings.fst">MonadicLetOperators</a> を参照してください。</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">st</span> <span class="pre">s</span></code> は状態 <code class="docutils literal notranslate"><span class="pre">s</span></code> をパラメータに持つ状態モナドで、<code class="docutils literal notranslate"><span class="pre">st</span> <span class="pre">s</span></code> は <code class="docutils literal notranslate"><span class="pre">monad</span></code> のインスタンスです。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> st (s:Type) (a:Type) = s -&gt; a &amp; s
+
+<span class="k">instance</span> st_monad s : monad (st s) =
+{
+   return = (<span class="k">fun</span> #a (x:a) -&gt; (<span class="k">fun</span> s -&gt; x, s));
+   ( <span class="k">let</span>! ) = (<span class="k">fun</span> #a #b (f: st s a) (g: a -&gt; st s b) (s0:s) -&gt;
+               <span class="k">let</span> x, s1 = f s0 <span class="k">in</span>
+               g x s1);
+}
+</pre></div>
+</div>
+<p>状態の読み書きをする基本操作 <code class="docutils literal notranslate"><span class="pre">get</span></code> と <code class="docutils literal notranslate"><span class="pre">put</span></code> を用意すれば、通常の直訳風の構文に近い形で <code class="docutils literal notranslate"><span class="pre">st</span></code> の計算を書けます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> get #s
+  : st s s
+  = <span class="k">fun</span> s -&gt; s, s
+
+<span class="k">let</span> put #s (x:s)
+  : st s unit
+  = <span class="k">fun</span> <span class="k">_</span> -&gt; (), x
+
+<span class="k">let</span> get_inc =
+  <span class="k">let</span>! x = get <span class="k">in</span>
+  return (x + 1)
+</pre></div>
+</div>
+<p>もちろん <code class="docutils literal notranslate"><span class="pre">st</span></code> 計算についての証明も可能です。例えば <code class="docutils literal notranslate"><span class="pre">get_put</span></code> が <code class="docutils literal notranslate"><span class="pre">noop</span></code> であるという簡単な証明を示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> get_put #s =
+  <span class="k">let</span>! x = get #s <span class="k">in</span>
+  put x
+
+<span class="k">let</span> noop #s : st s unit = return ()
+
+<span class="k">let</span> get_put_identity (s:Type)
+  : <span class="k">Lemma</span> (get_put #s `FStar.FunctionalExtensionality.feq` noop #s)
+  = ()
+</pre></div>
+</div>
+<p>良い点は、<code class="docutils literal notranslate"><span class="pre">(</span> <span class="pre">let!</span> <span class="pre">)</span></code> がモナド多相なので、他のモナドを定義しても同じ糖衣構文で計算を書けることです。失敗するかもしれない計算を表す <code class="docutils literal notranslate"><span class="pre">option</span></code> モナドの例を示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">instance</span> opt_monad : monad option =
+{
+   return = (<span class="k">fun</span> #a (x:a) -&gt; Some x);
+   ( <span class="k">let</span>! ) = (<span class="k">fun</span> #a #b (x:option a) (y: a -&gt; option b) -&gt;
+             <span class="k">match</span> x <span class="k">with</span>
+             | None -&gt; None
+             | Some a -&gt; y a)
+}
+
+<span class="k">let</span> raise #a : option a = None
+
+<span class="k">let</span> div (n m:int) =
+  <span class="k">if</span> m = 0 <span class="k">then</span> raise
+  <span class="k">else</span> return (n / m)
+
+<span class="k">let</span> test_opt_monad (i j k:nat) =
+  <span class="k">let</span>! x = div i j <span class="k">in</span>
+  <span class="k">let</span>! y = div i k <span class="k">in</span>
+  return (x + y)
+</pre></div>
+</div>
+<section id="exercise">
+<h3>演習<a class="headerlink" href="#exercise" title="Link to this heading"></a></h3>
+<p>ファンクタの型クラスを定義しなさい。すなわち、<code class="docutils literal notranslate"><span class="pre">fmap</span> <span class="pre">:</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">m</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">m</span> <span class="pre">b</span></code> を持つ型関数 <code class="docutils literal notranslate"><span class="pre">m:</span> <span class="pre">Type</span> <span class="pre">-&gt;</span> <span class="pre">Type</span></code> を表す型クラスです。</p>
+<p><code class="docutils literal notranslate"><span class="pre">list</span></code> など基本的な型について <code class="docutils literal notranslate"><span class="pre">functor</span></code> のインスタンスを作成しなさい。</p>
+<p>モナドからファンクタのインスタンスを導出し、次を示しなさい。</p>
+<p><code class="docutils literal notranslate"><span class="pre">instance</span> <span class="pre">monad_functor</span> <span class="pre">#m</span> <span class="pre">{|</span> <span class="pre">monad</span> <span class="pre">m</span> <span class="pre">|}</span> <span class="pre">:</span> <span class="pre">functor</span> <span class="pre">m</span> <span class="pre">=</span> <span class="pre">admit()</span></code></p>
+<p>必要な定義は <a class="reference external" href="../code/exercises/Part3.MonadsAndFunctors.fst">このファイル</a> にあります。</p>
+<div class="toggle docutils container">
+<div class="header docutils container">
+<p><strong>解答</strong></p>
+</div>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> functor (m:Type -&gt; Type) =
+{
+  fmap: (#a:Type -&gt; #b:Type -&gt; (a -&gt; b) -&gt; m a -&gt; m b);
+}
+
+<span class="k">let</span> id (a:Type) = a
+
+<span class="k">instance</span> id_functor : functor id =
+{
+  fmap = (<span class="k">fun</span> #a #b f -&gt; f);
+}
+
+<span class="k">let</span> test_id (a:Type) (f:a -&gt; a) (x:id a) = fmap f x
+
+<span class="k">instance</span> option_functor : functor option =
+{
+  fmap = (<span class="k">fun</span> #a #b (f:a -&gt; b) (x:option a) -&gt;
+            <span class="k">match</span> x <span class="k">with</span>
+            | None -&gt; None
+            | Some y -&gt; Some (f y));
+}
+
+<span class="k">let</span> test_option (f:int -&gt; bool) (x:option int) = fmap f x
+
+<span class="k">instance</span> monad_functor #m (d:monad m) : functor m =
+{
+  fmap = (<span class="k">fun</span> #a #b (f:a -&gt; b) (c:m a) -&gt; <span class="k">let</span>! x = c <span class="k">in</span> return (f x))
+}
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="beyond-monads-with-let-operators">
+<h2>Let 演算子でモナドを越えて<a class="headerlink" href="#beyond-monads-with-let-operators" title="Link to this heading"></a></h2>
+<p>副作用計算を構造化するために、多くのモナド類似構造が提案されています。これらはそれぞれ型クラスとして表現でき、F* の let 演算子の糖衣構文と組み合わせて使えます。</p>
+<p>例として <em>グレード付きモナド</em> を見ます。これは勝間田新也らによって <a class="reference external" href="https://www.irif.fr/~mellies/papers/fossacs2016-final-paper.pdf">複数の論文</a> で研究された構成です。型クラスで、別の型クラスによりインデックス付けされた型を扱える柔軟性を示します。</p>
+<p>グレード付きモナドの主眼は、モナドをモノイドでインデックス付けし、そのインデックスが計算の関心ある性質を表すことにあります。</p>
+<p>モノイドとは、結合法則を満たす二項演算とその単位元を持つ代数的構造の型クラスです。自然数（加法、単位元 <code class="docutils literal notranslate"><span class="pre">0</span></code>）は単純な例です。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> monoid (a:Type) =
+{
+   op   : a -&gt; a -&gt; a;
+   one  : a;
+   properties: squash (
+     (<span class="k">forall</span> (x:a). op one x == x /\ op x one == x) /\
+     (<span class="k">forall</span> (x y z:a). op x (op y z) == op (op x y) z)
+   );
+}
+
+<span class="k">instance</span> monoid_nat_plus : monoid nat =
+{
+  op = (<span class="k">fun</span> (x y:nat) -&gt; x + y);
+  one = 0;
+  properties = ()
+}
+</pre></div>
+</div>
+<p>グレード付きモナドは、以下のクラスで示すようにモノイドでインデックス付けされた型コンストラクタ <code class="docutils literal notranslate"><span class="pre">m</span></code> です。言い換えると、<code class="docutils literal notranslate"><span class="pre">m</span></code> は次の 2 操作を持ちます：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>モナドの <code class="docutils literal notranslate"><span class="pre">return</span></code> に似るが、インデックスがモノイドの単位元である <code class="docutils literal notranslate"><span class="pre">return</span></code></p></li>
+<li><p>モナドの <code class="docutils literal notranslate"><span class="pre">(</span> <span class="pre">let!</span> <span class="pre">)</span></code> に似るが、インデックスに対する作用がインデックス付けモノイドの二項演算に対応する <code class="docutils literal notranslate"><span class="pre">(</span> <span class="pre">let+</span> <span class="pre">)</span></code></p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> graded_monad (#index:Type) {| monoid index |}
+                   (m : index -&gt; Type -&gt; Type) = 
+{
+  return : #a:Type -&gt; x:a -&gt; m one a;
+  
+   ( <span class="k">let</span>+ )   : #a:Type -&gt; #b:Type -&gt; #ia:index -&gt; #ib:index -&gt;
+           m ia a -&gt; 
+           (a -&gt; m ib b) -&gt;
+           m (op ia ib) b
+
+}
+</pre></div>
+</div>
+<p>このクラスにより、<code class="docutils literal notranslate"><span class="pre">(</span> <span class="pre">let+</span> <span class="pre">)</span></code> をすべてのグレード付きモナドで使えるようにオーバーロードできます。例えば、<code class="docutils literal notranslate"><span class="pre">put</span></code> 回数をインデックスに持つグレード付き状態モナド <code class="docutils literal notranslate"><span class="pre">count_st</span></code> を示します。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> count_st (s:Type) (count:nat) (a:Type) = s -&gt; a &amp; s &amp; z:nat{z==count}
+
+<span class="k">let</span> count_return (#s:Type) (#a:Type) (x:a) : count_st s one a = <span class="k">fun</span> s -&gt; x, s, one #nat
+
+<span class="k">let</span> count_bind (#s:Type) (#a:Type) (#b:Type) (#ia:nat) (#ib:nat)
+               (f:count_st s ia a)
+               (g:(a -&gt; count_st s ib b))
+  : count_st s (op ia ib) b
+  = <span class="k">fun</span> s -&gt; <span class="k">let</span> x, s, n = f s <span class="k">in</span>
+          <span class="k">let</span> y, s&#39;, m = g x s <span class="k">in</span>
+          y, s&#39;, op #nat n m
+
+<span class="k">instance</span> count_st_graded (s:Type) : graded_monad (count_st s) =
+{ 
+  return = count_return #s;
+  ( <span class="k">let</span>+ ) = count_bind #s;
+}
+
+<span class="c">// A write-counting grade monad</span>
+<span class="k">let</span> get #s : count_st s 0 s = <span class="k">fun</span> s -&gt; s, s, 0
+<span class="k">let</span> put #s (x:s) : count_st s 1 unit = <span class="k">fun</span> <span class="k">_</span> -&gt; (), x, 1
+</pre></div>
+</div>
+<p>このグレード付き <code class="docutils literal notranslate"><span class="pre">count_st</span></code> モナドでの計算は比較的容易に構成できます。</p>
+<div class="highlight-fstar notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> test #s =
+  <span class="k">let</span>+ x = get #s <span class="k">in</span>
+  put x
+
+<span class="c">//F* + SMT automatically proves that the index simplifies to 2</span>
+<span class="k">let</span> test2 #s : count_st s 2 unit =
+  <span class="k">let</span>+ x = get <span class="k">in</span>
+  put x ;+
+  put x
+</pre></div>
+</div>
+<p>F* は型クラスのインスタンス化を推論し、<code class="docutils literal notranslate"><span class="pre">test</span></code> の型を <code class="docutils literal notranslate"><span class="pre">count_st</span> <span class="pre">s</span> <span class="pre">(op</span> <span class="pre">#monoid_nat_plus</span> <span class="pre">0</span> <span class="pre">1)</span> <span class="pre">unit</span></code> と導きます。</p>
+<p><code class="docutils literal notranslate"><span class="pre">test2</span></code> では、F* は型を <code class="docutils literal notranslate"><span class="pre">count_st</span> <span class="pre">s</span> <span class="pre">(op</span> <span class="pre">#monoid_nat_plus</span> <span class="pre">0</span> <span class="pre">(op</span> <span class="pre">#monoid_nat_plus</span> <span class="pre">1</span> <span class="pre">1))</span> <span class="pre">unit</span></code> と推論し、<code class="docutils literal notranslate"><span class="pre">monoid_nat_plus</span></code> の定義を用いて、これが注釈 <code class="docutils literal notranslate"><span class="pre">count_st</span> <span class="pre">s</span> <span class="pre">2</span> <span class="pre">unit</span></code> と同値であることを自動で示します。なお <code class="docutils literal notranslate"><span class="pre">let+</span></code> を定義した場合、<code class="docutils literal notranslate"><span class="pre">e1</span></code> の結果型が <code class="docutils literal notranslate"><span class="pre">unit</span></code> のときは <code class="docutils literal notranslate"><span class="pre">e1</span> <span class="pre">;+</span> <span class="pre">e2</span></code> という逐次記法も使えます。</p>
+</section>
+<section id="summary">
+<h2>まとめ<a class="headerlink" href="#summary" title="Link to this heading"></a></h2>
+<p>型クラスは、抽象的かつ汎用的なスタイルでプログラムを構成する柔軟な方法です。プログラム構築をよりモジュール的にするだけでなく、メソッドだけでなくその振る舞いを特徴付ける性質も含めることで、証明や推論もより抽象的にできます。抽象的に推論できれば証明は簡潔になります。例えば、自然数加法がモノイドであるという性質だけが必要なら、整数演算に特化して推論するより、すべてのモノイドに関して一般的に証明した方が簡単です。</p>
+<p>章の後半では、モナドやファンクタといった計算構造の型クラスを示しました。そこでは、それらを特徴付ける代数法則を明示しなかった点が目に付いたかもしれません。実際、本章では主に（証明より）モナドやグレード付きモナドを用いたプログラミングに焦点を当てました。これらの型クラスに代数法則を与えるのは有益で（難しいですが）良い練習になります。また、この流れは自然に次章の F* の効果システムへとつながります。効果システムは、モナド的構造で書かれたプログラムについての証明を主題とします。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="part3_interfaces.html" class="btn btn-neutral float-left" title="インターフェース" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part3_alacarte.html" class="btn btn-neutral float-right" title="型クラスで遊ぶ：Datatypes à la Carte" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,166 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>全域関数によるプログラミングと証明 &mdash; Proof-Oriented Programming in F*  ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=24463673" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c033477b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="まずは始めてみよう" href="part1_getting_off_the_ground.html" />
+    <link rel="prev" title="イントロダクション" href="../intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Proof-Oriented Programming in F*
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html">本書の構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">イントロダクション</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">全域関数によるプログラミングと証明</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="part1_getting_off_the_ground.html">まずは始めてみよう</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_polymorphism.html">多相と型推論</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_equality.html">等値性（Equality）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_prop_assertions.html">SMT ソルバとの連携</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_inductives.html">帰納的データ型とパターンマッチ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_termination.html">停止性の証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_lemmas.html">補題と帰納法による証明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_quicksort.html">ケーススタディ：クイックソート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_execution.html">プログラムの実行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="part1_wrap.html">まとめ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../part2/part2.html">帰納的型によるデータ・証明・計算の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part3/part3.html">インターフェースと型クラスによるモジュール性</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part4/part4.html">計算効果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../part5/part5.html">Meta-F* によるタクティクスとメタプログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pulse/pulse.html">Pulse: 並行分離論理における証明指向プログラミング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../under_the_hood/under_the_hood.html">内部の仕組み</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Proof-Oriented Programming in F*</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">全域関数によるプログラミングと証明</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="programming-and-proving-with-total-functions">
+<span id="part1"></span><h1>全域関数によるプログラミングと証明<a class="headerlink" href="#programming-and-proving-with-total-functions" title="Link to this heading"></a></h1>
+<p>F* の中核となる設計思想は、項（プログラム片）の型がその実行時挙動の仕様である、というものです。<code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">:</span> <span class="pre">t</span></code> は、項 <code class="docutils literal notranslate"><span class="pre">e</span></code> が型 <code class="docutils literal notranslate"><span class="pre">t</span></code> をもつことを表します。多くの項が同じ型をもつこともあれば、同じ項が複数の型をもつこともあります。</p>
+<p>（素朴ではありますが有用な）考え方として、型を“値の集合を記述するもの”とみなす方法があります。たとえば型 <code class="docutils literal notranslate"><span class="pre">int</span></code> は整数結果を計算する項の集合を記述します。すなわち <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">:</span> <span class="pre">int</span></code> のとき、<code class="docutils literal notranslate"><span class="pre">e</span></code> を完全に簡約すると <code class="docutils literal notranslate"><span class="pre">{...,</span> <span class="pre">-2,</span> <span class="pre">-1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">...}</span></code> に属する値が得られます。同様に型 <code class="docutils literal notranslate"><span class="pre">bool</span></code> は <code class="docutils literal notranslate"><span class="pre">{true,false}</span></code> のいずれかに計算・評価される項の型です。多くの言語と異なり、F* では任意の値集合を記述する型を定義できます。たとえば、数 <code class="docutils literal notranslate"><span class="pre">17</span></code> だけを含む型や、与えられた数を素因数分解する関数の型といったものです。</p>
+<p>プログラム <code class="docutils literal notranslate"><span class="pre">e</span></code> の正しさを証明する際には、まず関心のある性質を型 <code class="docutils literal notranslate"><span class="pre">t</span></code> として仕様化し、ついで F* に <code class="docutils literal notranslate"><span class="pre">e</span></code> が型 <code class="docutils literal notranslate"><span class="pre">t</span></code> をもつ（すなわち <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">:</span> <span class="pre">t</span></code> が導ける）ことを示します。</p>
+<p>型を用いてプログラムの性質を記述するという発想は、論理と計算の結びつきに深い根を持ちます。数学的・哲学的に多くの含意をもつ概念である <a class="reference external" href="https://cacm.acm.org/magazines/2015/12/194626-propositions-as-types/fulltext">propositions as types</a> （命題としての型）について読むと興味深いでしょう。現時点では、型 <code class="docutils literal notranslate"><span class="pre">t</span></code> は仕様、すなわち定理の主張であり、<code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">:</span> <span class="pre">t</span></code> は項 <code class="docutils literal notranslate"><span class="pre">e</span></code> が定理 <code class="docutils literal notranslate"><span class="pre">t</span></code> の証明であることを計算機で検査可能な形で述べている、と理解すれば十分です。</p>
+<p>次の数章では、全域関数の書き方と、その正しさの証明方法を学びます。</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">目次:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="part1_getting_off_the_ground.html">まずは始めてみよう</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part1_polymorphism.html">多相と型推論</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part1_equality.html">等値性（Equality）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part1_prop_assertions.html">SMT ソルバとの連携</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part1_inductives.html">帰納的データ型とパターンマッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part1_termination.html">停止性の証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part1_lemmas.html">補題と帰納法による証明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part1_quicksort.html">ケーススタディ：クイックソート</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part1_execution.html">プログラムの実行</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part1_wrap.html">まとめ</a></li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+    <!-- <a href="https://github.com/FStarLang/fstar/"> -->
+    <!--     <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> -->
+    <!-- </a> -->
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../intro.html" class="btn btn-neutral float-left" title="イントロダクション" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="part1_getting_off_the_ground.html" class="btn btn-neutral float-right" title="まずは始めてみよう" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Microsoft Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ <script type="text/javascript">
+    $(document).ready(function() {
+        $(".toggle > *").hide();
+        $(".toggle .header").show();
+        $(".toggle .header").click(function() {
+            $(this).parent().children().not(".header").toggle(400);
+            $(this).parent().children(".header").toggleClass("open");
+        })
+    });
+</script>
+
+
+</body>
+</html>
